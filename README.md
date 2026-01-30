@@ -79,7 +79,7 @@ iwr -useb https://raw.githubusercontent.com/spicetify/cli/main/install.ps1 | iex
 #### macOS / Linux
 터미널을 실행하고 다음 명령어를 입력합니다:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/spicetify/cli/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/spicetify/cli/main/install.sh | bash
 ```
 
 설치 과정에서 Marketplace 설치 여부를 묻는 질문이 나오면 Y를 입력하세요. Marketplace의 FullScreen 확장 프로그램과 함께 사용하면 더 나은 경험을 할 수 있습니다.
@@ -97,7 +97,7 @@ iwr -useb https://ivlis.kr/ivLyrics/install.ps1 | iex
 
 ##### macOS / Linux
 ```bash
-curl -fsSL https://ivlis.kr/ivLyrics/install.sh | sh
+curl -fsSL https://ivlis.kr/ivLyrics/install.sh | bash
 ```
 
 업데이트도 동일한 명령어로 가능합니다.
@@ -111,7 +111,7 @@ iwr -useb https://ivlis.kr/ivLyrics/uninstall.ps1 | iex
 
 ##### macOS / Linux
 ```bash
-curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | sh
+curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | bash
 ```
 
 #### 수동 설치

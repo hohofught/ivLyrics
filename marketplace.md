@@ -15,7 +15,7 @@ iwr -useb https://ivlis.kr/ivLyrics/install.ps1 | iex
 ##### macOS / Linux
 Run the following command in Terminal.
 ```bash
-curl -fsSL https://ivlis.kr/ivLyrics/install.sh | sh
+curl -fsSL https://ivlis.kr/ivLyrics/install.sh | bash
 ```
 
 # How to uninstall?
@@ -29,7 +29,7 @@ iwr -useb https://ivlis.kr/ivLyrics/uninstall.ps1 | iex
 ##### macOS / Linux
 Run the following command in Terminal.
 ```bash
-curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | sh
+curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | bash
 ```
 
 ---

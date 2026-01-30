@@ -96,7 +96,7 @@ iwr -useb https://ivlis.kr/ivLyrics/install.ps1 | iex
 
 ##### macOS / Linux
 ```bash
-curl -fsSL https://ivlis.kr/ivLyrics/install.sh | sh
+curl -fsSL https://ivlis.kr/ivLyrics/install.sh | bash
 ```
 
 Updates can also be done with the same command.
@@ -110,7 +110,7 @@ iwr -useb https://ivlis.kr/ivLyrics/uninstall.ps1 | iex
 
 ##### macOS / Linux
 ```bash
-curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | sh
+curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | bash
 ```
 
 #### Manual Installation
