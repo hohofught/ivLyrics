@@ -1947,7 +1947,9 @@
 
     // get the target language for translation (if auto, use the interface language)
     function getTranslationTargetLanguage() {
-        const targetLang = window.CONFIG?.visual?.["translate:target-language"];
+        // window.CONFIG가 초기화되지 않았을 수 있으므로 localStorage도 확인
+        const targetLang = window.CONFIG?.visual?.["translate:target-language"] ||
+            localStorage.getItem("ivLyrics:visual:translate:target-language");
         if (targetLang && targetLang !== "auto") {
             return targetLang;
         }
