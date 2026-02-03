@@ -45,13 +45,12 @@
     /**
      * Gemini API에서 사용 가능한 모델 목록을 가져옴 (텍스트 생성용 모델만)
      */
-    async function fetchAvailableModels(apiKey) {
+    async function fetchAvailableModels(apiKey, baseUrl) {
         if (!apiKey) return [];
 
         try {
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`
-            );
+            const endpoint = `${(baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '')}/models?key=${encodeURIComponent(apiKey)}`;
+            const response = await fetch(endpoint);
 
             if (!response.ok) {
                 console.warn('[Gemini Addon] Failed to fetch models:', response.status);
@@ -123,8 +122,9 @@
      */
     async function getModels() {
         const apiKeys = getApiKeys();
+        const baseUrl = getSetting('base-url', 'https://generativelanguage.googleapis.com/v1beta');
         if (apiKeys.length === 0) return [];
-        return await fetchAvailableModels(apiKeys[0]);
+        return await fetchAvailableModels(apiKeys[0], baseUrl);
     }
 
     // ============================================
@@ -201,6 +201,10 @@
 
     function getSelectedModel() {
         return getSetting('model', null);
+    }
+
+    function getBaseUrl() {
+        return getSetting('base-url', 'https://generativelanguage.googleapis.com/v1beta') || 'https://generativelanguage.googleapis.com/v1beta';
     }
 
     function getLangInfo(lang) {
@@ -348,7 +352,8 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
-                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                    const baseUrl = getBaseUrl();
+                    const endpoint = `${baseUrl.replace(/\/$/, '')}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
                     const response = await fetch(endpoint, {
                         method: 'POST',
@@ -500,6 +505,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                 const [apiKeys, setApiKeys] = useState(
                     Array.isArray(initialApiKeys) ? JSON.stringify(initialApiKeys) : initialApiKeys
                 );
+                const [baseUrl, setBaseUrl] = useState(getSetting('base-url', 'https://generativelanguage.googleapis.com/v1beta'));
                 const [model, setModel] = useState(getSelectedModel());
                 const [testStatus, setTestStatus] = useState('');
                 const [availableModels, setAvailableModels] = useState([]);
@@ -524,7 +530,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     } finally {
                         setModelsLoading(false);
                     }
-                }, [apiKeys]);
+                }, [apiKeys, baseUrl]);
 
                 // API 키가 변경되면 모델 목록 다시 로드
                 useEffect(() => {
@@ -534,12 +540,18 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     } else {
                         setAvailableModels([]);
                     }
-                }, [apiKeys]);
+                }, [apiKeys, baseUrl]);
 
                 const handleApiKeyChange = useCallback((e) => {
                     const value = e.target.value;
                     setApiKeys(value);
                     setSetting('api-keys', value);
+                }, []);
+
+                const handleBaseUrlChange = useCallback((e) => {
+                    const value = e.target.value;
+                    setBaseUrl(value);
+                    setSetting('base-url', value);
                 }, []);
 
                 const handleModelChange = useCallback((e) => {
@@ -586,6 +598,16 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                             }, 'Get API Key')
                         ),
                         React.createElement('small', null, 'Enter a single key or JSON array for rotation')
+                    ),
+                    React.createElement('div', { className: 'ai-addon-setting' },
+                        React.createElement('label', null, 'Base URL'),
+                        React.createElement('input', {
+                            type: 'text',
+                            value: baseUrl,
+                            onChange: handleBaseUrlChange,
+                            placeholder: 'https://generativelanguage.googleapis.com/v1beta'
+                        }),
+                        React.createElement('small', null, 'Change this to use Gemini-compatible APIs')
                     ),
                     React.createElement('div', { className: 'ai-addon-setting' },
                         React.createElement('label', null, 'Model'),
