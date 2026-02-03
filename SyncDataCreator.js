@@ -248,15 +248,13 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 
 			if (result && (result.synced || result.unsynced)) {
 				// provider 설정
-				// preferredProvider가 있으면(유저가 선택함) 그것을 유지. 
-				// 아니면 result.provider(제공자가 리턴한 값) 또는 usedProvider 사용.
-				let finalProvider = preferredProvider || result.provider || usedProvider;
+				// result.provider(가사에서 리턴한 실제 provider)를 우선 사용
+				// result.provider가 없으면 usedProvider(addon ID) 사용
+				let finalProvider = result.provider || usedProvider;
 
-				// 만약 자동 로드(preferredProvider 없음)였고, Spotify인 경우 상세 provider 표기 (기존 로직 유지)
-				if (!preferredProvider) {
-					if ((finalProvider === 'Spotify' || finalProvider === 'spotify') && result.spotifyLyricsProvider) {
-						finalProvider = `spotify-${result.spotifyLyricsProvider}`;
-					}
+				// Spotify addon의 경우 spotifyLyricsProvider를 사용해 상세 provider 표기
+				if ((finalProvider === 'Spotify' || finalProvider === 'spotify') && result.spotifyLyricsProvider) {
+					finalProvider = `spotify-${result.spotifyLyricsProvider}`;
 				}
 
 				setProvider(finalProvider);
