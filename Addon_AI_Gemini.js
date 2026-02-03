@@ -200,7 +200,7 @@
     }
 
     function getSelectedModel() {
-        return getSetting('model', ADDON_INFO.models.find(m => m.default)?.id || ADDON_INFO.models[0]?.id);
+        return getSetting('model', null);
     }
 
     function getLangInfo(lang) {
@@ -338,6 +338,9 @@ Even if the song is English, the description and trivia MUST be written in ${lan
         }
 
         const model = getSelectedModel();
+        if (!model) {
+            throw new Error('[Gemini] Model is not selected. Please select a model in settings.');
+        }
         let lastError = null;
 
         for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
@@ -595,7 +598,10 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                                 modelsLoading
                                     ? React.createElement('option', { value: '' }, 'Loading models...')
                                     : availableModels.length > 0
-                                        ? availableModels.map(m => React.createElement('option', { key: m.id, value: m.id }, m.name))
+                                        ? [
+                                            !model && React.createElement('option', { key: '__placeholder__', value: '' }, '-- Select a model --'),
+                                            ...availableModels.map(m => React.createElement('option', { key: m.id, value: m.id }, m.name))
+                                        ].filter(Boolean)
                                         : React.createElement('option', { value: '' }, hasApiKey ? 'No models found' : 'Enter API key first')
                             ),
                             React.createElement('button', {

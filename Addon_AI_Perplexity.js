@@ -516,7 +516,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                                     ? React.createElement('option', { value: '' }, 'Loading models...')
                                     : availableModels.length > 0
                                         ? availableModels.map(m => React.createElement('option', { key: m.id, value: m.id }, m.name))
-                                        : React.createElement('option', { value: selectedModel }, selectedModel)
+                                        : React.createElement('option', { value: selectedModel }, selectedModel || (hasApiKey ? 'No models found' : 'Enter API key first'))
                             ),
                             React.createElement('button', {
                                 onClick: loadModels,
