@@ -1571,29 +1571,29 @@ window.LANG_TH = {
       "next": "ถัดไป",
       "back": "ย้อนกลับ",
       "skip": "ข้าม"
+    },
+    "videoTest": {  
+      "title": "ทดสอบพื้นหลังวิดีโอ",
+      "subtitle": "โปรดตรวจสอบว่าวิดีโอ YouTube ด้านล่างเล่นได้ปกติหรือไม่",
+      "question": "มีข้อความแจ้งว่าต้องล็อกอินเพื่อเล่นวิดีโอหรือไม่?",
+      "yes": "ใช่",
+      "no": "ไม่",
+      "helperRequired": "ถ้าอย่างนั้น คุณต้องติดตั้งโปรแกรม Helper",
+      "helperDesc": "โปรแกรม Helper ช่วยให้เล่นวิดีโอ YouTube ได้โดยไม่ต้องล็อกอิน",
+      "installHelper": "ติดตั้งโปรแกรม Helper",
+      "skip": "ข้าม"
+    },
+    "videoHelperTest": {  
+      "title": "ทดสอบโปรแกรม Helper",
+      "subtitle": "ตรวจสอบว่าโปรแกรม Helper ทำงานถูกต้องหรือไม่",
+      "enableHelper": "เปิดใช้งานโปรแกรม Helper",
+      "testVideo": "เล่นวิดีโอทดสอบ",
+      "testing": "กำลังทดสอบ...",
+      "success": "โปรแกรม Helper ทำงานปกติ!",
+      "failed": "เชื่อมต่อโปรแกรม Helper ไม่ได้ โปรดตรวจสอบว่าโปรแกรมกำลังทำงานอยู่",
+      "downloading": "กำลังดาวน์โหลดวิดีโอ: {percent}%",
+      "skip": "ข้าม"
     }
-  },
-  "videoTest": {
-    "title": "ทดสอบพื้นหลังวิดีโอ",
-    "subtitle": "โปรดตรวจสอบว่าวิดีโอ YouTube ด้านล่างเล่นได้ปกติหรือไม่",
-    "question": "มีข้อความแจ้งว่าต้องล็อกอินเพื่อเล่นวิดีโอหรือไม่?",
-    "yes": "ใช่",
-    "no": "ไม่",
-    "helperRequired": "ถ้าอย่างนั้น คุณต้องติดตั้งโปรแกรม Helper",
-    "helperDesc": "โปรแกรม Helper ช่วยให้เล่นวิดีโอ YouTube ได้โดยไม่ต้องล็อกอิน",
-    "installHelper": "ติดตั้งโปรแกรม Helper",
-    "skip": "ข้าม"
-  },
-  "videoHelperTest": {
-    "title": "ทดสอบโปรแกรม Helper",
-    "subtitle": "ตรวจสอบว่าโปรแกรม Helper ทำงานถูกต้องหรือไม่",
-    "enableHelper": "เปิดใช้งานโปรแกรม Helper",
-    "testVideo": "เล่นวิดีโอทดสอบ",
-    "testing": "กำลังทดสอบ...",
-    "success": "โปรแกรม Helper ทำงานปกติ!",
-    "failed": "เชื่อมต่อโปรแกรม Helper ไม่ได้ โปรดตรวจสอบว่าโปรแกรมกำลังทำงานอยู่",
-    "downloading": "กำลังดาวน์โหลดวิดีโอ: {percent}%",
-    "skip": "ข้าม"
   },
   "tmi": {
     "getApiKeyDesc": "รับ Gemini API Key",

@@ -1571,29 +1571,29 @@ window.LANG_IT = {
       "next": "Avanti",
       "back": "Indietro",
       "skip": "Salta"
+    },
+    "videoTest": {  
+      "title": "Test sfondo video",
+      "subtitle": "Verifica se il video YouTube qui sotto viene riprodotto correttamente",
+      "question": "Ti viene richiesto il login per riprodurre il video?",
+      "yes": "Sì",
+      "no": "No",
+      "helperRequired": "In tal caso, devi installare il programma Helper.",
+      "helperDesc": "Il programma Helper permette di riprodurre video YouTube senza login.",
+      "installHelper": "Installa Helper",
+      "skip": "Salta"
+    },
+    "videoHelperTest": {  
+      "title": "Test programma Helper",
+      "subtitle": "Verifica il corretto funzionamento dell'Helper",
+      "enableHelper": "Attiva programma Helper",
+      "testVideo": "Riproduci video test",
+      "testing": "Test in corso...",
+      "success": "L'Helper funziona correttamente!",
+      "failed": "Impossibile connettersi all'Helper. Verifica che sia in esecuzione.",
+      "downloading": "Scaricamento video: {percent}%",
+      "skip": "Salta"
     }
-  },
-  "videoTest": {
-    "title": "Test sfondo video",
-    "subtitle": "Verifica se il video YouTube qui sotto viene riprodotto correttamente",
-    "question": "Ti viene richiesto il login per riprodurre il video?",
-    "yes": "Sì",
-    "no": "No",
-    "helperRequired": "In tal caso, devi installare il programma Helper.",
-    "helperDesc": "Il programma Helper permette di riprodurre video YouTube senza login.",
-    "installHelper": "Installa Helper",
-    "skip": "Salta"
-  },
-  "videoHelperTest": {
-    "title": "Test programma Helper",
-    "subtitle": "Verifica il corretto funzionamento dell'Helper",
-    "enableHelper": "Attiva programma Helper",
-    "testVideo": "Riproduci video test",
-    "testing": "Test in corso...",
-    "success": "L'Helper funziona correttamente!",
-    "failed": "Impossibile connettersi all'Helper. Verifica che sia in esecuzione.",
-    "downloading": "Scaricamento video: {percent}%",
-    "skip": "Salta"
   },
   "tmi": {
     "getApiKeyDesc": "Ottieni chiave API Gemini",

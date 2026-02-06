@@ -1570,29 +1570,29 @@ window.LANG_DE = {
       "next": "Weiter",
       "back": "Zurück",
       "skip": "Überspringen"
+    },
+    "videoTest": {  
+      "title": "Video-Hintergrund Test",
+      "subtitle": "Bitte prüfen Sie, ob das YouTube-Video unten abgespielt wird",
+      "question": "Wird eine Anmeldung zum Abspielen verlangt?",
+      "yes": "Ja",
+      "no": "Nein",
+      "helperRequired": "Dann benötigen Sie das Helper-Programm.",
+      "helperDesc": "Das Helper-Programm ermöglicht das Abspielen ohne Anmeldung.",
+      "installHelper": "Helper installieren",
+      "skip": "Überspringen"
+    },
+    "videoHelperTest": {  
+      "title": "Helper-Programm Test",
+      "subtitle": "Überprüft, ob der Helper korrekt funktioniert",
+      "enableHelper": "Helper aktivieren",
+      "testVideo": "Testvideo abspielen",
+      "testing": "Teste...",
+      "success": "Helper funktioniert einwandfrei!",
+      "failed": "Keine Verbindung zum Helper. Bitte prüfen Sie, ob er läuft.",
+      "downloading": "Lade Video: {percent}%",
+      "skip": "Überspringen"
     }
-  },
-  "videoTest": {
-    "title": "Video-Hintergrund Test",
-    "subtitle": "Bitte prüfen Sie, ob das YouTube-Video unten abgespielt wird",
-    "question": "Wird eine Anmeldung zum Abspielen verlangt?",
-    "yes": "Ja",
-    "no": "Nein",
-    "helperRequired": "Dann benötigen Sie das Helper-Programm.",
-    "helperDesc": "Das Helper-Programm ermöglicht das Abspielen ohne Anmeldung.",
-    "installHelper": "Helper installieren",
-    "skip": "Überspringen"
-  },
-  "videoHelperTest": {
-    "title": "Helper-Programm Test",
-    "subtitle": "Überprüft, ob der Helper korrekt funktioniert",
-    "enableHelper": "Helper aktivieren",
-    "testVideo": "Testvideo abspielen",
-    "testing": "Teste...",
-    "success": "Helper funktioniert einwandfrei!",
-    "failed": "Keine Verbindung zum Helper. Bitte prüfen Sie, ob er läuft.",
-    "downloading": "Lade Video: {percent}%",
-    "skip": "Überspringen"
   },
   "tmi": {
     "getApiKeyDesc": "Gemini API-Schlüssel holen",

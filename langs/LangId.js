@@ -1570,29 +1570,29 @@ window.LANG_ID = {
       "next": "Lanjut",
       "back": "Kembali",
       "skip": "Lewati"
+    },
+    "videoTest": {  
+      "title": "Tes Latar Belakang Video",
+      "subtitle": "Harap periksa apakah video YouTube di bawah ini diputar dengan normal",
+      "question": "Apakah muncul pesan perlu login untuk memutar video?",
+      "yes": "Ya",
+      "no": "Tidak",
+      "helperRequired": "Jika ya, Anda perlu menginstal program Helper.",
+      "helperDesc": "Program Helper memungkinkan pemutaran video tanpa login YouTube.",
+      "installHelper": "Instal Program Helper",
+      "skip": "Lewati"
+    },
+    "videoHelperTest": {  
+      "title": "Tes Program Helper",
+      "subtitle": "Memeriksa apakah program Helper berfungsi dengan benar",
+      "enableHelper": "Aktifkan Program Helper",
+      "testVideo": "Putar Video Tes",
+      "testing": "Menguji...",
+      "success": "Program Helper berfungsi normal!",
+      "failed": "Tidak dapat terhubung ke program Helper. Pastikan program berjalan.",
+      "downloading": "Mengunduh video: {percent}%",
+      "skip": "Lewati"
     }
-  },
-  "videoTest": {
-    "title": "Tes Latar Belakang Video",
-    "subtitle": "Harap periksa apakah video YouTube di bawah ini diputar dengan normal",
-    "question": "Apakah muncul pesan perlu login untuk memutar video?",
-    "yes": "Ya",
-    "no": "Tidak",
-    "helperRequired": "Jika ya, Anda perlu menginstal program Helper.",
-    "helperDesc": "Program Helper memungkinkan pemutaran video tanpa login YouTube.",
-    "installHelper": "Instal Program Helper",
-    "skip": "Lewati"
-  },
-  "videoHelperTest": {
-    "title": "Tes Program Helper",
-    "subtitle": "Memeriksa apakah program Helper berfungsi dengan benar",
-    "enableHelper": "Aktifkan Program Helper",
-    "testVideo": "Putar Video Tes",
-    "testing": "Menguji...",
-    "success": "Program Helper berfungsi normal!",
-    "failed": "Tidak dapat terhubung ke program Helper. Pastikan program berjalan.",
-    "downloading": "Mengunduh video: {percent}%",
-    "skip": "Lewati"
   },
   "tmi": {
     "getApiKeyDesc": "Dapatkan Kunci API Gemini",

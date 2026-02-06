@@ -1571,29 +1571,29 @@ window.LANG_PT = {
       "next": "Próximo",
       "back": "Voltar",
       "skip": "Pular"
+    },
+    "videoTest": {  
+      "title": "Teste de Fundo de Vídeo",
+      "subtitle": "Verifique se o vídeo do YouTube abaixo é reproduzido normalmente",
+      "question": "Aparece uma mensagem dizendo que é necessário login para reproduzir?",
+      "yes": "Sim",
+      "no": "Não",
+      "helperRequired": "Se sim, você precisa instalar o programa Helper.",
+      "helperDesc": "O programa Helper permite reproduzir vídeos do YouTube sem login.",
+      "installHelper": "Instalar Programa Helper",
+      "skip": "Pular"
+    },
+    "videoHelperTest": {  
+      "title": "Teste do Programa Helper",
+      "subtitle": "Verificando se o programa Helper está funcionando corretamente",
+      "enableHelper": "Ativar Programa Helper",
+      "testVideo": "Reproduzir Vídeo de Teste",
+      "testing": "Testando...",
+      "success": "O programa Helper está funcionando normalmente!",
+      "failed": "Não foi possível conectar ao Helper. Verifique se o programa está em execução.",
+      "downloading": "Baixando vídeo: {percent}%",
+      "skip": "Pular"
     }
-  },
-  "videoTest": {
-    "title": "Teste de Fundo de Vídeo",
-    "subtitle": "Verifique se o vídeo do YouTube abaixo é reproduzido normalmente",
-    "question": "Aparece uma mensagem dizendo que é necessário login para reproduzir?",
-    "yes": "Sim",
-    "no": "Não",
-    "helperRequired": "Se sim, você precisa instalar o programa Helper.",
-    "helperDesc": "O programa Helper permite reproduzir vídeos do YouTube sem login.",
-    "installHelper": "Instalar Programa Helper",
-    "skip": "Pular"
-  },
-  "videoHelperTest": {
-    "title": "Teste do Programa Helper",
-    "subtitle": "Verificando se o programa Helper está funcionando corretamente",
-    "enableHelper": "Ativar Programa Helper",
-    "testVideo": "Reproduzir Vídeo de Teste",
-    "testing": "Testando...",
-    "success": "O programa Helper está funcionando normalmente!",
-    "failed": "Não foi possível conectar ao Helper. Verifique se o programa está em execução.",
-    "downloading": "Baixando vídeo: {percent}%",
-    "skip": "Pular"
   },
   "tmi": {
     "getApiKeyDesc": "Obter Chave API Gemini",

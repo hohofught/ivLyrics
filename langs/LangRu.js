@@ -1571,29 +1571,29 @@ window.LANG_RU = {
       "next": "Далее",
       "back": "Назад",
       "skip": "Пропустить"
+    },
+    "videoTest": {  
+      "title": "Тест видео-фона",
+      "subtitle": "Проверьте, воспроизводится ли это видео с YouTube",
+      "question": "Видео просит войти в аккаунт?",
+      "yes": "Да",
+      "no": "Нет",
+      "helperRequired": "В таком случае, нужно установить Helper.",
+      "helperDesc": "Программа Helper позволяет смотреть видео без входа в YouTube.",
+      "installHelper": "Установить Helper",
+      "skip": "Пропустить"
+    },
+    "videoHelperTest": {  
+      "title": "Тест Helper",
+      "subtitle": "Проверка работы программы-помощника",
+      "enableHelper": "Включить Helper",
+      "testVideo": "Тестовое видео",
+      "testing": "Тестирование...",
+      "success": "Helper работает нормально!",
+      "failed": "Нет связи с Helper. Убедитесь, что он запущен.",
+      "downloading": "Скачивание: {percent}%",
+      "skip": "Пропустить"
     }
-  },
-  "videoTest": {
-    "title": "Тест видео-фона",
-    "subtitle": "Проверьте, воспроизводится ли это видео с YouTube",
-    "question": "Видео просит войти в аккаунт?",
-    "yes": "Да",
-    "no": "Нет",
-    "helperRequired": "В таком случае, нужно установить Helper.",
-    "helperDesc": "Программа Helper позволяет смотреть видео без входа в YouTube.",
-    "installHelper": "Установить Helper",
-    "skip": "Пропустить"
-  },
-  "videoHelperTest": {
-    "title": "Тест Helper",
-    "subtitle": "Проверка работы программы-помощника",
-    "enableHelper": "Включить Helper",
-    "testVideo": "Тестовое видео",
-    "testing": "Тестирование...",
-    "success": "Helper работает нормально!",
-    "failed": "Нет связи с Helper. Убедитесь, что он запущен.",
-    "downloading": "Скачивание: {percent}%",
-    "skip": "Пропустить"
   },
   "tmi": {
     "getApiKeyDesc": "Получить ключ Gemini API",

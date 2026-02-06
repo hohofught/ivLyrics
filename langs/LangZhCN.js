@@ -1571,29 +1571,29 @@ window.LANG_ZH_CN = {
       "next": "下一步",
       "back": "上一步",
       "skip": "跳过"
+    },
+    "videoTest": {  
+      "title": "视频背景测试",
+      "subtitle": "请确认下方的 YouTube 视频是否能正常播放",
+      "question": "是否显示需要登录才能播放视频？",
+      "yes": "是",
+      "no": "否",
+      "helperRequired": "如果是，您需要安装助手程序。",
+      "helperDesc": "助手程序可以让您在无需登录 YouTube 的情况下播放视频。",
+      "installHelper": "安装助手程序",
+      "skip": "跳过"
+    },
+    "videoHelperTest": {  
+      "title": "助手程序测试",
+      "subtitle": "检查助手程序是否正常工作",
+      "enableHelper": "启用助手程序",
+      "testVideo": "播放测试视频",
+      "testing": "测试中...",
+      "success": "助手程序工作正常！",
+      "failed": "无法连接到助手程序。请确认程序是否正在运行。",
+      "downloading": "视频下载中: {percent}%",
+      "skip": "跳过"
     }
-  },
-  "videoTest": {
-    "title": "视频背景测试",
-    "subtitle": "请确认下方的 YouTube 视频是否能正常播放",
-    "question": "是否显示需要登录才能播放视频？",
-    "yes": "是",
-    "no": "否",
-    "helperRequired": "如果是，您需要安装助手程序。",
-    "helperDesc": "助手程序可以让您在无需登录 YouTube 的情况下播放视频。",
-    "installHelper": "安装助手程序",
-    "skip": "跳过"
-  },
-  "videoHelperTest": {
-    "title": "助手程序测试",
-    "subtitle": "检查助手程序是否正常工作",
-    "enableHelper": "启用助手程序",
-    "testVideo": "播放测试视频",
-    "testing": "测试中...",
-    "success": "助手程序工作正常！",
-    "failed": "无法连接到助手程序。请确认程序是否正在运行。",
-    "downloading": "视频下载中: {percent}%",
-    "skip": "跳过"
   },
   "tmi": {
     "getApiKeyDesc": "获取 Gemini API 密钥",

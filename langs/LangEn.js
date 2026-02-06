@@ -1579,29 +1579,29 @@ window.LANG_EN = {
       "next": "Next",
       "back": "Back",
       "skip": "Skip"
+    },
+    "videoTest": {  
+      "title": "Video Background Test",
+      "subtitle": "Please check if the YouTube video below plays correctly",
+      "question": "Does it say login is required to play the video?",
+      "yes": "Yes",
+      "no": "No",
+      "helperRequired": "If so, you need to install the Helper Program.",
+      "helperDesc": "The Helper Program allows playing YouTube videos without logging in.",
+      "installHelper": "Install Helper Program",
+      "skip": "Skip"
+    },
+    "videoHelperTest": {  
+      "title": "Helper Program Test",
+      "subtitle": "Checking if Helper Program works correctly",
+      "enableHelper": "Enable Helper Program",
+      "testVideo": "Play Test Video",
+      "testing": "Testing...",
+      "success": "Helper Program is working correctly!",
+      "failed": "Cannot connect to Helper Program. Please check if it is running.",
+      "downloading": "Downloading video: {percent}%",
+      "skip": "Skip"
     }
-  },
-  "videoTest": {
-    "title": "Video Background Test",
-    "subtitle": "Please check if the YouTube video below plays correctly",
-    "question": "Does it say login is required to play the video?",
-    "yes": "Yes",
-    "no": "No",
-    "helperRequired": "If so, you need to install the Helper Program.",
-    "helperDesc": "The Helper Program allows playing YouTube videos without logging in.",
-    "installHelper": "Install Helper Program",
-    "skip": "Skip"
-  },
-  "videoHelperTest": {
-    "title": "Helper Program Test",
-    "subtitle": "Checking if Helper Program works correctly",
-    "enableHelper": "Enable Helper Program",
-    "testVideo": "Play Test Video",
-    "testing": "Testing...",
-    "success": "Helper Program is working correctly!",
-    "failed": "Cannot connect to Helper Program. Please check if it is running.",
-    "downloading": "Downloading video: {percent}%",
-    "skip": "Skip"
   },
   "tmi": {
     "getApiKeyDesc": "Get Gemini API Key",

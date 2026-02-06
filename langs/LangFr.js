@@ -1571,29 +1571,29 @@ window.LANG_FR = {
       "next": "Suivant",
       "back": "Précédent",
       "skip": "Passer"
+    },
+    "videoTest": {  
+      "title": "Test arrière-plan vidéo",
+      "subtitle": "Vérifiez si la vidéo YouTube ci-dessous se lit correctement",
+      "question": "On vous demande de vous connecter pour lire la vidéo ?",
+      "yes": "Oui",
+      "no": "Non",
+      "helperRequired": "Dans ce cas, vous devez installer le programme assistant.",
+      "helperDesc": "L'assistant permet de lire les vidéos sans connexion YouTube.",
+      "installHelper": "Installer l'assistant",
+      "skip": "Passer"
+    },
+    "videoHelperTest": {  
+      "title": "Test programme assistant",
+      "subtitle": "Vérification du fonctionnement de l'assistant",
+      "enableHelper": "Activer assistant",
+      "testVideo": "Lire vidéo test",
+      "testing": "Test en cours...",
+      "success": "L'assistant fonctionne correctement !",
+      "failed": "Impossible de connecter l'assistant. Vérifiez qu'il est lancé.",
+      "downloading": "Téléchargement : {percent}%",
+      "skip": "Passer"
     }
-  },
-  "videoTest": {
-    "title": "Test arrière-plan vidéo",
-    "subtitle": "Vérifiez si la vidéo YouTube ci-dessous se lit correctement",
-    "question": "On vous demande de vous connecter pour lire la vidéo ?",
-    "yes": "Oui",
-    "no": "Non",
-    "helperRequired": "Dans ce cas, vous devez installer le programme assistant.",
-    "helperDesc": "L'assistant permet de lire les vidéos sans connexion YouTube.",
-    "installHelper": "Installer l'assistant",
-    "skip": "Passer"
-  },
-  "videoHelperTest": {
-    "title": "Test programme assistant",
-    "subtitle": "Vérification du fonctionnement de l'assistant",
-    "enableHelper": "Activer assistant",
-    "testVideo": "Lire vidéo test",
-    "testing": "Test en cours...",
-    "success": "L'assistant fonctionne correctement !",
-    "failed": "Impossible de connecter l'assistant. Vérifiez qu'il est lancé.",
-    "downloading": "Téléchargement : {percent}%",
-    "skip": "Passer"
   },
   "tmi": {
     "getApiKeyDesc": "Obtenir Clé API Gemini",

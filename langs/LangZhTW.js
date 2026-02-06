@@ -1571,29 +1571,29 @@ window.LANG_ZH_TW = {
       "next": "下一步",
       "back": "上一步",
       "skip": "跳過"
+    },
+    "videoTest": {  
+      "title": "影片背景測試",
+      "subtitle": "請確認下方 YouTube 影片是否正常播放",
+      "question": "請問是否顯示需要登入才能播放影片？",
+      "yes": "是",
+      "no": "否",
+      "helperRequired": "若是如此，您必須安裝輔助程式。",
+      "helperDesc": "輔助程式可讓您無需登入 YouTube 即可播放影片。",
+      "installHelper": "安裝輔助程式",
+      "skip": "跳過"
+    },
+    "videoHelperTest": {  
+      "title": "輔助程式測試",
+      "subtitle": "確認輔助程式是否運作正常",
+      "enableHelper": "啟用輔助程式",
+      "testVideo": "播放測試影片",
+      "testing": "測試中...",
+      "success": "輔助程式運作正常！",
+      "failed": "無法連線至輔助程式。請確認程式是否正在執行。",
+      "downloading": "影片下載中: {percent}%",
+      "skip": "跳過"
     }
-  },
-  "videoTest": {
-    "title": "影片背景測試",
-    "subtitle": "請確認下方 YouTube 影片是否正常播放",
-    "question": "請問是否顯示需要登入才能播放影片？",
-    "yes": "是",
-    "no": "否",
-    "helperRequired": "若是如此，您必須安裝輔助程式。",
-    "helperDesc": "輔助程式可讓您無需登入 YouTube 即可播放影片。",
-    "installHelper": "安裝輔助程式",
-    "skip": "跳過"
-  },
-  "videoHelperTest": {
-    "title": "輔助程式測試",
-    "subtitle": "確認輔助程式是否運作正常",
-    "enableHelper": "啟用輔助程式",
-    "testVideo": "播放測試影片",
-    "testing": "測試中...",
-    "success": "輔助程式運作正常！",
-    "failed": "無法連線至輔助程式。請確認程式是否正在執行。",
-    "downloading": "影片下載中: {percent}%",
-    "skip": "跳過"
   },
   "tmi": {
     "getApiKeyDesc": "取得 Gemini API 金鑰",

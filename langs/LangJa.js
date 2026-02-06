@@ -1571,29 +1571,29 @@ window.LANG_JA = {
       "next": "次へ",
       "back": "戻る",
       "skip": "スキップ"
+    },
+    "videoTest": {  
+      "title": "動画背景テスト",
+      "subtitle": "以下のYouTube動画が正常に再生されるか確認してください",
+      "question": "動画を再生するにはログインが必要だと表示されますか？",
+      "yes": "はい",
+      "no": "いいえ",
+      "helperRequired": "その場合、ヘルパープログラムをインストールする必要があります。",
+      "helperDesc": "ヘルパープログラムはYouTubeログインなしで動画を再生できるようにします。",
+      "installHelper": "ヘルパープログラムをインストール",
+      "skip": "スキップ"
+    },
+    "videoHelperTest": {  
+      "title": "ヘルパープログラムテスト",
+      "subtitle": "ヘルパープログラムが正しく動作するか確認します",
+      "enableHelper": "ヘルパープログラム有効化",
+      "testVideo": "テスト動画再生",
+      "testing": "テスト中...",
+      "success": "ヘルパープログラムが正常に動作しています！",
+      "failed": "ヘルパープログラムに接続できません。プログラムが実行中か確認してください。",
+      "downloading": "動画ダウンロード中: {percent}%",
+      "skip": "スキップ"
     }
-  },
-  "videoTest": {
-    "title": "動画背景テスト",
-    "subtitle": "以下のYouTube動画が正常に再生されるか確認してください",
-    "question": "動画を再生するにはログインが必要だと表示されますか？",
-    "yes": "はい",
-    "no": "いいえ",
-    "helperRequired": "その場合、ヘルパープログラムをインストールする必要があります。",
-    "helperDesc": "ヘルパープログラムはYouTubeログインなしで動画を再生できるようにします。",
-    "installHelper": "ヘルパープログラムをインストール",
-    "skip": "スキップ"
-  },
-  "videoHelperTest": {
-    "title": "ヘルパープログラムテスト",
-    "subtitle": "ヘルパープログラムが正しく動作するか確認します",
-    "enableHelper": "ヘルパープログラム有効化",
-    "testVideo": "テスト動画再生",
-    "testing": "テスト中...",
-    "success": "ヘルパープログラムが正常に動作しています！",
-    "failed": "ヘルパープログラムに接続できません。プログラムが実行中か確認してください。",
-    "downloading": "動画ダウンロード中: {percent}%",
-    "skip": "スキップ"
   },
   "tmi": {
     "getApiKeyDesc": "Gemini APIキーを取得",

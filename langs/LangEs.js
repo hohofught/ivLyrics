@@ -1571,29 +1571,29 @@ window.LANG_ES = {
       "next": "Siguiente",
       "back": "Anterior",
       "skip": "Omitir"
+    },
+    "videoTest": {  
+      "title": "Prueba de fondo de video",
+      "subtitle": "Verifica si el siguiente video de YouTube se reproduce correctamente",
+      "question": "¿Te pide iniciar sesión para reproducir el video?",
+      "yes": "Sí",
+      "no": "No",
+      "helperRequired": "Si es así, necesitas instalar el programa asistente.",
+      "helperDesc": "El asistente permite reproducir videos sin iniciar sesión en YouTube.",
+      "installHelper": "Instalar programa asistente",
+      "skip": "Omitir"
+    },
+    "videoHelperTest": {  
+      "title": "Prueba de programa asistente",
+      "subtitle": "Verifica si el asistente funciona correctamente",
+      "enableHelper": "Activar programa asistente",
+      "testVideo": "Reproducir video de prueba",
+      "testing": "Probando...",
+      "success": "¡El asistente funciona correctamente!",
+      "failed": "No se puede conectar al asistente. Verifica que esté ejecutándose.",
+      "downloading": "Descargando video: {percent}%",
+      "skip": "Omitir"
     }
-  },
-  "videoTest": {
-    "title": "Prueba de fondo de video",
-    "subtitle": "Verifica si el siguiente video de YouTube se reproduce correctamente",
-    "question": "¿Te pide iniciar sesión para reproducir el video?",
-    "yes": "Sí",
-    "no": "No",
-    "helperRequired": "Si es así, necesitas instalar el programa asistente.",
-    "helperDesc": "El asistente permite reproducir videos sin iniciar sesión en YouTube.",
-    "installHelper": "Instalar programa asistente",
-    "skip": "Omitir"
-  },
-  "videoHelperTest": {
-    "title": "Prueba de programa asistente",
-    "subtitle": "Verifica si el asistente funciona correctamente",
-    "enableHelper": "Activar programa asistente",
-    "testVideo": "Reproducir video de prueba",
-    "testing": "Probando...",
-    "success": "¡El asistente funciona correctamente!",
-    "failed": "No se puede conectar al asistente. Verifica que esté ejecutándose.",
-    "downloading": "Descargando video: {percent}%",
-    "skip": "Omitir"
   },
   "tmi": {
     "getApiKeyDesc": "Obtener clave API Gemini",

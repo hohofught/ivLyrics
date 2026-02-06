@@ -1571,29 +1571,29 @@ window.LANG_VI = {
       "next": "Tiếp",
       "back": "Trước",
       "skip": "Bỏ qua"
+    },
+    "videoTest": {  
+      "title": "Kiểm tra nền Video",
+      "subtitle": "Vui lòng kiểm tra xem video YouTube dưới đây có phát bình thường không",
+      "question": "Có thông báo yêu cầu đăng nhập để phát video không?",
+      "yes": "Có",
+      "no": "Không",
+      "helperRequired": "Nếu vậy, bạn cần cài đặt chương trình Helper.",
+      "helperDesc": "Chương trình Helper giúp phát video YouTube mà không cần đăng nhập.",
+      "installHelper": "Cài đặt chương trình Helper",
+      "skip": "Bỏ qua"
+    },
+    "videoHelperTest": {  
+      "title": "Kiểm tra chương trình Helper",
+      "subtitle": "Đang kiểm tra xem Helper có hoạt động đúng không",
+      "enableHelper": "Bật chương trình Helper",
+      "testVideo": "Phát video kiểm tra",
+      "testing": "Đang kiểm tra...",
+      "success": "Chương trình Helper hoạt động bình thường!",
+      "failed": "Không thể kết nối với Helper. Vui lòng đảm bảo chương trình đang chạy.",
+      "downloading": "Đang tải video: {percent}%",
+      "skip": "Bỏ qua"
     }
-  },
-  "videoTest": {
-    "title": "Kiểm tra nền Video",
-    "subtitle": "Vui lòng kiểm tra xem video YouTube dưới đây có phát bình thường không",
-    "question": "Có thông báo yêu cầu đăng nhập để phát video không?",
-    "yes": "Có",
-    "no": "Không",
-    "helperRequired": "Nếu vậy, bạn cần cài đặt chương trình Helper.",
-    "helperDesc": "Chương trình Helper giúp phát video YouTube mà không cần đăng nhập.",
-    "installHelper": "Cài đặt chương trình Helper",
-    "skip": "Bỏ qua"
-  },
-  "videoHelperTest": {
-    "title": "Kiểm tra chương trình Helper",
-    "subtitle": "Đang kiểm tra xem Helper có hoạt động đúng không",
-    "enableHelper": "Bật chương trình Helper",
-    "testVideo": "Phát video kiểm tra",
-    "testing": "Đang kiểm tra...",
-    "success": "Chương trình Helper hoạt động bình thường!",
-    "failed": "Không thể kết nối với Helper. Vui lòng đảm bảo chương trình đang chạy.",
-    "downloading": "Đang tải video: {percent}%",
-    "skip": "Bỏ qua"
   },
   "tmi": {
     "getApiKeyDesc": "Nhận Gemini API Key",
