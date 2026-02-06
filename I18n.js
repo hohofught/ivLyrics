@@ -264,6 +264,27 @@
     }
 
     /**
+     * 주어진 i18n 키의 번역 문자열을 로드된 모든 언어에서 수집하여 반환
+     * 검색 시 모든 언어의 번역을 검색 대상에 포함시키기 위해 사용
+     * @param {string} keyPath - i18n 키 경로 (예: "settings.language.label")
+     * @returns {string[]} - 중복 제거된 번역 문자열 배열
+     */
+    function getAllTranslations(keyPath) {
+        if (!keyPath) return [];
+        var translations = [];
+        for (var i = 0; i < AVAILABLE_LANGUAGES.length; i++) {
+            var langData = getLanguageData(AVAILABLE_LANGUAGES[i]);
+            if (langData) {
+                var value = getNestedValue(langData, keyPath);
+                if (value && translations.indexOf(value) === -1) {
+                    translations.push(value);
+                }
+            }
+        }
+        return translations;
+    }
+
+    /**
      * Check if initialized
      */
     function isInitialized() {
@@ -276,6 +297,7 @@
         initSync: initSync,
         getString: getString,
         t: getString,
+        getAllTranslations: getAllTranslations,
         getCurrentLanguage: getCurrentLanguage,
         setLanguage: setLanguage,
         getAvailableLanguages: getAvailableLanguages,

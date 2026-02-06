@@ -3975,6 +3975,7 @@ const ConfigModal = () => {
   };
 
   // 검색 가능한 설정 항목 정의
+  // i18nKeys: 모든 언어의 번역을 검색 대상에 포함시키기 위한 i18n 키 경로 배열
   const searchableSettings = react.useMemo(() => [
     // 일반 탭 - 언어
     {
@@ -3983,7 +3984,7 @@ const ConfigModal = () => {
       settingKey: "language",
       name: I18n.t("settings.language.label"),
       desc: I18n.t("settings.language.desc"),
-      keywords: ["언어", "language", "lang", "언어 설정", "한국어", "english", "日本語", "中文"]
+      i18nKeys: ["tabs.general", "settings.language.label", "settings.language.desc"]
     },
     // 일반 탭 - 시각 효과
     {
@@ -3992,7 +3993,7 @@ const ConfigModal = () => {
       settingKey: "alignment",
       name: I18n.t("settings.alignment.label"),
       desc: I18n.t("settings.alignment.desc"),
-      keywords: ["정렬", "alignment", "왼쪽", "가운데", "오른쪽", "left", "center", "right"]
+      i18nKeys: ["tabs.general", "settings.alignment.label", "settings.alignment.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4000,7 +4001,7 @@ const ConfigModal = () => {
       settingKey: "noise",
       name: I18n.t("settings.noise.label"),
       desc: I18n.t("settings.noise.desc"),
-      keywords: ["노이즈", "noise", "그레인", "grain", "필름", "film"]
+      i18nKeys: ["tabs.general", "settings.noise.label", "settings.noise.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4008,7 +4009,7 @@ const ConfigModal = () => {
       settingKey: "colorful",
       name: I18n.t("settings.colorful.label"),
       desc: I18n.t("settings.colorful.desc"),
-      keywords: ["컬러풀", "colorful", "배경", "background", "동적", "dynamic", "앨범 색상"]
+      i18nKeys: ["tabs.general", "settings.colorful.label", "settings.colorful.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4016,7 +4017,7 @@ const ConfigModal = () => {
       settingKey: "gradient-background",
       name: I18n.t("settings.gradientBackground.label"),
       desc: I18n.t("settings.gradientBackground.desc"),
-      keywords: ["앨범", "album", "커버", "cover", "배경", "background", "gradient"]
+      i18nKeys: ["tabs.general", "settings.gradientBackground.label", "settings.gradientBackground.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4024,7 +4025,7 @@ const ConfigModal = () => {
       settingKey: "solid-background",
       name: I18n.t("settings.solidBackground.label"),
       desc: I18n.t("settings.solidBackground.desc"),
-      keywords: ["단색", "solid", "배경", "background", "색상"]
+      i18nKeys: ["tabs.general", "settings.solidBackground.label", "settings.solidBackground.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4032,7 +4033,7 @@ const ConfigModal = () => {
       settingKey: "video-background",
       name: I18n.t("settings.videoBackground.label"),
       desc: I18n.t("settings.videoBackground.desc"),
-      keywords: ["동영상", "video", "유튜브", "youtube", "배경", "background"]
+      i18nKeys: ["tabs.general", "settings.videoBackground.label", "settings.videoBackground.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4040,7 +4041,7 @@ const ConfigModal = () => {
       settingKey: "backgroundBrightness",
       name: I18n.t("settings.backgroundBrightness.label"),
       desc: I18n.t("settings.backgroundBrightness.desc"),
-      keywords: ["밝기", "brightness", "배경", "background", "어둡게", "밝게"]
+      i18nKeys: ["tabs.general", "settings.backgroundBrightness.label", "settings.backgroundBrightness.desc"]
     },
     // 일반 탭 - 데스크탑 오버레이
     {
@@ -4049,7 +4050,7 @@ const ConfigModal = () => {
       settingKey: "overlay-enabled",
       name: I18n.t("overlay.enabled.label"),
       desc: I18n.t("overlay.enabled.desc"),
-      keywords: ["오버레이", "overlay", "데스크탑", "desktop", "외부 앱"]
+      i18nKeys: ["tabs.general", "overlay.enabled.label", "overlay.enabled.desc"]
     },
 
     // 외관 탭
@@ -4059,7 +4060,7 @@ const ConfigModal = () => {
       settingKey: "original-style",
       name: I18n.t("settingsAdvanced.originalStyle.title"),
       desc: I18n.t("settingsAdvanced.originalStyle.subtitle"),
-      keywords: ["폰트", "font", "글꼴", "원문", "original", "스타일", "style", "크기", "size", "두께", "weight"]
+      i18nKeys: ["tabs.appearance", "settingsAdvanced.originalStyle.title", "settingsAdvanced.originalStyle.subtitle"]
     },
     {
       section: I18n.t("tabs.appearance"),
@@ -4067,7 +4068,7 @@ const ConfigModal = () => {
       settingKey: "pronunciation-style",
       name: I18n.t("settingsAdvanced.pronunciationStyle.title"),
       desc: I18n.t("settingsAdvanced.pronunciationStyle.subtitle"),
-      keywords: ["발음", "pronunciation", "폰트", "font", "로마자", "romaji", "phonetic", "스타일"]
+      i18nKeys: ["tabs.appearance", "settingsAdvanced.pronunciationStyle.title", "settingsAdvanced.pronunciationStyle.subtitle"]
     },
     {
       section: I18n.t("tabs.appearance"),
@@ -4075,7 +4076,7 @@ const ConfigModal = () => {
       settingKey: "translation-style",
       name: I18n.t("settingsAdvanced.translationStyle.title"),
       desc: I18n.t("settingsAdvanced.translationStyle.subtitle"),
-      keywords: ["번역", "translation", "폰트", "font", "스타일", "style"]
+      i18nKeys: ["tabs.appearance", "settingsAdvanced.translationStyle.title", "settingsAdvanced.translationStyle.subtitle"]
     },
     {
       section: I18n.t("tabs.appearance"),
@@ -4083,7 +4084,7 @@ const ConfigModal = () => {
       settingKey: "furigana-style",
       name: I18n.t("settingsAdvanced.furiganaStyle.title"),
       desc: I18n.t("settingsAdvanced.furiganaStyle.subtitle"),
-      keywords: ["후리가나", "furigana", "히라가나", "hiragana", "일본어", "japanese", "한자"]
+      i18nKeys: ["tabs.appearance", "settingsAdvanced.furiganaStyle.title", "settingsAdvanced.furiganaStyle.subtitle"]
     },
     {
       section: I18n.t("tabs.appearance"),
@@ -4091,7 +4092,7 @@ const ConfigModal = () => {
       settingKey: "text-shadow",
       name: I18n.t("settingsAdvanced.textShadow.title"),
       desc: I18n.t("settingsAdvanced.textShadow.subtitle"),
-      keywords: ["그림자", "shadow", "텍스트", "text", "가독성"]
+      i18nKeys: ["tabs.appearance", "settingsAdvanced.textShadow.title", "settingsAdvanced.textShadow.subtitle"]
     },
 
     // 동작 탭
@@ -4101,7 +4102,7 @@ const ConfigModal = () => {
       settingKey: "auto-scroll",
       name: I18n.t("settings.autoScroll.label"),
       desc: I18n.t("settings.autoScroll.desc"),
-      keywords: ["자동", "auto", "스크롤", "scroll"]
+      i18nKeys: ["tabs.behavior", "settings.autoScroll.label", "settings.autoScroll.desc"]
     },
     {
       section: I18n.t("tabs.behavior"),
@@ -4109,7 +4110,7 @@ const ConfigModal = () => {
       settingKey: "animation",
       name: I18n.t("settings.animation.label"),
       desc: I18n.t("settings.animation.desc"),
-      keywords: ["애니메이션", "animation", "효과", "effect"]
+      i18nKeys: ["tabs.behavior", "settings.animation.label", "settings.animation.desc"]
     },
     {
       section: I18n.t("tabs.behavior"),
@@ -4117,7 +4118,7 @@ const ConfigModal = () => {
       settingKey: "karaoke",
       name: I18n.t("settings.karaoke.label"),
       desc: I18n.t("settings.karaoke.desc"),
-      keywords: ["가라오케", "karaoke", "노래방", "리드", "카운트다운"]
+      i18nKeys: ["tabs.behavior", "settings.karaoke.label", "settings.karaoke.desc"]
     },
     {
       section: I18n.t("tabs.behavior"),
@@ -4125,7 +4126,7 @@ const ConfigModal = () => {
       settingKey: "blur-inactive",
       name: I18n.t("settings.blurInactive.label"),
       desc: I18n.t("settings.blurInactive.desc"),
-      keywords: ["블러", "blur", "비활성", "inactive", "흐림"]
+      i18nKeys: ["tabs.behavior", "settings.blurInactive.label", "settings.blurInactive.desc"]
     },
     {
       section: I18n.t("tabs.behavior"),
@@ -4133,7 +4134,7 @@ const ConfigModal = () => {
       settingKey: "synced-fallback",
       name: I18n.t("settings.syncedAsFallback.label"),
       desc: I18n.t("settings.syncedAsFallback.desc"),
-      keywords: ["싱크", "sync", "대체", "fallback", "싱크 가사"]
+      i18nKeys: ["tabs.behavior", "settings.syncedAsFallback.label", "settings.syncedAsFallback.desc"]
     },
     {
       section: I18n.t("tabs.behavior"),
@@ -4141,7 +4142,7 @@ const ConfigModal = () => {
       settingKey: "unsynced-fallback",
       name: I18n.t("settings.unsyncedAsFallback.label"),
       desc: I18n.t("settings.unsyncedAsFallback.desc"),
-      keywords: ["비싱크", "unsynced", "대체", "fallback"]
+      i18nKeys: ["tabs.behavior", "settings.unsyncedAsFallback.label", "settings.unsyncedAsFallback.desc"]
     },
 
     // 고급 탭
@@ -4151,7 +4152,7 @@ const ConfigModal = () => {
       settingKey: "playback",
       name: I18n.t("settingsAdvanced.playback.title"),
       desc: I18n.t("settingsAdvanced.playback.subtitle"),
-      keywords: ["재생", "playback", "플레이바", "playbar", "버튼", "button"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.playback.title", "settingsAdvanced.playback.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4159,7 +4160,7 @@ const ConfigModal = () => {
       settingKey: "karaoke-mode",
       name: I18n.t("settingsAdvanced.karaokeMode.title"),
       desc: I18n.t("settingsAdvanced.karaokeMode.subtitle"),
-      keywords: ["가라오케", "karaoke", "노래방", "바운스", "bounce"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.karaokeMode.title", "settingsAdvanced.karaokeMode.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4167,7 +4168,7 @@ const ConfigModal = () => {
       settingKey: "prefetch",
       name: I18n.t("settingsAdvanced.prefetch.title"),
       desc: I18n.t("settingsAdvanced.prefetch.subtitle"),
-      keywords: ["미리", "prefetch", "로드", "load", "다음 곡", "next"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.prefetch.title", "settingsAdvanced.prefetch.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4175,7 +4176,7 @@ const ConfigModal = () => {
       settingKey: "community-sync",
       name: I18n.t("settingsAdvanced.communitySync.title"),
       desc: I18n.t("settingsAdvanced.communitySync.subtitle"),
-      keywords: ["커뮤니티", "community", "싱크", "sync", "오프셋", "offset", "공유"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.communitySync.title", "settingsAdvanced.communitySync.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4183,7 +4184,7 @@ const ConfigModal = () => {
       settingKey: "cache-management",
       name: I18n.t("settingsAdvanced.cacheManagement.title"),
       desc: I18n.t("settingsAdvanced.cacheManagement.subtitle"),
-      keywords: ["캐시", "cache", "저장", "storage", "삭제", "clear", "메모리", "memory"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.cacheManagement.title", "settingsAdvanced.cacheManagement.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4191,7 +4192,7 @@ const ConfigModal = () => {
       settingKey: "export-import",
       name: I18n.t("settingsAdvanced.exportImport.title"),
       desc: I18n.t("settingsAdvanced.exportImport.subtitle"),
-      keywords: ["내보내기", "export", "가져오기", "import", "백업", "backup"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.exportImport.title", "settingsAdvanced.exportImport.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4199,7 +4200,7 @@ const ConfigModal = () => {
       settingKey: "reset-settings",
       name: I18n.t("settingsAdvanced.resetSettings.title"),
       desc: I18n.t("settingsAdvanced.resetSettings.subtitle"),
-      keywords: ["초기화", "reset", "기본값", "default"]
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.resetSettings.title", "settingsAdvanced.resetSettings.subtitle"]
     },
 
     // 전체화면 탭
@@ -4209,7 +4210,7 @@ const ConfigModal = () => {
       settingKey: "fullscreen-mode",
       name: I18n.t("settingsAdvanced.fullscreenMode.title"),
       desc: I18n.t("settingsAdvanced.fullscreenMode.subtitle"),
-      keywords: ["전체화면", "fullscreen", "단축키", "shortcut", "레이아웃", "layout"]
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.fullscreenMode.title", "settingsAdvanced.fullscreenMode.subtitle"]
     },
     {
       section: I18n.t("tabs.fullscreen"),
@@ -4217,7 +4218,7 @@ const ConfigModal = () => {
       settingKey: "fullscreen-style",
       name: I18n.t("settingsAdvanced.fullscreenStyle.title"),
       desc: I18n.t("settingsAdvanced.fullscreenStyle.subtitle"),
-      keywords: ["전체화면", "fullscreen", "앨범", "album", "크기", "size", "스타일", "style"]
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.fullscreenStyle.title", "settingsAdvanced.fullscreenStyle.subtitle"]
     },
     {
       section: I18n.t("tabs.fullscreen"),
@@ -4225,21 +4226,21 @@ const ConfigModal = () => {
       settingKey: "fullscreen-ui",
       name: I18n.t("settingsAdvanced.fullscreenUI.title"),
       desc: I18n.t("settingsAdvanced.fullscreenUI.subtitle"),
-      keywords: ["전체화면", "fullscreen", "시계", "clock", "컨트롤", "control", "볼륨", "volume"]
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.fullscreenUI.title", "settingsAdvanced.fullscreenUI.subtitle"]
     },
   ], []);
 
-  // 검색 결과 필터링
+  // 검색 결과 필터링 (모든 언어의 번역을 검색 대상에 포함)
   const searchResults = react.useMemo(() => {
     if (!searchQuery.trim()) return [];
 
     const query = searchQuery.toLowerCase().trim();
     return searchableSettings.filter(setting => {
-      const searchIn = [
-        setting.name,
-        setting.desc,
-        ...setting.keywords
-      ].join(" ").toLowerCase();
+      // i18nKeys의 모든 키에 대해, 모든 언어의 번역을 수집
+      const allTranslations = (setting.i18nKeys || []).flatMap(key =>
+        I18n.getAllTranslations(key)
+      );
+      const searchIn = allTranslations.join(" ").toLowerCase();
 
       return searchIn.includes(query);
     });
