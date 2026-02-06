@@ -511,8 +511,24 @@
                         window.AddonDebug.time('lyrics', `provider:${provider.id}`);
                     }
 
-                    // 1. Provider에서 가사 가져오기
-                    const result = await provider.getLyrics(info);
+                    // 0. IndexedDB 캐시 확인
+                    let result = null;
+                    if (trackId && window.LyricsService?.getCachedLyrics) {
+                        try {
+                            const cached = await window.LyricsService.getCachedLyrics(trackId, provider.id);
+                            if (cached) {
+                                result = cached;
+                                console.log(`[LyricsAddonManager] Cache hit for ${provider.id}`);
+                            }
+                        } catch (e) {
+                            console.warn(`[LyricsAddonManager] Cache lookup failed for ${provider.id}:`, e);
+                        }
+                    }
+
+                    // 1. 캐시 miss 시 Provider에서 가사 가져오기
+                    if (!result) {
+                        result = await provider.getLyrics(info);
+                    }
 
                     // 디버그 타이머 종료
                     if (window.AddonDebug?.isEnabled()) {
@@ -629,6 +645,11 @@
                             hasUnsynced: !!finalResult.unsynced,
                             syncDataApplied: finalResult.syncDataApplied || false
                         });
+
+                        // IndexedDB에 캐시 저장
+                        if (trackId && window.LyricsService?.cacheLyrics) {
+                            window.LyricsService.cacheLyrics(trackId, provider.id, finalResult);
+                        }
 
                         return finalResult;
                     }
