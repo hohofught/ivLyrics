@@ -981,6 +981,16 @@
                     metaTx.onerror = () => reject(metaTx.error);
                 }));
 
+                // Sync 삭제
+                if (db.objectStoreNames.contains('sync')) {
+                    deletePromises.push(new Promise((resolve, reject) => {
+                        const syncTx = db.transaction('sync', 'readwrite');
+                        syncTx.objectStore('sync').delete(trackId);
+                        syncTx.oncomplete = () => resolve();
+                        syncTx.onerror = () => reject(syncTx.error);
+                    }));
+                }
+
                 // TMI 삭제
                 if (db.objectStoreNames.contains('tmi')) {
                     deletePromises.push(new Promise((resolve, reject) => {
@@ -1011,7 +1021,7 @@
         async clearAll() {
             try {
                 const db = await this._openDB();
-                const stores = ['lyrics', 'translations', 'youtube', 'metadata', 'tmi'];
+                const stores = ['lyrics', 'translations', 'youtube', 'metadata', 'sync', 'tmi'];
 
                 const clearPromises = stores.map(storeName => {
                     return new Promise((resolve, reject) => {
@@ -1037,7 +1047,7 @@
         async getStats() {
             try {
                 const db = await this._openDB();
-                const stores = ['lyrics', 'translations', 'youtube', 'metadata', 'tmi'];
+                const stores = ['lyrics', 'translations', 'youtube', 'metadata', 'sync', 'tmi'];
                 const stats = {};
 
                 for (const storeName of stores) {

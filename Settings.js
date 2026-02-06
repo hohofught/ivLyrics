@@ -1637,6 +1637,9 @@ const LocalCacheManager = () => {
         window.lyricContainer._inflightGemini.clear();
       }
 
+      // SyncDataService 메모리 캐시 초기화
+      window.SyncDataService?.clearCache();
+
       await LyricsCache.clearAll();
       await loadStats();
 
@@ -1685,6 +1688,9 @@ const LocalCacheManager = () => {
           }
         }
       }
+
+      // SyncDataService 메모리 캐시 초기화
+      window.SyncDataService?.clearCache(trackId);
 
       await LyricsCache.clearTrack(trackId);
       await loadStats();
