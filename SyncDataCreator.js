@@ -6,7 +6,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 	const { useState, useEffect, useRef, useCallback, useMemo } = react;
 
 	// 상태 관리
-	const [provider, setProvider] = useState('');
+	const [provider, setProvider] = useState('');   // 상세 provider (sync-data 매칭용, 예: spotify-MusixMatch)
+	const [addonId, setAddonId] = useState('');     // 실제 addon ID (가사 로드용, 예: spotify)
 	const [lyrics, setLyrics] = useState(null);
 	const [lyricsText, setLyricsText] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
@@ -151,26 +152,24 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 		};
 	}, [trackUri]);
 
-	// Provider 목록 로드
+	// Provider 목록 로드 (활성화된 Provider만, 사용자 설정 순서대로)
 	useEffect(() => {
 		const loadProviders = () => {
 			if (window.LyricsAddonManager) {
-				const addons = window.LyricsAddonManager.getAddons();
-				// 'lyrics' type만 필터링 필요하다면? 현재는 모두가 lyrics provider임.
-				// id와 name을 사용
-				setAvailableProviders(addons);
-				setAvailableProviders(addons);
+				const enabledAddons = window.LyricsAddonManager.getEnabledProviders();
+				setAvailableProviders(enabledAddons);
 			} else {
-				// Wait for manager
 				setAvailableProviders([]);
 			}
 		};
 		loadProviders();
 
-		// 리스너 등록 (Addon이 나중에 로드될 수 있음)
+		// 리스너 등록 (Addon이 나중에 로드될 수 있음, 활성화 상태/순서 변경도 반영)
 		if (window.LyricsAddonManager) {
-			const unsubscribe = window.LyricsAddonManager.on('addon:registered', loadProviders);
-			return () => unsubscribe();
+			const unsub1 = window.LyricsAddonManager.on('addon:registered', loadProviders);
+			const unsub2 = window.LyricsAddonManager.on('provider:enabled:changed', loadProviders);
+			const unsub3 = window.LyricsAddonManager.on('provider:order:changed', loadProviders);
+			return () => { unsub1(); unsub2(); unsub3(); };
 		}
 	}, []);
 
@@ -258,18 +257,17 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				}
 
 				setProvider(finalProvider);
+				setAddonId(usedProvider);
 				setLyrics(result);
 
 				// 기존 싱크 데이터 로드
 				if (window.SyncDataService && trackId) {
 					try {
-						const existingSyncData = await window.SyncDataService.getSyncData(trackId);
+						const existingSyncData = await window.SyncDataService.getSyncData(trackId, finalProvider);
 						if (existingSyncData && existingSyncData.syncData && existingSyncData.syncData.lines) {
-							if (existingSyncData.provider === finalProvider) {
-								console.log('[SyncDataCreator] Found matching existing sync data');
-								setSyncData(existingSyncData.syncData);
-								Toast.success(I18n.t('syncCreator.loadedExistingSyncData') || '기존 싱크 데이터를 불러왔습니다');
-							}
+							console.log('[SyncDataCreator] Found matching existing sync data');
+							setSyncData(existingSyncData.syncData);
+							Toast.success(I18n.t('syncCreator.loadedExistingSyncData') || '기존 싱크 데이터를 불러왔습니다');
 						}
 					} catch (e) {
 						console.warn('[SyncDataCreator] Failed to load existing sync data:', e);
@@ -368,16 +366,14 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					setError(I18n.t('syncCreator.noLyrics'));
 				}
 
-				// 기존 싱크 데이터가 있는지 확인 (현재 provider와 일치하는 것만)
+				// 기존 싱크 데이터가 있는지 확인
 				if (window.SyncDataService && trackId) {
 					try {
-						const existingSyncData = await window.SyncDataService.getSyncData(trackId);
+						const existingSyncData = await window.SyncDataService.getSyncData(trackId, finalProvider);
 						if (existingSyncData && existingSyncData.syncData && existingSyncData.syncData.lines) {
-							if (existingSyncData.provider === finalProvider) {
-								console.log('[SyncDataCreator] Found matching existing sync data');
-								setSyncData(existingSyncData.syncData);
-								Toast.success(I18n.t('syncCreator.loadedExistingSyncData') || '기존 싱크 데이터를 불러왔습니다');
-							}
+							console.log('[SyncDataCreator] Found matching existing sync data');
+							setSyncData(existingSyncData.syncData);
+							Toast.success(I18n.t('syncCreator.loadedExistingSyncData') || '기존 싱크 데이터를 불러왔습니다');
 						}
 					} catch (e) {
 						console.warn('[SyncDataCreator] Failed to load existing sync data:', e);
@@ -1955,12 +1951,12 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				react.createElement('span', { style: { fontSize: '12px', color: 'var(--spice-subtext)' } }, 'Provider:'),
 				react.createElement('select', {
 					style: s.select,
-					value: provider || '',
+					value: addonId || '',
 					onChange: (e) => {
-						const newProvider = e.target.value;
-						if (newProvider) {
-							setProvider(newProvider); // UI 즉시 업데이트
-							loadLyrics(newProvider);
+						const newAddonId = e.target.value;
+						if (newAddonId) {
+							setAddonId(newAddonId);
+							loadLyrics(newAddonId);
 						}
 					}
 				},
@@ -1971,7 +1967,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 						)
 					]
 				),
-				react.createElement('button', { style: { ...s.loadBtn, opacity: isLoading ? 0.5 : 1 }, onClick: () => loadLyrics(provider), disabled: isLoading },
+				react.createElement('button', { style: { ...s.loadBtn, opacity: isLoading ? 0.5 : 1 }, onClick: () => loadLyrics(addonId), disabled: isLoading },
 					isLoading ? I18n.t('syncCreator.loading') : I18n.t('syncCreator.reload') || '다시 로드'
 				)
 			)
