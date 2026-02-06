@@ -553,6 +553,12 @@ window.LANG_ZH_CN = {
     "exportSuccessDesc": "配置文件将保存到下载文件夹。",
     "exportFailed": "设置导出失败",
     "importSuccessDesc": "页面即将刷新...",
+    "dbExportSuccess": "数据库导出成功",
+    "dbExportSuccessDesc": "数据库文件已保存到下载文件夹。",
+    "dbExportFailed": "数据库导出失败",
+    "dbImportSuccess": "数据库导入成功",
+    "dbImportSuccessDesc": "页面即将刷新...",
+    "dbImportFailed": "数据库导入失败",
     "resetSuccess": "重置完成",
     "resetSuccessDesc": "页面即将刷新...",
     "resetFailed": "重置失败",
@@ -966,6 +972,21 @@ window.LANG_ZH_CN = {
         "label": "导入设置",
         "button": "导入",
         "processing": "正在导入..."
+      }
+    },
+    "dbExportImport": {
+      "title": "导出/导入数据库",
+      "subtitle": "转移翻译、歌词缓存等所有数据",
+      "export": {
+        "label": "导出数据库",
+        "button": "导出",
+        "processing": "导出中..."
+      },
+      "import": {
+        "label": "导入数据库",
+        "button": "导入",
+        "processing": "导入中...",
+        "confirm": "所有现有数据库数据将被覆盖。是否继续？"
       }
     },
     "resetSettings": {

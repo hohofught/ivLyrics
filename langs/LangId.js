@@ -553,6 +553,12 @@ window.LANG_ID = {
     "exportSuccessDesc": "Menyimpan file pengaturan ke folder unduhan.",
     "exportFailed": "Gagal mengekspor pengaturan",
     "importSuccessDesc": "Halaman akan disegarkan sebentar lagi...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "Reset selesai",
     "resetSuccessDesc": "Halaman akan disegarkan sebentar lagi...",
     "resetFailed": "Reset gagal",
@@ -966,6 +972,21 @@ window.LANG_ID = {
         "label": "Impor Pengaturan",
         "button": "Impor",
         "processing": "Mengimpor..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {

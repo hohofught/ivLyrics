@@ -553,6 +553,12 @@ window.LANG_VI = {
     "exportSuccessDesc": "Tệp cài đặt đã được lưu vào thư mục Tải xuống.",
     "exportFailed": "Xuất cài đặt thất bại",
     "importSuccessDesc": "Trang sẽ được tải lại sau giây lát...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "Đã hoàn tất đặt lại",
     "resetSuccessDesc": "Trang sẽ được tải lại sau giây lát...",
     "resetFailed": "Đặt lại thất bại",
@@ -966,6 +972,21 @@ window.LANG_VI = {
         "label": "Nhập cài đặt",
         "button": "Nhập",
         "processing": "Đang nhập..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {

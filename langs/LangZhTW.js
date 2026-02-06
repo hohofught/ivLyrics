@@ -553,6 +553,12 @@ window.LANG_ZH_TW = {
     "exportSuccessDesc": "設定檔將儲存至下載資料夾。",
     "exportFailed": "設定匯出失敗",
     "importSuccessDesc": "頁面即將重新整理...",
+    "dbExportSuccess": "資料庫匯出成功",
+    "dbExportSuccessDesc": "資料庫檔案已儲存至下載資料夾。",
+    "dbExportFailed": "資料庫匯出失敗",
+    "dbImportSuccess": "資料庫匯入成功",
+    "dbImportSuccessDesc": "頁面即將重新整理...",
+    "dbImportFailed": "資料庫匯入失敗",
     "resetSuccess": "重置完成",
     "resetSuccessDesc": "頁面即將重新整理...",
     "resetFailed": "重置失敗",
@@ -966,6 +972,21 @@ window.LANG_ZH_TW = {
         "label": "匯入設定",
         "button": "匯入",
         "processing": "正在匯入..."
+      }
+    },
+    "dbExportImport": {
+      "title": "匯出/匯入資料庫",
+      "subtitle": "轉移翻譯、歌詞快取等所有資料",
+      "export": {
+        "label": "匯出資料庫",
+        "button": "匯出",
+        "processing": "匯出中..."
+      },
+      "import": {
+        "label": "匯入資料庫",
+        "button": "匯入",
+        "processing": "匯入中...",
+        "confirm": "所有現有資料庫資料將被覆蓋。是否繼續？"
       }
     },
     "resetSettings": {

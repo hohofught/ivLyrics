@@ -553,6 +553,12 @@ window.LANG_JA = {
     "exportSuccessDesc": "設定ファイルをダウンロードフォルダに保存します。",
     "exportFailed": "設定の書き出しに失敗しました",
     "importSuccessDesc": "まもなくページが再読み込みされます...",
+    "dbExportSuccess": "DBエクスポートに成功しました",
+    "dbExportSuccessDesc": "DBファイルをダウンロードフォルダに保存しました。",
+    "dbExportFailed": "DBエクスポート失敗",
+    "dbImportSuccess": "DBインポートに成功しました",
+    "dbImportSuccessDesc": "まもなくページが更新されます...",
+    "dbImportFailed": "DBインポート失敗",
     "resetSuccess": "初期化が完了しました",
     "resetSuccessDesc": "まもなくページが再読み込みされます...",
     "resetFailed": "初期化に失敗しました",
@@ -966,6 +972,21 @@ window.LANG_JA = {
         "label": "設定の読み込み",
         "button": "読み込み",
         "processing": "読み込み中..."
+      }
+    },
+    "dbExportImport": {
+      "title": "DB エクスポート/インポート",
+      "subtitle": "翻訳、歌詞キャッシュなどすべてのデータを移行",
+      "export": {
+        "label": "DB エクスポート",
+        "button": "エクスポート",
+        "processing": "エクスポート中..."
+      },
+      "import": {
+        "label": "DB インポート",
+        "button": "インポート",
+        "processing": "インポート中...",
+        "confirm": "既存のDBデータがすべて上書きされます。続行しますか？"
       }
     },
     "resetSettings": {

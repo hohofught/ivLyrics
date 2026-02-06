@@ -1023,6 +1023,107 @@ const StorageManager = {
   },
 };
 
+// DB Export/Import Manager - 모든 IndexedDB 데이터 내보내기/가져오기
+const DB_EXPORT_TARGETS = [
+  { name: "ivLyrics-db", version: 1, stores: ["track-sync-offsets"] },
+  { name: "ivLyrics-lang-db", version: 1, stores: ["track-language-overrides"] },
+  { name: "ivLyricsCache", version: 6, stores: ["lyrics", "translations", "youtube", "metadata", "sync", "tmi"] },
+  { name: "ivLyricsSelectedVideos", version: 1, stores: ["selectedVideos"] },
+];
+
+const DBExportManager = {
+  _openDB(name, version, stores) {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(name, version);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        for (const storeName of stores) {
+          if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName);
+          }
+        }
+      };
+    });
+  },
+
+  _readStore(db, storeName) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, "readonly");
+      const store = tx.objectStore(storeName);
+      const records = [];
+
+      const cursorReq = store.openCursor();
+      cursorReq.onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) {
+          records.push({ key: cursor.key, value: cursor.value });
+          cursor.continue();
+        } else {
+          resolve(records);
+        }
+      };
+      cursorReq.onerror = () => reject(cursorReq.error);
+    });
+  },
+
+  _writeStore(db, storeName, records) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, "readwrite");
+      const store = tx.objectStore(storeName);
+      store.clear();
+      for (const record of records) {
+        if (store.keyPath) {
+          store.put(record.value);
+        } else {
+          store.put(record.value, record.key);
+        }
+      }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  async exportAllDBs() {
+    const result = {};
+    for (const target of DB_EXPORT_TARGETS) {
+      try {
+        const db = await this._openDB(target.name, target.version, target.stores);
+        const existingStores = Array.from(db.objectStoreNames);
+        result[target.name] = {};
+        for (const storeName of target.stores) {
+          if (existingStores.includes(storeName)) {
+            result[target.name][storeName] = await this._readStore(db, storeName);
+          }
+        }
+        db.close();
+      } catch (e) {
+        console.warn(`[ivLyrics] Failed to export DB ${target.name}:`, e);
+      }
+    }
+    return result;
+  },
+
+  async importAllDBs(data) {
+    for (const target of DB_EXPORT_TARGETS) {
+      if (!data[target.name]) continue;
+      try {
+        const db = await this._openDB(target.name, target.version, target.stores);
+        const existingStores = Array.from(db.objectStoreNames);
+        for (const storeName of target.stores) {
+          if (existingStores.includes(storeName) && data[target.name][storeName]) {
+            await this._writeStore(db, storeName, data[target.name][storeName]);
+          }
+        }
+        db.close();
+      } catch (e) {
+        console.error(`[ivLyrics] Failed to import DB ${target.name}:`, e);
+      }
+    }
+  },
+};
+
 const KARAOKE = 0;
 const SYNCED = 1;
 const UNSYNCED = 2;

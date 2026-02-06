@@ -553,6 +553,12 @@ window.LANG_IT = {
     "exportSuccessDesc": "File impostazioni salvato nella cartella download.",
     "exportFailed": "Esportazione impostazioni fallita",
     "importSuccessDesc": "La pagina verrà ricaricata a breve...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "Ripristino completato",
     "resetSuccessDesc": "La pagina verrà ricaricata a breve...",
     "resetFailed": "Ripristino fallito",
@@ -966,6 +972,21 @@ window.LANG_IT = {
         "label": "Importa impostazioni",
         "button": "Importa",
         "processing": "Importazione..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {

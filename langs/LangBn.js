@@ -553,6 +553,12 @@ window.LANG_BN = {
     "exportSuccessDesc": "সেটিংস ফাইলটি ডাউনলোড ফোল্ডারে সেভ করা হচ্ছে।",
     "exportFailed": "সেটিংস এক্সপোর্ট ব্যর্থ হয়েছে",
     "importSuccessDesc": "কিছুক্ষণ পর পেজটি রিফ্রেশ হবে...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "রিসেট সম্পন্ন হয়েছে",
     "resetSuccessDesc": "কিছুক্ষণ পর পেজটি রিফ্রেশ হবে...",
     "resetFailed": "রিসেট ব্যর্থ হয়েছে",
@@ -966,6 +972,21 @@ window.LANG_BN = {
         "label": "সেটিংস ইম্পোর্ট",
         "button": "ইম্পোর্ট",
         "processing": "ইম্পোর্ট করা হচ্ছে..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {

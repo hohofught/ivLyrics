@@ -553,6 +553,12 @@ window.LANG_TH = {
     "exportSuccessDesc": "บันทึกไฟล์การตั้งค่าลงในโฟลเดอร์ดาวน์โหลดแล้ว",
     "exportFailed": "ส่งออกการตั้งค่าล้มเหลว",
     "importSuccessDesc": "หน้าเว็บจะรีเฟรชในอีกสักครู่...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "รีเซ็ตเสร็จสมบูรณ์",
     "resetSuccessDesc": "หน้าเว็บจะรีเฟรชในอีกสักครู่...",
     "resetFailed": "รีเซ็ตล้มเหลว",
@@ -966,6 +972,21 @@ window.LANG_TH = {
         "label": "นำเข้าการตั้งค่า",
         "button": "นำเข้า",
         "processing": "กำลังนำเข้า..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {

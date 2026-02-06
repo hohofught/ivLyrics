@@ -4203,6 +4203,14 @@ const ConfigModal = () => {
     {
       section: I18n.t("tabs.advanced"),
       sectionKey: "advanced",
+      settingKey: "db-export-import",
+      name: I18n.t("settingsAdvanced.dbExportImport.title"),
+      desc: I18n.t("settingsAdvanced.dbExportImport.subtitle"),
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.dbExportImport.title", "settingsAdvanced.dbExportImport.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.advanced"),
+      sectionKey: "advanced",
       settingKey: "reset-settings",
       name: I18n.t("settingsAdvanced.resetSettings.title"),
       desc: I18n.t("settingsAdvanced.resetSettings.subtitle"),
@@ -8716,6 +8724,290 @@ const ConfigModal = () => {
           ],
           onChange: () => { },
         }),
+
+        react.createElement(SectionTitle, {
+          title: I18n.t("settingsAdvanced.dbExportImport.title"),
+          subtitle: I18n.t("settingsAdvanced.dbExportImport.subtitle"),
+        }),
+        react.createElement(OptionList, {
+          items: [
+            {
+              desc: I18n.t("settingsAdvanced.dbExportImport.export.label"),
+              info: I18n.t("settingsAdvanced.dbExportImport.export.label"),
+              key: "export-db",
+              text: I18n.t("settingsAdvanced.dbExportImport.export.button"),
+              type: ConfigButton,
+              onChange: async (_, event) => {
+                const button = event?.target;
+                if (!button) return;
+                const originalText = button.textContent;
+                button.textContent = I18n.t("settingsAdvanced.dbExportImport.export.processing");
+                button.disabled = true;
+
+                try {
+                  const data = await DBExportManager.exportAllDBs();
+                  const json = JSON.stringify(data);
+                  const blob = new Blob([json], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "ivLyrics.ivldb";
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+
+                  const settingRow = button.closest(".setting-row");
+                  let resultContainer = settingRow?.nextElementSibling;
+
+                  if (
+                    !resultContainer ||
+                    !resultContainer.id ||
+                    resultContainer.id !== "db-export-result-container"
+                  ) {
+                    resultContainer = document.createElement("div");
+                    resultContainer.id = "db-export-result-container";
+                    resultContainer.style.cssText = "margin-top: -1px;";
+                    settingRow?.parentNode?.insertBefore(
+                      resultContainer,
+                      settingRow.nextSibling
+                    );
+                  }
+
+                  resultContainer.innerHTML = `<div style="
+                    padding: 16px 20px;
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(96, 165, 250, 0.15);
+                    border-left: 1px solid rgba(255, 255, 255, 0.08);
+                    border-right: 1px solid rgba(255, 255, 255, 0.08);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    backdrop-filter: blur(30px) saturate(150%);
+                    -webkit-backdrop-filter: blur(30px) saturate(150%);
+                  ">
+                    <div style="
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+                      color: rgba(96, 165, 250, 0.9);
+                      font-size: 13px;
+                    ">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      <div>
+                        <div style="font-weight: 600; margin-bottom: 2px;">${I18n.t("notifications.dbExportSuccess")}</div>
+                        <div style="opacity: 0.8; font-size: 12px;">${I18n.t("notifications.dbExportSuccessDesc")}</div>
+                      </div>
+                    </div>
+                  </div>`;
+                } catch (e) {
+                  const settingRow = button.closest(".setting-row");
+                  let resultContainer = settingRow?.nextElementSibling;
+
+                  if (
+                    !resultContainer ||
+                    !resultContainer.id ||
+                    resultContainer.id !== "db-export-result-container"
+                  ) {
+                    resultContainer = document.createElement("div");
+                    resultContainer.id = "db-export-result-container";
+                    resultContainer.style.cssText = "margin-top: -1px;";
+                    settingRow?.parentNode?.insertBefore(
+                      resultContainer,
+                      settingRow.nextSibling
+                    );
+                  }
+                  resultContainer.innerHTML = `
+                    <div style="
+                      padding: 16px 20px;
+                      background: rgba(255, 255, 255, 0.03);
+                      border: 1px solid rgba(255, 107, 107, 0.2);
+                      border-left: 1px solid rgba(255, 255, 255, 0.08);
+                      border-right: 1px solid rgba(255, 255, 255, 0.08);
+                      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                      backdrop-filter: blur(30px) saturate(150%);
+                      -webkit-backdrop-filter: blur(30px) saturate(150%);
+                    ">
+                      <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        color: rgba(255, 107, 107, 0.9);
+                        font-size: 13px;
+                        font-weight: 500;
+                      ">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                          <div style="font-weight: 600; margin-bottom: 2px;">${I18n.t("notifications.dbExportFailed")}</div>
+                          <div style="opacity: 0.8; font-size: 12px;">${e.message || e.reason || e.toString()}</div>
+                        </div>
+                      </div>
+                    </div>`;
+                } finally {
+                  button.textContent = originalText;
+                  button.disabled = false;
+                }
+              },
+            },
+
+            {
+              desc: I18n.t("settingsAdvanced.dbExportImport.import.label"),
+              info: I18n.t("settingsAdvanced.dbExportImport.import.label"),
+              key: "import-db",
+              text: I18n.t("settingsAdvanced.dbExportImport.import.button"),
+              type: ConfigButton,
+              onChange: async (_, event) => {
+                const button = event?.target;
+                if (!button) return;
+                const originalText = button.textContent;
+                button.textContent = I18n.t("settingsAdvanced.dbExportImport.import.processing");
+                button.disabled = true;
+
+                try {
+                  const fileInput = document.createElement("input");
+                  fileInput.type = "file";
+                  fileInput.accept = ".ivldb";
+                  fileInput.onchange = async (e) => {
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                      button.textContent = originalText;
+                      button.disabled = false;
+                      return;
+                    }
+
+                    const confirmed = confirm(
+                      I18n.t("settingsAdvanced.dbExportImport.import.confirm")
+                    );
+                    if (!confirmed) {
+                      button.textContent = originalText;
+                      button.disabled = false;
+                      return;
+                    }
+
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                      const contents = e.target.result;
+                      try {
+                        const text = new TextDecoder("utf-8").decode(contents);
+                        const data = JSON.parse(text);
+                        await DBExportManager.importAllDBs(data);
+
+                        const settingRow = button.closest(".setting-row");
+                        let resultContainer = settingRow?.nextElementSibling;
+
+                        if (
+                          !resultContainer ||
+                          !resultContainer.id ||
+                          resultContainer.id !== "db-import-result-container"
+                        ) {
+                          resultContainer = document.createElement("div");
+                          resultContainer.id = "db-import-result-container";
+                          resultContainer.style.cssText = "margin-top: -1px;";
+                          settingRow?.parentNode?.insertBefore(
+                            resultContainer,
+                            settingRow.nextSibling
+                          );
+                        }
+
+                        resultContainer.innerHTML = `<div style="
+                          padding: 16px 20px;
+                          background: rgba(255, 255, 255, 0.03);
+                          border: 1px solid rgba(96, 165, 250, 0.15);
+                          border-left: 1px solid rgba(255, 255, 255, 0.08);
+                          border-right: 1px solid rgba(255, 255, 255, 0.08);
+                          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                          border-bottom-left-radius: 12px;
+                          border-bottom-right-radius: 12px;
+                          backdrop-filter: blur(30px) saturate(150%);
+                          -webkit-backdrop-filter: blur(30px) saturate(150%);
+                        ">
+                          <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            color: rgba(96, 165, 250, 0.9);
+                            font-size: 13px;
+                          ">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                              <div style="font-weight: 600; margin-bottom: 2px;">${I18n.t("notifications.dbImportSuccess")}</div>
+                              <div style="opacity: 0.8; font-size: 12px;">${I18n.t("notifications.dbImportSuccessDesc")}</div>
+                            </div>
+                          </div>
+                        </div>`;
+
+                        setTimeout(() => {
+                          location.reload();
+                        }, 1500);
+                      } catch (e) {
+                        const settingRow = button.closest(".setting-row");
+                        let resultContainer = settingRow?.nextElementSibling;
+
+                        if (
+                          !resultContainer ||
+                          !resultContainer.id ||
+                          resultContainer.id !== "db-import-result-container"
+                        ) {
+                          resultContainer = document.createElement("div");
+                          resultContainer.id = "db-import-result-container";
+                          resultContainer.style.cssText = "margin-top: -1px;";
+                          settingRow?.parentNode?.insertBefore(
+                            resultContainer,
+                            settingRow.nextSibling
+                          );
+                        }
+                        resultContainer.innerHTML = `
+                          <div style="
+                            padding: 16px 20px;
+                            background: rgba(255, 255, 255, 0.03);
+                            border: 1px solid rgba(255, 107, 107, 0.2);
+                            border-left: 1px solid rgba(255, 255, 255, 0.08);
+                            border-right: 1px solid rgba(255, 255, 255, 0.08);
+                            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                            backdrop-filter: blur(30px) saturate(150%);
+                            -webkit-backdrop-filter: blur(30px) saturate(150%);
+                          ">
+                            <div style="
+                              display: flex;
+                              align-items: center;
+                              gap: 12px;
+                              color: rgba(255, 107, 107, 0.9);
+                              font-size: 13px;
+                              font-weight: 500;
+                            ">
+                              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                              </svg>
+                              <div>
+                                <div style="font-weight: 600; margin-bottom: 2px;">${I18n.t("notifications.dbImportFailed")}</div>
+                                <div style="opacity: 0.8; font-size: 12px;">${e.message || e.reason || e.toString()}</div>
+                              </div>
+                            </div>
+                          </div>`;
+                      } finally {
+                        button.textContent = originalText;
+                        button.disabled = false;
+                      }
+                    };
+                    reader.readAsArrayBuffer(file);
+                  };
+                  document.body.appendChild(fileInput);
+                  fileInput.click();
+                  document.body.removeChild(fileInput);
+                } catch (e) {
+                  button.textContent = originalText;
+                  button.disabled = false;
+                }
+              },
+            },
+          ],
+          onChange: () => { },
+        }),
+
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.resetSettings.title"),
           subtitle: I18n.t("settingsAdvanced.resetSettings.subtitle"),

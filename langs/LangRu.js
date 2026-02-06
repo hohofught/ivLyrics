@@ -553,6 +553,12 @@ window.LANG_RU = {
     "exportSuccessDesc": "Файл настроек сохранен в папку загрузок.",
     "exportFailed": "Ошибка экспорта настроек",
     "importSuccessDesc": "Страница скоро обновится...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "Сброс выполнен успешно",
     "resetSuccessDesc": "Страница скоро обновится...",
     "resetFailed": "Ошибка сброса",
@@ -966,6 +972,21 @@ window.LANG_RU = {
         "label": "Импорт настроек",
         "button": "Импортировать",
         "processing": "Импорт..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {

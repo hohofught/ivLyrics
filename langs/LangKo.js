@@ -561,6 +561,12 @@ window.LANG_KO = {
     "exportSuccessDesc": "설정파일을 다운로드 폴더에 저장합니다.",
     "exportFailed": "설정 내보내기 실패",
     "importSuccessDesc": "잠시 후 페이지가 새로고침됩니다...",
+    "dbExportSuccess": "DB 내보내기에 성공했습니다",
+    "dbExportSuccessDesc": "DB 파일을 다운로드 폴더에 저장합니다.",
+    "dbExportFailed": "DB 내보내기 실패",
+    "dbImportSuccess": "DB 불러오기에 성공했습니다",
+    "dbImportSuccessDesc": "잠시 후 페이지가 새로고침됩니다...",
+    "dbImportFailed": "DB 불러오기 실패",
     "resetSuccess": "초기화가 완료되었습니다",
     "resetSuccessDesc": "잠시 후 페이지가 새로고침됩니다...",
     "resetFailed": "초기화 실패",
@@ -974,6 +980,21 @@ window.LANG_KO = {
         "label": "설정 불러오기",
         "button": "불러오기",
         "processing": "불러오는 중..."
+      }
+    },
+    "dbExportImport": {
+      "title": "DB 내보내기/가져오기",
+      "subtitle": "번역, 가사 캐시 등 모든 데이터를 옮기세요",
+      "export": {
+        "label": "DB 내보내기",
+        "button": "내보내기",
+        "processing": "내보내는 중..."
+      },
+      "import": {
+        "label": "DB 불러오기",
+        "button": "불러오기",
+        "processing": "불러오는 중...",
+        "confirm": "기존 DB 데이터가 모두 덮어씌워집니다. 계속하시겠습니까?"
       }
     },
     "resetSettings": {

@@ -553,6 +553,12 @@ window.LANG_FA = {
     "exportSuccessDesc": "فایل تنظیمات در پوشه دانلودها ذخیره شد.",
     "exportFailed": "صادر کردن تنظیمات ناموفق بود",
     "importSuccessDesc": "صفحه لحظاتی دیگر رفرش می‌شود...",
+    "dbExportSuccess": "Database export successful",
+    "dbExportSuccessDesc": "Database file saved to Downloads folder.",
+    "dbExportFailed": "Database export failed",
+    "dbImportSuccess": "Database import successful",
+    "dbImportSuccessDesc": "Page will refresh shortly...",
+    "dbImportFailed": "Database import failed",
     "resetSuccess": "بازنشانی کامل شد",
     "resetSuccessDesc": "صفحه لحظاتی دیگر رفرش می‌شود...",
     "resetFailed": "بازنشانی ناموفق بود",
@@ -966,6 +972,21 @@ window.LANG_FA = {
         "label": "وارد کردن تنظیمات",
         "button": "وارد کردن",
         "processing": "در حال وارد کردن..."
+      }
+    },
+    "dbExportImport": {
+      "title": "Export/Import Database",
+      "subtitle": "Transfer translations, lyrics cache and all data",
+      "export": {
+        "label": "Export Database",
+        "button": "Export",
+        "processing": "Exporting..."
+      },
+      "import": {
+        "label": "Import Database",
+        "button": "Import",
+        "processing": "Importing...",
+        "confirm": "All existing DB data will be overwritten. Continue?"
       }
     },
     "resetSettings": {
