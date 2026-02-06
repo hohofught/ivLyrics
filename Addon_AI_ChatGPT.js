@@ -250,20 +250,24 @@
         const langInfo = getLangInfo(lang);
         const lineCount = text.split('\n').length;
 
-        return `Translate these ${lineCount} lines of song lyrics to ${langInfo.name} (${langInfo.native}).
+        return `You are a lyrics translator. Translate these ${lineCount} lines of song lyrics into ${langInfo.name} (${langInfo.native}).
 
-RULES:
+CRITICAL RULES:
+- This is a TRANSLATION task - translate the MEANING of each line
+- Output must be written in ${langInfo.name} (${langInfo.native}) only
+- Do NOT output the original lyrics unchanged
+- Do NOT output romanization or pronunciation instead of translation
 - Output EXACTLY ${lineCount} lines, one translation per line
 - Keep empty lines as empty
 - Keep ♪ symbols and markers like [Chorus], (Yeah) as-is
-- Do NOT add line numbers or prefixes
+- Do NOT add line numbers, prefixes, or explanations
 - Do NOT use JSON or code blocks
 - Just output the translated lines, nothing else
 
 INPUT:
 ${text}
 
-OUTPUT (${lineCount} lines):`;
+OUTPUT (${lineCount} lines in ${langInfo.native}):`;
     }
 
     function buildPhoneticPrompt(text, lang) {
@@ -271,24 +275,28 @@ OUTPUT (${lineCount} lines):`;
         const lineCount = text.split('\n').length;
         const isEnglish = lang === 'en';
         const scriptInstruction = isEnglish
-            ? 'Use Latin alphabet only (romanization).'
-            : `Use ${langInfo.native} script.`;
+            ? 'Use Latin alphabet only (romanization). Example: こんにちは → konnichiwa, 안녕하세요 → annyeonghaseyo'
+            : `Write pronunciation in ${langInfo.native} script. ${langInfo.phoneticDesc || ''}`;
 
-        return `Convert these ${lineCount} lines of lyrics to pronunciation for ${langInfo.name} speakers.
+        return `You are a pronunciation converter. Convert these ${lineCount} lines of lyrics into how they SOUND (pronunciation) for ${langInfo.name} speakers.
 ${scriptInstruction}
 
-RULES:
+CRITICAL RULES:
+- This is a PRONUNCIATION task, NOT a translation task
+- Output how each line SOUNDS when spoken aloud, written in ${isEnglish ? 'Latin alphabet' : langInfo.native + ' script'}
+- Do NOT translate the meaning of the lyrics
+- Do NOT output the original lyrics unchanged
 - Output EXACTLY ${lineCount} lines, one pronunciation per line
 - Keep empty lines as empty
 - Keep ♪ symbols and markers like [Chorus], (Yeah) as-is
-- Do NOT add line numbers or prefixes
+- Do NOT add line numbers, prefixes, or explanations
 - Do NOT use JSON or code blocks
 - Just output the pronunciations, nothing else
 
 INPUT:
 ${text}
 
-OUTPUT (${lineCount} lines):`;
+OUTPUT (${lineCount} lines of pronunciation only):`;
     }
 
     function buildMetadataPrompt(title, artist, lang) {
