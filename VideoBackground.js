@@ -147,8 +147,6 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                 return;
             }
 
-            // 2.5. SongDataService 제거 - 이 단계는 생략됨
-
             // 3. 로컬 캐시 확인 (IndexedDB)
             try {
                 const cachedYouTube = await LyricsCache.getYouTube(trackId);
@@ -177,7 +175,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                 let youtubeUrl = `https://lyrics.api.ivl.is/lyrics/youtube?trackId=${trackId}&userHash=${userHash}&useCommunity=true`;
 
                 // Spotify 트랙 메타데이터를 백엔드에 전달
-                const spotifyData = window.SongDataService?._extractSpotifyData?.(trackUri);
+                const spotifyData = window.SpotifyDataHelper?.extractSpotifyData?.(trackUri);
                 if (spotifyData?.name) {
                     youtubeUrl += `&trackName=${encodeURIComponent(spotifyData.name)}`;
                     if (spotifyData.artists?.length) {

@@ -1913,40 +1913,26 @@ const RateLimiter = {
 };
 
 // ============================================
-// SongDataService - 통합 데이터 서비스
-// 백엔드의 /lyrics/song-data 엔드포인트를 통해 모든 캐시된 데이터를 한 번에 가져옴
-//
-// 캐싱 전략:
-// - 현재 곡과 다음 곡(프리페치)만 캐시 유지
-// - 곡이 바뀌면 이전 곡 캐시 삭제
-// - 사용자가 싱크 데이터 생성/번역 시 즉시 반영되도록 캐시 무효화 메서드 제공
+// SpotifyDataHelper - Spotify 트랙 메타데이터 추출 유틸리티
 // ============================================
-const SongDataService = {
-  _cache: new Map(), // trackId -> data
-  _inflightRequests: new Map(), // trackId -> Promise
-  _currentTrackId: null, // 현재 재생 중인 트랙 ID
-  _nextTrackId: null, // 다음 곡 트랙 ID (프리페치용)
-
+const SpotifyDataHelper = {
   /**
    * Spotify 트랙 데이터를 추출
    * @param {string} uri - Spotify URI (spotify:track:XXXX)
    * @returns {Object|null} spotifyData
    */
-  _extractSpotifyData(uri) {
+  extractSpotifyData(uri) {
     try {
       const trackId = uri?.split(':')[2];
       if (!trackId) return null;
 
-      // Spicetify에서 현재 트랙 정보 가져오기
       const playerData = Spicetify.Player?.data;
       const currentTrack = playerData?.item || playerData?.track?.metadata;
 
       if (!currentTrack) return null;
 
-      // URI가 일치하는지 확인
       const currentUri = currentTrack.uri || `spotify:track:${currentTrack.id}`;
       if (currentUri !== uri) {
-        // 다음 곡 정보 (큐에서 가져오기)
         const queue = Spicetify.Queue?.nextTracks || [];
         const nextTrack = queue.find(t => {
           const tUri = t.contextTrack?.uri || t.uri;
@@ -1965,7 +1951,6 @@ const SongDataService = {
         return null;
       }
 
-      // 현재 트랙 정보
       const metadata = currentTrack.metadata || currentTrack;
       return {
         name: metadata.title || currentTrack.name,
@@ -1975,14 +1960,11 @@ const SongDataService = {
         duration_ms: parseInt(metadata.duration) || currentTrack.duration_ms || 0
       };
     } catch (error) {
-      console.warn('[SongDataService] Failed to extract Spotify data:', error);
+      console.warn('[SpotifyDataHelper] Failed to extract Spotify data:', error);
       return null;
     }
   },
 
-  /**
-   * 아티스트 정보 파싱
-   */
   _parseArtists(metadata) {
     if (metadata.artist_name) {
       return metadata.artist_name.split(', ');
@@ -1994,114 +1976,10 @@ const SongDataService = {
       return [metadata.artists];
     }
     return [];
-  },
-
-  /**
-   * 통합 데이터 가져오기
-   * @param {string} uri - Spotify URI
-   * @param {string} [lang] - 언어 코드
-   * @param {boolean} [isNextTrack] - 다음 곡 프리페치 여부
-   * @returns {Promise<Object|null>} 통합 데이터
-   */
-  async getSongData(uri, lang = null, isNextTrack = false) {
-    const trackId = uri?.split(':')[2];
-    if (!trackId || trackId.length !== 22) {
-      console.warn('[SongDataService] Invalid trackId:', trackId);
-      return null;
-    }
-
-    // 현재/다음 트랙 ID 관리 (캐시 정리용)
-    if (isNextTrack) {
-      this._nextTrackId = trackId;
-    } else {
-      // 현재 곡이 바뀌면 이전 캐시 정리 (현재 곡과 다음 곡만 유지)
-      if (this._currentTrackId && this._currentTrackId !== trackId) {
-        this._cleanupOldCache(trackId);
-      }
-      this._currentTrackId = trackId;
-    }
-
-    // 캐시 확인 (현재 곡/다음 곡만 캐시되어 있음)
-    const cached = this._cache.get(trackId);
-    if (cached) {
-      console.log(`[SongDataService] Cache hit for ${trackId}`);
-      return cached.data;
-    }
-
-    // 이미 진행 중인 요청이 있으면 대기
-    if (this._inflightRequests.has(trackId)) {
-      console.log(`[SongDataService] Waiting for inflight request: ${trackId}`);
-      return this._inflightRequests.get(trackId);
-    }
-
-    // 새 요청 시작
-    const requestPromise = this._fetchSongData(trackId, uri, lang);
-    this._inflightRequests.set(trackId, requestPromise);
-
-    try {
-      const result = await requestPromise;
-      return result;
-    } finally {
-      this._inflightRequests.delete(trackId);
-    }
-  },
-
-  /**
-   * 이전 곡 캐시 정리 (현재 곡과 다음 곡만 유지)
-   */
-  _cleanupOldCache(newCurrentTrackId) {
-    const keepIds = new Set([newCurrentTrackId]);
-    if (this._nextTrackId) keepIds.add(this._nextTrackId);
-
-    for (const trackId of this._cache.keys()) {
-      if (!keepIds.has(trackId)) {
-        this._cache.delete(trackId);
-        console.log(`[SongDataService] Cleaned up cache for ${trackId}`);
-      }
-    }
-  },
-
-  /**
-   * 백엔드에서 통합 데이터 가져오기
-   */
-  async _fetchSongData(trackId, uri, lang) {
-    // song-data 엔드포인트 사용 중지 (Addon_Lyrics_Spotify.js에서 직접 sync-data 호출)
-    return null;
-  },
-
-  /**
-   * 특정 trackId의 데이터 가져오기 (캐시에서만)
-   */
-  getCachedData(trackId) {
-    const cached = this._cache.get(trackId);
-    return cached?.data || null;
-  },
-
-  /**
-   * 특정 trackId의 캐시 무효화
-   * 싱크 데이터 생성, 번역 요청 등 데이터가 변경됐을 때 호출
-   */
-  invalidateCache(trackId) {
-    if (this._cache.has(trackId)) {
-      this._cache.delete(trackId);
-      console.log(`[SongDataService] Cache invalidated for ${trackId}`);
-    }
-  },
-
-  /**
-   * 모든 캐시 클리어
-   */
-  clearCache() {
-    this._cache.clear();
-    this._inflightRequests.clear();
-    this._currentTrackId = null;
-    this._nextTrackId = null;
-    console.log('[SongDataService] All cache cleared');
   }
 };
 
-// window에 노출 (다른 모듈에서 사용 가능하도록)
-window.SongDataService = SongDataService;
+window.SpotifyDataHelper = SpotifyDataHelper;
 
 // Prefetcher for next track elements (lyrics, phonetic, translation, video background)
 const Prefetcher = {
@@ -2143,8 +2021,6 @@ const Prefetcher = {
       console.log(`[Prefetcher] Starting prefetch for: ${trackInfo.title}`);
 
       try {
-        // 0단계: 통합 데이터 프리페치 제거됨 (SongDataService 미사용)
-
         // 1단계: 가사 먼저 프리페치 (필수)
         const lyrics = await this._prefetchLyrics(trackInfo, mode);
 
@@ -2405,7 +2281,6 @@ const Prefetcher = {
 
   /**
    * 영상 배경 정보 프리페치
-   * SongDataService에서 이미 youtube 정보를 가져왔으므로 별도 API 호출 불필요
    */
   async _prefetchVideoBackground(uri) {
     const trackId = uri.split(":")[2];
@@ -2414,7 +2289,6 @@ const Prefetcher = {
     // 이미 캐시에 있으면 스킵
     if (this._prefetchCache.has(cacheKey)) {
       console.log(`[Prefetcher] Video info already cached for trackId: ${trackId}`);
-      // 헬퍼 프리로드는 별도 진행 (캐시된 데이터에서 videoId 사용)
       const cached = this._prefetchCache.get(cacheKey);
       if (cached?.data?.youtubeVideoId) {
         this._prefetchVideoWithHelper(cached.data.youtubeVideoId);
@@ -2422,25 +2296,6 @@ const Prefetcher = {
       return;
     }
 
-    // SongDataService에서 이미 가져온 데이터 확인
-    const songData = SongDataService.getCachedData(trackId);
-    if (songData?.youtube) {
-      console.log(`[Prefetcher] Using SongDataService youtube data for trackId: ${trackId}`);
-      this._prefetchCache.set(cacheKey, {
-        data: {
-          youtubeVideoId: songData.youtube.videoId,
-          captionStartTime: songData.youtube.captionStartTime,
-          captionLanguage: songData.youtube.captionLanguage,
-          totalCaptions: songData.youtube.totalCaptions
-        },
-        timestamp: Date.now(),
-      });
-      // 헬퍼를 통한 영상 미리 다운로드
-      this._prefetchVideoWithHelper(songData.youtube.videoId);
-      return;
-    }
-
-    // SongDataService에 없으면 API 호출 (폴백)
     // 이미 요청 중이면 기존 요청 반환
     if (this._inflightRequests.has(cacheKey)) {
       return this._inflightRequests.get(cacheKey);
@@ -2453,7 +2308,7 @@ const Prefetcher = {
         const userHash = Utils.getUserHash();
         // Spotify 트랙 메타데이터를 백엔드에 전달 (백엔드가 Spotify API에 접근 불가하므로)
         let youtubeApiUrl = `https://lyrics.api.ivl.is/lyrics/youtube?trackId=${trackId}&userHash=${userHash}`;
-        const spotifyData = SongDataService._extractSpotifyData(uri);
+        const spotifyData = SpotifyDataHelper.extractSpotifyData(uri);
         if (spotifyData?.name) {
           youtubeApiUrl += `&trackName=${encodeURIComponent(spotifyData.name)}`;
           if (spotifyData.artists?.length) {

@@ -1464,9 +1464,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				const result = await SyncDataService.submitSyncData(trackId, provider, syncData);
 				if (result) {
 					Toast.success(I18n.t('syncCreator.submitSuccess'));
-					// 캐시 무효화 - SyncDataService와 SongDataService 모두
+					// 캐시 무효화
 					window.SyncDataService?.clearCache(trackId);
-					window.SongDataService?.invalidateCache(trackId);
 					// 가사 페이지 새로고침
 					setTimeout(() => {
 						if (typeof window.reloadLyrics === 'function') {
@@ -1489,9 +1488,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 
 				if (response.ok) {
 					Toast.success(I18n.t('syncCreator.submitSuccess'));
-					// 캐시 무효화 - SyncDataService와 SongDataService 모두
+					// 캐시 무효화
 					window.SyncDataService?.clearCache(trackId);
-					window.SongDataService?.invalidateCache(trackId);
 					// 가사 페이지 새로고침
 					setTimeout(() => {
 						if (typeof window.reloadLyrics === 'function') {

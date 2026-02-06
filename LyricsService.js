@@ -1103,23 +1103,6 @@
                 return _syncDataCache.get(cacheKey);
             }
 
-            // SongDataService 캐시 확인
-            const songDataCached = window.SongDataService?.getCachedData(trackId);
-            if (songDataCached?.syncData && Object.keys(songDataCached.syncData).length > 0) {
-                console.log(`[SyncDataService] Using SongDataService cached providers for ${trackId}`);
-                const providers = Object.keys(songDataCached.syncData).map(provider => ({
-                    provider,
-                    createdAt: null,
-                    updatedAt: null
-                }));
-                _syncDataCache.set(cacheKey, providers);
-                _fullyLoadedTracks.add(trackId);
-                return providers;
-            }
-
-            // SongDataService에 데이터가 없으면 별도 API 요청하지 않음
-            // (song-data 응답과 sync-data 응답은 동일한 DB를 조회하므로)
-            console.log(`[SyncDataService] No sync data in SongDataService cache for ${trackId}, returning empty`);
             _syncDataCache.set(cacheKey, []);
             return [];
         }
@@ -1145,22 +1128,7 @@
                 return _syncDataCache.get(specificKey);
             }
 
-            // SongDataService 캐시 확인
-            const songDataCached = window.SongDataService?.getCachedData(trackId);
-            if (songDataCached?.syncData?.[provider]) {
-                console.log(`[SyncDataService] Using SongDataService cached sync data for ${trackId}:${provider}`);
-                const syncData = {
-                    trackId,
-                    provider,
-                    syncData: songDataCached.syncData[provider],
-                    createdAt: null,
-                    updatedAt: null
-                };
-                _syncDataCache.set(specificKey, syncData);
-                return syncData;
-            }
-
-            // SongDataService에 데이터가 없으면 API 직접 요청
+            // API 직접 요청
             try {
                 // In-flight request check
                 if (_inflightRequests.has(specificKey)) {
@@ -1256,7 +1224,7 @@
          * @returns {Promise<Object>} - 제출 결과
          */
         async function submitSyncData(trackId, provider, syncData) {
-            const userHash = Spicetify.LocalStorage.get("ivLyrics:user-hash") || 'anonymous';
+            const userHash = getUserHash();
 
             const response = await fetch(`${API_BASE}/lyrics/sync-data`, {
                 method: 'POST',
@@ -1806,7 +1774,7 @@
                 // 하지만 호출하는 쪽에서 이미 처리가 되어있어야 함.
                 // 여기서는 있는 그대로 호출.
 
-                const response = await fetch(`https://lyrics.api.ivl.is/lyrics/sync-data?id=${trackId}&provider=${provider}`);
+                const response = await fetch(`https://lyrics.api.ivl.is/lyrics/sync-data?trackId=${trackId}&provider=${provider}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.provider === provider) {
@@ -2046,8 +2014,6 @@
                 }
             }
 
-            // SongDataService 캐시 확인 (제거됨 - 통합 데이터 의존성 제거)
-
             // AIAddonManager를 통한 번역 시도
             if (window.AIAddonManager) {
                 console.log(`[Translator] Using AIAddonManager for metadata`);
@@ -2163,8 +2129,6 @@
                     console.warn('[Translator] Local cache check failed:', e);
                 }
             }
-
-            // SongDataService 캐시 확인 (제거됨 - 통합 데이터 의존성 제거)
 
             // AIAddonManager를 통한 번역 시도
             if (window.AIAddonManager) {

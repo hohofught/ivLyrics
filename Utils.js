@@ -1064,22 +1064,11 @@ const Utils = {
 
   /**
    * 커뮤니티 싱크 오프셋 조회
-   * SongDataService에서 캐시된 데이터만 반환 (별도 API 요청 없음)
    */
   async getCommunityOffset(trackUri, provider) {
     const trackId = this.extractTrackId(trackUri);
     if (!trackId) return null;
 
-    // SongDataService에서 캐시된 데이터 확인
-    // song-data 응답과 sync 응답은 동일한 DB를 조회하므로 별도 요청 불필요
-    const cachedSongData = window.SongDataService?.getCachedData(trackId);
-    if (cachedSongData?.syncOffset) {
-      console.log(`[Utils] Using cached sync offset for ${trackId}`);
-      return cachedSongData.syncOffset;
-    }
-
-    // SongDataService에 데이터가 없으면 null 반환 (별도 API 요청하지 않음)
-    console.log(`[Utils] No sync offset in SongDataService cache for ${trackId}`);
     return null;
   },
 
@@ -1117,8 +1106,6 @@ const Utils = {
           window.ApiTracker.logResponse(logId, { submitted: true }, 'success');
         }
         console.log(`[ivLyrics] Community offset submitted: ${offsetMs}ms`);
-        // 캐시 무효화 - 싱크 오프셋이 변경되었으므로 song-data 캐시 갱신 필요
-        window.SongDataService?.invalidateCache(trackId);
         return data;
       }
       if (window.ApiTracker && logId) {
@@ -1158,8 +1145,6 @@ const Utils = {
 
       if (data.success) {
         console.log(`[ivLyrics] Community feedback submitted: ${isPositive ? '👍' : '👎'}`);
-        // 캐시 무효화 - 피드백으로 인해 커뮤니티 싱크 상태가 변경될 수 있음
-        window.SongDataService?.invalidateCache(trackId);
         return data;
       }
       return null;
@@ -1175,27 +1160,12 @@ const Utils = {
 
   /**
    * 커뮤니티 영상 목록 조회
-   * SongDataService 캐시 우선 확인 후, 없으면 서버에서 가져옴
    * @param {string} trackUri - 트랙 URI
    * @param {boolean} skipCache - true면 캐시를 건너뛰고 서버에서 가져옴
    */
   async getCommunityVideos(trackUri, skipCache = false) {
     const trackId = this.extractTrackId(trackUri);
     if (!trackId) return null;
-
-    // SongDataService 캐시 확인 (skipCache가 아닐 때만)
-    if (!skipCache) {
-      const songDataCached = window.SongDataService?.getCachedData(trackId);
-      if (songDataCached?.communityVideos && songDataCached.communityVideos.length > 0) {
-        console.log(`[Utils] Using cached community videos for ${trackId}`);
-        return {
-          trackId,
-          videos: songDataCached.communityVideos,
-          totalCount: songDataCached.communityVideos.length,
-          bestVideo: songDataCached.communityVideos[0] || null
-        };
-      }
-    }
 
     const userHash = this.getUserHash();
 
@@ -1231,9 +1201,6 @@ const Utils = {
     if (!trackId) return null;
 
     const userHash = this.getUserHash();
-    const userName = Spicetify.Platform?.UserAPI?._currentUser?.displayName ||
-      Spicetify.User?.displayName ||
-      'Anonymous';
 
     try {
       const response = await fetch('https://lyrics.api.ivl.is/lyrics/youtube/community', {
@@ -1245,16 +1212,13 @@ const Utils = {
           videoId,
           videoTitle,
           startTime,
-          submitterId: userHash,
-          submitterName: userName
+          submitterId: userHash
         })
       });
       const data = await response.json();
 
       if (data.success) {
         console.log(`[ivLyrics] Community video submitted: ${videoId}`);
-        // 캐시 무효화 - 커뮤니티 영상 목록이 변경됨
-        window.SongDataService?.invalidateCache(trackId);
         return data;
       }
       return null;
@@ -1288,11 +1252,6 @@ const Utils = {
 
       if (data.success) {
         console.log(`[ivLyrics] Community vote submitted: ${voteType > 0 ? '👍' : voteType < 0 ? '👎' : '취소'}`);
-        // 캐시 무효화 - 커뮤니티 영상 투표 결과가 변경됨
-        if (trackUri) {
-          const trackId = this.extractTrackId(trackUri);
-          if (trackId) window.SongDataService?.invalidateCache(trackId);
-        }
         return data;
       }
       return null;
@@ -1329,11 +1288,6 @@ const Utils = {
 
       if (data.success) {
         console.log(`[ivLyrics] Community video deleted: ${videoEntryId}`);
-        // 캐시 무효화 - 커뮤니티 영상 목록이 변경됨
-        if (trackUri) {
-          const trackId = this.extractTrackId(trackUri);
-          if (trackId) window.SongDataService?.invalidateCache(trackId);
-        }
         return data;
       }
       return null;

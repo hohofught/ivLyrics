@@ -474,6 +474,8 @@ const NicknameSection = ({ userHash }) => {
         setNickname(data.nickname);
         setEditing(false);
         Toast.success(I18n.t("settingsAdvanced.aboutTab.account.nickname.changed"));
+        // 닉네임 변경 후 싱크 데이터 캐시 무효화 (기여자 닉네임 갱신)
+        window.SyncDataService?.clearCache();
       } else {
         Toast.error(data.error || I18n.t("settingsAdvanced.aboutTab.account.nickname.failed"));
       }
