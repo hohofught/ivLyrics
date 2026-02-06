@@ -173,8 +173,17 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             // 4. 캐시가 없으면 API 호출 (커뮤니티 우선)
             try {
                 const userHash = Utils.getUserHash();
-                // 백엔드 엔드포인트 수정됨: /lyrics/youtube
-                const youtubeUrl = `https://lyrics.api.ivl.is/lyrics/youtube?trackId=${trackId}&userHash=${userHash}&useCommunity=true`;
+                // 백엔드 엔드포인트: /lyrics/youtube (트랙 메타데이터 포함)
+                let youtubeUrl = `https://lyrics.api.ivl.is/lyrics/youtube?trackId=${trackId}&userHash=${userHash}&useCommunity=true`;
+
+                // Spotify 트랙 메타데이터를 백엔드에 전달
+                const spotifyData = window.SongDataService?._extractSpotifyData?.(trackUri);
+                if (spotifyData?.name) {
+                    youtubeUrl += `&trackName=${encodeURIComponent(spotifyData.name)}`;
+                    if (spotifyData.artists?.length) {
+                        youtubeUrl += `&trackArtists=${encodeURIComponent(spotifyData.artists.join(', '))}`;
+                    }
+                }
 
                 // API 요청 로깅
                 let logId = null;

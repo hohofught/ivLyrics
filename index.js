@@ -2350,7 +2350,16 @@ const Prefetcher = {
         console.log(`[Prefetcher] Fetching video info for trackId: ${trackId} (fallback)`);
 
         const userHash = Utils.getUserHash();
-        const response = await fetch(`https://lyrics.api.ivl.is/lyrics/youtube?trackId=${trackId}&userHash=${userHash}`);
+        // Spotify 트랙 메타데이터를 백엔드에 전달 (백엔드가 Spotify API에 접근 불가하므로)
+        let youtubeApiUrl = `https://lyrics.api.ivl.is/lyrics/youtube?trackId=${trackId}&userHash=${userHash}`;
+        const spotifyData = SongDataService._extractSpotifyData(uri);
+        if (spotifyData?.name) {
+          youtubeApiUrl += `&trackName=${encodeURIComponent(spotifyData.name)}`;
+          if (spotifyData.artists?.length) {
+            youtubeApiUrl += `&trackArtists=${encodeURIComponent(spotifyData.artists.join(', '))}`;
+          }
+        }
+        const response = await fetch(youtubeApiUrl);
         const data = await response.json();
 
         if (data.success) {
