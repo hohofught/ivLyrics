@@ -621,7 +621,7 @@
                     const hasNonLatin = (str) => /[^\u0000-\u024F\u1E00-\u1EFF\u2000-\u206F\u0300-\u036F]/.test(str);
                     const inputHasNonLatin = hasNonLatin(info.artist);
 
-                    const inputArtists = info.artist.split(/[,&、·]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
+                    const inputArtists = info.artist.split(/[,&、·/]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
                     const beforeCount = data.length;
 
                     data = data.filter(item => {
@@ -632,7 +632,7 @@
                         if (inputHasNonLatin !== resultHasNonLatin) return true;
 
                         // 같은 스크립트 → pear-desktop 방식 JW 퍼뮤테이션 검사
-                        const resultArtists = resultArtist.split(/[,&、·]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
+                        const resultArtists = resultArtist.split(/[,&、·/]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
                         let maxJW = 0;
                         for (const a of inputArtists) {
                             for (const b of resultArtists) {
