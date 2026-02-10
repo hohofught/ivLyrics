@@ -579,73 +579,98 @@
                 // ─────────────────────────────────────────────────────────────
                 // 【Tier 3】 아티스트 기반 폴백 (최후의 수단)
                 // ─────────────────────────────────────────────────────────────
-                // Tier 2도 실패 시 아티스트 이름으로 검색
-                // 아티스트의 전체 곡 목록을 가져와 Duration으로 매칭
-                if (!Array.isArray(data) || data.length === 0) {
-                    tier = 3;
-                    searchUrl = `${LRCLIB_API_BASE}/search?q=${encodeURIComponent(info.artist)}`;
-                    response = await fetchWithTimeout(searchUrl, { headers }, 35000);
+                // T3 검색 + 토큰 필터 공통 함수 (T2 필터 후 폴백에서도 재사용)
+                // q=artist 검색 후 결과의 artistName에 입력 토큰이 포함된 항목만 유지
+                const searchT3WithTokenFilter = async (label) => {
+                    const url = `${LRCLIB_API_BASE}/search?q=${encodeURIComponent(info.artist)}`;
+                    const res = await fetchWithTimeout(url, { headers }, 35000);
+                    let results = [];
+                    if (res && res.ok) results = await res.json();
+                    console.log(`[LR-DEBUG] ${label}: 아티스트 검색 → ${Array.isArray(results) ? results.length : 0}개 결과`);
 
-                    if (response && response.ok) {
-                        data = await response.json();
-                    }
-                    console.log(`[LR-DEBUG] T${tier}: 아티스트 검색 → ${Array.isArray(data) ? data.length : 0}개 결과`);
-
-                    // 【T3 아티스트 토큰 필터】
-                    // q= 파라미터는 전체 텍스트 검색이므로 아티스트명의 단어가
-                    // 곡 제목에 매칭되어 완전히 다른 아티스트의 곡이 반환될 수 있음
-                    // 이를 방지하기 위해 결과의 artistName에 요청 아티스트 토큰이 포함된 항목만 유지
-                    if (Array.isArray(data) && data.length > 0) {
-                        const artistTokens = info.artist.split(/[,、&·/\s]+/).map(s => s.trim().toLowerCase()).filter(t => t.length >= 2);
-                        const beforeCount = data.length;
-                        data = data.filter(item => {
-                            const resultArtist = (item.artistName || '').toLowerCase();
-                            return artistTokens.some(t => resultArtist.includes(t));
+                    if (Array.isArray(results) && results.length > 0) {
+                        const tokens = info.artist.split(/[,、&·/\s]+/).map(s => s.trim().toLowerCase()).filter(t => t.length >= 2);
+                        const before = results.length;
+                        results = results.filter(item => {
+                            const ra = (item.artistName || '').toLowerCase();
+                            return tokens.some(t => ra.includes(t));
                         });
-                        if (data.length !== beforeCount) {
-                            console.log(`[LR-DEBUG] T3: 아티스트 토큰 필터 적용 → ${beforeCount}개 → ${data.length}개 (토큰: ${artistTokens.join(', ')})`);
+                        if (results.length !== before) {
+                            console.log(`[LR-DEBUG] ${label}: 토큰 필터 → ${before}개 → ${results.length}개 (토큰: ${tokens.join(', ')})`);
                         }
                     }
+                    return Array.isArray(results) ? results : [];
+                };
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    tier = 3;
+                    data = await searchT3WithTokenFilter('T3');
                 }
 
                 // ─────────────────────────────────────────────────────────────
                 // 【T2 스크립트 인식 아티스트 필터】 (pear-desktop 참고)
                 // ─────────────────────────────────────────────────────────────
                 // T2는 q=제목으로 검색하므로 동명곡이 다른 아티스트와 함께 반환됨
-                // 예: "Stardust Away" 검색 → DE DE MOUSE 곡 + 다른 팝 아티스트 곡
-                // 해결: 아티스트 JW > 0.85 필터를 적용하되,
-                //       이종 스크립트(CJK↔라틴 등)인 경우 필터를 건너뜀
-                //       (米津玄師 vs Kenshi Yonezu 같은 로마자 변환 보호)
+                // 해결: 아티스트를 분리 후 파트별로 스크립트 체크 + JW 비교
+                //   - 같은 스크립트 파트 → JW > 0.85 필요
+                //   - 이종 스크립트 파트 → 비교 불가 (무시)
+                //   - 같은 스크립트 파트가 없으면 → 필터 스킵 (CJK↔라틴 보호)
                 if (tier === 2 && Array.isArray(data) && data.length > 1) {
-                    // 비라틴 문자 감지: CJK, 한글, 키릴, 아랍, 히브리, 타이 등
                     const hasNonLatin = (str) => /[^\u0000-\u024F\u1E00-\u1EFF\u2000-\u206F\u0300-\u036F]/.test(str);
-                    const inputHasNonLatin = hasNonLatin(info.artist);
+                    const normFeat = (s) => s.replace(/\s+feat(?:uring)?\.?\s+|\s+ft\.?\s+/gi, ',');
+                    // 악센트 제거: é→e, ñ→n, ö→o 등 (NFD 분해 후 결합 문자 제거)
+                    const stripAccent = (s) => s.normalize('NFD').replace(/[\u0300-\u036F]/g, '');
 
-                    const inputArtists = info.artist.split(/[,&、·/]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
+                    const inputArtists = normFeat(info.artist).split(/[,&、·/]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
                     const beforeCount = data.length;
 
                     data = data.filter(item => {
                         const resultArtist = (item.artistName || '');
-                        const resultHasNonLatin = hasNonLatin(resultArtist);
+                        const resultArtists = normFeat(resultArtist).split(/[,&、·/]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
 
-                        // 이종 스크립트 → 필터 스킵 (CJK↔라틴 보호)
-                        if (inputHasNonLatin !== resultHasNonLatin) return true;
+                        // 파트별 스크립트 인식 JW 비교
+                        let hasSameScriptPair = false;
+                        let anySameScriptMatch = false;
 
-                        // 같은 스크립트 → pear-desktop 방식 JW 퍼뮤테이션 검사
-                        const resultArtists = resultArtist.split(/[,&、·/]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
-                        let maxJW = 0;
                         for (const a of inputArtists) {
                             for (const b of resultArtists) {
-                                maxJW = Math.max(maxJW, jaroWinkler(a, b));
+                                if (hasNonLatin(a) === hasNonLatin(b)) {
+                                    // 같은 스크립트 → JW 비교 (악센트 정규화 적용)
+                                    hasSameScriptPair = true;
+                                    if (jaroWinkler(stripAccent(a), stripAccent(b)) > 0.85) {
+                                        anySameScriptMatch = true;
+                                    }
+                                }
+                                // 이종 스크립트 → 비교 불가, 무시
                             }
                         }
-                        return maxJW > 0.85;
+
+                        // 같은 스크립트 파트가 하나도 없으면 → 비교 불가 → 통과 (CJK↔라틴 보호)
+                        // 같은 스크립트 파트가 있으면 → 하나라도 JW > 0.85 필요
+                        return !hasSameScriptPair || anySameScriptMatch;
                     });
 
                     if (data.length !== beforeCount) {
                         console.log(`[LR-DEBUG] T2: 아티스트 필터 적용 → ${beforeCount}개 → ${data.length}개`);
                     }
+
+                    // 【T2 필터 후 T3 폴백】
+                    // T2 필터가 모든 결과를 제거한 경우 T3로 재시도
+                    if (data.length === 0) {
+                        console.log(`[LR-DEBUG] T2: 필터 후 결과 없음 → T3 폴백 시도`);
+                        tier = 3;
+                        data = await searchT3WithTokenFilter('T3(폴백)');
+                    }
                 }
+
+
+                // 【TODO: instrumental 트랙 명시적 처리】
+                // 현재는 instrumental 곡이 syncedLyrics/plainLyrics = null이므로
+                // 자연스럽게 "No lyrics found"로 처리됨.
+                // 만약 향후 instrumental인데 가짜 가사가 등록된 케이스가 빈번해지면:
+                //   - pear-desktop 참고: item.instrumental === true → null 반환
+                //   - 주의: LRCLIB의 instrumental 플래그가 항상 정확하지는 않음
+                //   - 현재 densityRatio 필터가 스팸 가사를 어느 정도 잡아줌
 
                 endServer = performance.now();  // 서버 응답 시간 측정 종료
 
