@@ -590,6 +590,23 @@
                         data = await response.json();
                     }
                     console.log(`[LR-DEBUG] T${tier}: 아티스트 검색 → ${Array.isArray(data) ? data.length : 0}개 결과`);
+
+                    // 【T3 아티스트 토큰 필터】
+                    // q= 파라미터는 전체 텍스트 검색이므로 아티스트명의 단어가
+                    // 곡 제목에 매칭되어 완전히 다른 아티스트의 곡이 반환될 수 있음
+                    // 예: "MOTTO MUSIC" 검색 → "The Motto" by Drake 반환
+                    // 이를 방지하기 위해 결과의 artistName에 요청 아티스트 토큰이 포함된 항목만 유지
+                    if (Array.isArray(data) && data.length > 0) {
+                        const artistTokens = info.artist.split(/[,、&·/\s]+/).map(s => s.trim().toLowerCase()).filter(t => t.length >= 2);
+                        const beforeCount = data.length;
+                        data = data.filter(item => {
+                            const resultArtist = (item.artistName || '').toLowerCase();
+                            return artistTokens.some(t => resultArtist.includes(t));
+                        });
+                        if (data.length !== beforeCount) {
+                            console.log(`[LR-DEBUG] T3: 아티스트 토큰 필터 적용 → ${beforeCount}개 → ${data.length}개 (토큰: ${artistTokens.join(', ')})`);
+                        }
+                    }
                 }
 
                 endServer = performance.now();  // 서버 응답 시간 측정 종료
