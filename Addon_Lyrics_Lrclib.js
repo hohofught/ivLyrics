@@ -594,7 +594,6 @@
                     // 【T3 아티스트 토큰 필터】
                     // q= 파라미터는 전체 텍스트 검색이므로 아티스트명의 단어가
                     // 곡 제목에 매칭되어 완전히 다른 아티스트의 곡이 반환될 수 있음
-                    // 예: "MOTTO MUSIC" 검색 → "The Motto" by Drake 반환
                     // 이를 방지하기 위해 결과의 artistName에 요청 아티스트 토큰이 포함된 항목만 유지
                     if (Array.isArray(data) && data.length > 0) {
                         const artistTokens = info.artist.split(/[,、&·/\s]+/).map(s => s.trim().toLowerCase()).filter(t => t.length >= 2);
@@ -606,6 +605,45 @@
                         if (data.length !== beforeCount) {
                             console.log(`[LR-DEBUG] T3: 아티스트 토큰 필터 적용 → ${beforeCount}개 → ${data.length}개 (토큰: ${artistTokens.join(', ')})`);
                         }
+                    }
+                }
+
+                // ─────────────────────────────────────────────────────────────
+                // 【T2 스크립트 인식 아티스트 필터】 (pear-desktop 참고)
+                // ─────────────────────────────────────────────────────────────
+                // T2는 q=제목으로 검색하므로 동명곡이 다른 아티스트와 함께 반환됨
+                // 예: "Stardust Away" 검색 → DE DE MOUSE 곡 + 다른 팝 아티스트 곡
+                // 해결: 아티스트 JW > 0.85 필터를 적용하되,
+                //       이종 스크립트(CJK↔라틴 등)인 경우 필터를 건너뜀
+                //       (米津玄師 vs Kenshi Yonezu 같은 로마자 변환 보호)
+                if (tier === 2 && Array.isArray(data) && data.length > 1) {
+                    // 비라틴 문자 감지: CJK, 한글, 키릴, 아랍, 히브리, 타이 등
+                    const hasNonLatin = (str) => /[^\u0000-\u024F\u1E00-\u1EFF\u2000-\u206F\u0300-\u036F]/.test(str);
+                    const inputHasNonLatin = hasNonLatin(info.artist);
+
+                    const inputArtists = info.artist.split(/[,&、·]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
+                    const beforeCount = data.length;
+
+                    data = data.filter(item => {
+                        const resultArtist = (item.artistName || '');
+                        const resultHasNonLatin = hasNonLatin(resultArtist);
+
+                        // 이종 스크립트 → 필터 스킵 (CJK↔라틴 보호)
+                        if (inputHasNonLatin !== resultHasNonLatin) return true;
+
+                        // 같은 스크립트 → pear-desktop 방식 JW 퍼뮤테이션 검사
+                        const resultArtists = resultArtist.split(/[,&、·]+/g).map(s => s.trim().toLowerCase()).filter(s => s);
+                        let maxJW = 0;
+                        for (const a of inputArtists) {
+                            for (const b of resultArtists) {
+                                maxJW = Math.max(maxJW, jaroWinkler(a, b));
+                            }
+                        }
+                        return maxJW > 0.85;
+                    });
+
+                    if (data.length !== beforeCount) {
+                        console.log(`[LR-DEBUG] T2: 아티스트 필터 적용 → ${beforeCount}개 → ${data.length}개`);
                     }
                 }
 
