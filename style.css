@@ -6096,7 +6096,7 @@ ruby .lyrics-karaoke-char.sung {
    Marketplace Styles
    ============================================ */
 
-.marketplace-container {
+.ivlyrics-marketplace-container {
   width: 100%;
   height: 100%;
   display: flex;
@@ -6120,7 +6120,7 @@ ruby .lyrics-karaoke-char.sung {
 }
 
 /* Header */
-.marketplace-header {
+.ivlyrics-marketplace-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -6129,13 +6129,13 @@ ruby .lyrics-karaoke-char.sung {
   flex-shrink: 0;
 }
 
-.marketplace-header-left {
+.ivlyrics-marketplace-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.marketplace-back-btn {
+.ivlyrics-marketplace-back-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6150,12 +6150,12 @@ ruby .lyrics-karaoke-char.sung {
   flex-shrink: 0;
 }
 
-.marketplace-back-btn:hover {
+.ivlyrics-marketplace-back-btn:hover {
   background: rgba(var(--spice-rgb-text), 0.2);
   transform: scale(1.05);
 }
 
-.marketplace-title {
+.ivlyrics-marketplace-title {
   font-size: 24px;
   font-weight: 700;
   margin: 0;
@@ -6163,13 +6163,13 @@ ruby .lyrics-karaoke-char.sung {
 }
 
 /* Search */
-.marketplace-search-wrapper {
+.ivlyrics-marketplace-search-wrapper {
   position: relative;
   flex: 0 1 300px;
   min-width: 180px;
 }
 
-.marketplace-search-icon {
+.ivlyrics-marketplace-search-icon {
   position: absolute;
   left: 12px;
   top: 50%;
@@ -6178,7 +6178,7 @@ ruby .lyrics-karaoke-char.sung {
   pointer-events: none;
 }
 
-.marketplace-search-input {
+.ivlyrics-marketplace-search-input {
   width: 100%;
   padding: 8px 12px 8px 36px;
   border: 1px solid rgba(var(--spice-rgb-text), 0.15);
@@ -6190,24 +6190,24 @@ ruby .lyrics-karaoke-char.sung {
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.marketplace-search-input:focus {
+.ivlyrics-marketplace-search-input:focus {
   border-color: rgba(var(--spice-rgb-text), 0.3);
   background: rgba(var(--spice-rgb-text), 0.1);
 }
 
-.marketplace-search-input::placeholder {
+.ivlyrics-marketplace-search-input::placeholder {
   color: rgba(var(--spice-rgb-text), 0.4);
 }
 
 /* Filter Tabs */
-.marketplace-filter-tabs {
+.ivlyrics-marketplace-filter-tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 20px;
   flex-shrink: 0;
 }
 
-.marketplace-filter-tab {
+.ivlyrics-marketplace-filter-tab {
   padding: 6px 16px;
   border: 1px solid rgba(var(--spice-rgb-text), 0.15);
   border-radius: 20px;
@@ -6219,19 +6219,19 @@ ruby .lyrics-karaoke-char.sung {
   transition: all 0.2s ease;
 }
 
-.marketplace-filter-tab:hover {
+.ivlyrics-marketplace-filter-tab:hover {
   background: rgba(var(--spice-rgb-text), 0.08);
   color: var(--spice-text);
 }
 
-.marketplace-filter-tab.active {
+.ivlyrics-marketplace-filter-tab.active {
   background: rgba(var(--spice-rgb-text), 0.15);
   color: var(--spice-text);
   border-color: rgba(var(--spice-rgb-text), 0.3);
 }
 
 /* Card Grid */
-.marketplace-grid {
+.ivlyrics-marketplace-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
@@ -6239,7 +6239,7 @@ ruby .lyrics-karaoke-char.sung {
 }
 
 /* Card */
-.marketplace-card {
+.ivlyrics-marketplace-card {
   position: relative;
   border-radius: 12px;
   background: rgba(var(--spice-rgb-card), 0.5);
@@ -6249,19 +6249,19 @@ ruby .lyrics-karaoke-char.sung {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.marketplace-card:hover {
+.ivlyrics-marketplace-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   border-color: rgba(var(--spice-rgb-text), 0.15);
 }
 
-.marketplace-card:focus-visible {
+.ivlyrics-marketplace-card:focus-visible {
   outline: 2px solid var(--spice-text);
   outline-offset: 2px;
 }
 
 /* Card Image */
-.marketplace-card-image {
+.ivlyrics-marketplace-card-image {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: rgba(var(--spice-rgb-text), 0.05);
@@ -6271,22 +6271,22 @@ ruby .lyrics-karaoke-char.sung {
   overflow: hidden;
 }
 
-.marketplace-card-image img {
+.ivlyrics-marketplace-card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.marketplace-card-image-placeholder {
+.ivlyrics-marketplace-card-image-placeholder {
   opacity: 0.2;
 }
 
 /* Card Info */
-.marketplace-card-info {
+.ivlyrics-marketplace-card-info {
   padding: 12px 14px;
 }
 
-.marketplace-card-title {
+.ivlyrics-marketplace-card-title {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -6295,13 +6295,13 @@ ruby .lyrics-karaoke-char.sung {
   text-overflow: ellipsis;
 }
 
-.marketplace-card-author {
+.ivlyrics-marketplace-card-author {
   font-size: 12px;
   opacity: 0.6;
   margin-bottom: 6px;
 }
 
-.marketplace-card-meta {
+.ivlyrics-marketplace-card-meta {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -6309,7 +6309,7 @@ ruby .lyrics-karaoke-char.sung {
   opacity: 0.5;
 }
 
-.marketplace-card-type {
+.ivlyrics-marketplace-card-type {
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 10px;
@@ -6318,18 +6318,18 @@ ruby .lyrics-karaoke-char.sung {
   letter-spacing: 0.5px;
 }
 
-.marketplace-card-type-lyrics {
+.ivlyrics-marketplace-card-type-lyrics {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
 }
 
-.marketplace-card-type-ai {
+.ivlyrics-marketplace-card-type-ai {
   background: rgba(168, 85, 247, 0.15);
   color: #c084fc;
 }
 
 /* Badge */
-.marketplace-badge {
+.ivlyrics-marketplace-badge {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -6341,23 +6341,23 @@ ruby .lyrics-karaoke-char.sung {
   -webkit-backdrop-filter: blur(12px);
 }
 
-.marketplace-badge-install {
+.ivlyrics-marketplace-badge-install {
   background: rgba(59, 130, 246, 0.8);
   color: #fff;
 }
 
-.marketplace-badge-installed {
+.ivlyrics-marketplace-badge-installed {
   background: rgba(34, 197, 94, 0.8);
   color: #fff;
 }
 
-.marketplace-badge-update {
+.ivlyrics-marketplace-badge-update {
   background: rgba(245, 158, 11, 0.85);
   color: #fff;
 }
 
 /* Detail View */
-.marketplace-detail {
+.ivlyrics-marketplace-detail {
   width: 100%;
   height: 100%;
   display: flex;
@@ -6368,14 +6368,14 @@ ruby .lyrics-karaoke-char.sung {
   animation: fadeInSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.marketplace-detail-header {
+.ivlyrics-marketplace-detail-header {
   display: flex;
   align-items: center;
   margin-bottom: 24px;
   flex-shrink: 0;
 }
 
-.marketplace-detail-back {
+.ivlyrics-marketplace-detail-back {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -6389,43 +6389,43 @@ ruby .lyrics-karaoke-char.sung {
   transition: background 0.2s ease;
 }
 
-.marketplace-detail-back:hover {
+.ivlyrics-marketplace-detail-back:hover {
   background: rgba(var(--spice-rgb-text), 0.2);
 }
 
-.marketplace-detail-content {
+.ivlyrics-marketplace-detail-content {
   display: flex;
   flex-direction: column;
   gap: 20px;
   padding-bottom: 80px;
 }
 
-.marketplace-detail-image {
+.ivlyrics-marketplace-detail-image {
   width: 100%;
   max-width: 600px;
   border-radius: 12px;
   overflow: hidden;
 }
 
-.marketplace-detail-image img {
+.ivlyrics-marketplace-detail-image img {
   width: 100%;
   height: auto;
   display: block;
 }
 
-.marketplace-detail-info {
+.ivlyrics-marketplace-detail-info {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.marketplace-detail-title {
+.ivlyrics-marketplace-detail-title {
   font-size: 28px;
   font-weight: 700;
   margin: 0;
 }
 
-.marketplace-detail-meta {
+.ivlyrics-marketplace-detail-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -6433,21 +6433,21 @@ ruby .lyrics-karaoke-char.sung {
   opacity: 0.6;
 }
 
-.marketplace-detail-description {
+.ivlyrics-marketplace-detail-description {
   font-size: 15px;
   line-height: 1.6;
   opacity: 0.85;
   white-space: pre-wrap;
 }
 
-.marketplace-detail-actions {
+.ivlyrics-marketplace-detail-actions {
   display: flex;
   gap: 12px;
   margin-top: 8px;
 }
 
 /* Buttons */
-.marketplace-btn {
+.ivlyrics-marketplace-btn {
   padding: 10px 24px;
   border: none;
   border-radius: 20px;
@@ -6457,43 +6457,43 @@ ruby .lyrics-karaoke-char.sung {
   transition: all 0.2s ease;
 }
 
-.marketplace-btn:disabled {
+.ivlyrics-marketplace-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.marketplace-btn-install {
+.ivlyrics-marketplace-btn-install {
   background: rgba(59, 130, 246, 0.9);
   color: #fff;
 }
 
-.marketplace-btn-install:hover:not(:disabled) {
+.ivlyrics-marketplace-btn-install:hover:not(:disabled) {
   background: rgba(59, 130, 246, 1);
   transform: scale(1.03);
 }
 
-.marketplace-btn-uninstall {
+.ivlyrics-marketplace-btn-uninstall {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.marketplace-btn-uninstall:hover:not(:disabled) {
+.ivlyrics-marketplace-btn-uninstall:hover:not(:disabled) {
   background: rgba(239, 68, 68, 0.25);
 }
 
-.marketplace-btn-update {
+.ivlyrics-marketplace-btn-update {
   background: rgba(245, 158, 11, 0.9);
   color: #fff;
 }
 
-.marketplace-btn-update:hover:not(:disabled) {
+.ivlyrics-marketplace-btn-update:hover:not(:disabled) {
   background: rgba(245, 158, 11, 1);
   transform: scale(1.03);
 }
 
 /* Loading / Error / Empty States */
-.marketplace-loading {
+.ivlyrics-marketplace-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -6503,7 +6503,7 @@ ruby .lyrics-karaoke-char.sung {
   opacity: 0.6;
 }
 
-.marketplace-spinner {
+.ivlyrics-marketplace-spinner {
   width: 32px;
   height: 32px;
   border: 3px solid rgba(var(--spice-rgb-text), 0.15);
@@ -6512,7 +6512,7 @@ ruby .lyrics-karaoke-char.sung {
   animation: spin 0.8s linear infinite;
 }
 
-.marketplace-error {
+.ivlyrics-marketplace-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -6522,13 +6522,13 @@ ruby .lyrics-karaoke-char.sung {
   text-align: center;
 }
 
-.marketplace-error-detail {
+.ivlyrics-marketplace-error-detail {
   font-size: 12px;
   opacity: 0.5;
   max-width: 400px;
 }
 
-.marketplace-empty {
+.ivlyrics-marketplace-empty {
   display: flex;
   align-items: center;
   justify-content: center;

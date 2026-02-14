@@ -29,10 +29,10 @@ const MarketplacePage = (() => {
             : (addon.description || '');
 
         const badgeClass = addon.hasUpdate
-            ? 'marketplace-badge marketplace-badge-update'
+            ? 'ivlyrics-marketplace-badge ivlyrics-marketplace-badge-update'
             : addon.isInstalled
-                ? 'marketplace-badge marketplace-badge-installed'
-                : 'marketplace-badge marketplace-badge-install';
+                ? 'ivlyrics-marketplace-badge ivlyrics-marketplace-badge-installed'
+                : 'ivlyrics-marketplace-badge ivlyrics-marketplace-badge-install';
 
         const badgeText = addon.hasUpdate
             ? I18n.t('marketplace.updateAvailable')
@@ -41,14 +41,14 @@ const MarketplacePage = (() => {
                 : I18n.t('marketplace.install');
 
         return react.createElement('div', {
-            className: 'marketplace-card',
+            className: 'ivlyrics-marketplace-card',
             onClick: () => onClick(addon),
             tabIndex: 0,
             role: 'button',
             onKeyDown: (e) => { if (e.key === 'Enter') onClick(addon); }
         },
             // Preview Image
-            react.createElement('div', { className: 'marketplace-card-image' },
+            react.createElement('div', { className: 'ivlyrics-marketplace-card-image' },
                 addon.preview
                     ? react.createElement('img', {
                         src: addon.preview,
@@ -56,7 +56,7 @@ const MarketplacePage = (() => {
                         loading: 'lazy',
                         onError: (e) => { e.target.style.display = 'none'; }
                     })
-                    : react.createElement('div', { className: 'marketplace-card-image-placeholder' },
+                    : react.createElement('div', { className: 'ivlyrics-marketplace-card-image-placeholder' },
                         react.createElement('svg', {
                             width: 48, height: 48, viewBox: '0 0 24 24',
                             fill: 'none', stroke: 'currentColor', strokeWidth: 1.5
@@ -68,17 +68,17 @@ const MarketplacePage = (() => {
                     )
             ),
             // Card Info
-            react.createElement('div', { className: 'marketplace-card-info' },
-                react.createElement('div', { className: 'marketplace-card-title' }, addon.name),
-                react.createElement('div', { className: 'marketplace-card-author' },
+            react.createElement('div', { className: 'ivlyrics-marketplace-card-info' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-card-title' }, addon.name),
+                react.createElement('div', { className: 'ivlyrics-marketplace-card-author' },
                     I18n.t('marketplace.by', { author: addon.author })
                 ),
-                react.createElement('div', { className: 'marketplace-card-meta' },
-                    react.createElement('span', { className: 'marketplace-card-version' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-card-meta' },
+                    react.createElement('span', { className: 'ivlyrics-marketplace-card-version' },
                         I18n.t('marketplace.version', { version: addon.version })
                     ),
                     addon.type && react.createElement('span', {
-                        className: `marketplace-card-type marketplace-card-type-${addon.type}`
+                        className: `ivlyrics-marketplace-card-type ivlyrics-marketplace-card-type-${addon.type}`
                     }, addon.type === 'lyrics' ? 'Lyrics' : 'AI')
                 )
             ),
@@ -127,11 +127,11 @@ const MarketplacePage = (() => {
             }
         }, [addon, onUpdate]);
 
-        return react.createElement('div', { className: 'marketplace-detail' },
+        return react.createElement('div', { className: 'ivlyrics-marketplace-detail' },
             // Header
-            react.createElement('div', { className: 'marketplace-detail-header' },
+            react.createElement('div', { className: 'ivlyrics-marketplace-detail-header' },
                 react.createElement('button', {
-                    className: 'marketplace-detail-back',
+                    className: 'ivlyrics-marketplace-detail-back',
                     onClick: onBack,
                 },
                     react.createElement('svg', {
@@ -144,9 +144,9 @@ const MarketplacePage = (() => {
                 ),
             ),
             // Content
-            react.createElement('div', { className: 'marketplace-detail-content' },
+            react.createElement('div', { className: 'ivlyrics-marketplace-detail-content' },
                 // Preview
-                addon.preview && react.createElement('div', { className: 'marketplace-detail-image' },
+                addon.preview && react.createElement('div', { className: 'ivlyrics-marketplace-detail-image' },
                     react.createElement('img', {
                         src: addon.preview,
                         alt: addon.name,
@@ -154,9 +154,9 @@ const MarketplacePage = (() => {
                     })
                 ),
                 // Info
-                react.createElement('div', { className: 'marketplace-detail-info' },
-                    react.createElement('h2', { className: 'marketplace-detail-title' }, addon.name),
-                    react.createElement('div', { className: 'marketplace-detail-meta' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-detail-info' },
+                    react.createElement('h2', { className: 'ivlyrics-marketplace-detail-title' }, addon.name),
+                    react.createElement('div', { className: 'ivlyrics-marketplace-detail-meta' },
                         react.createElement('span', null,
                             I18n.t('marketplace.by', { author: addon.author })
                         ),
@@ -167,29 +167,29 @@ const MarketplacePage = (() => {
                             I18n.t('marketplace.updated', { date: addon.updated })
                         ),
                         addon.type && react.createElement('span', {
-                            className: `marketplace-card-type marketplace-card-type-${addon.type}`
+                            className: `ivlyrics-marketplace-card-type ivlyrics-marketplace-card-type-${addon.type}`
                         }, addon.type === 'lyrics' ? 'Lyrics' : 'AI')
                     ),
                     // Description
-                    react.createElement('div', { className: 'marketplace-detail-description' },
+                    react.createElement('div', { className: 'ivlyrics-marketplace-detail-description' },
                         description
                     ),
                     // Action Buttons
-                    react.createElement('div', { className: 'marketplace-detail-actions' },
+                    react.createElement('div', { className: 'ivlyrics-marketplace-detail-actions' },
                         addon.hasUpdate && react.createElement('button', {
-                            className: 'marketplace-btn marketplace-btn-update',
+                            className: 'ivlyrics-marketplace-btn ivlyrics-marketplace-btn-update',
                             onClick: handleUpdate,
                             disabled: actionLoading
                         }, actionLoading ? I18n.t('marketplace.installing') : I18n.t('marketplace.update')),
 
                         addon.isInstalled
                             ? react.createElement('button', {
-                                className: 'marketplace-btn marketplace-btn-uninstall',
+                                className: 'ivlyrics-marketplace-btn ivlyrics-marketplace-btn-uninstall',
                                 onClick: handleUninstall,
                                 disabled: actionLoading
                             }, actionLoading ? I18n.t('marketplace.uninstalling') : I18n.t('marketplace.uninstall'))
                             : react.createElement('button', {
-                                className: 'marketplace-btn marketplace-btn-install',
+                                className: 'ivlyrics-marketplace-btn ivlyrics-marketplace-btn-install',
                                 onClick: handleInstall,
                                 disabled: actionLoading
                             }, actionLoading ? I18n.t('marketplace.installing') : I18n.t('marketplace.install'))
@@ -311,12 +311,12 @@ const MarketplacePage = (() => {
         }
 
         // 메인 마켓플레이스 뷰
-        return react.createElement('div', { className: 'marketplace-container' },
+        return react.createElement('div', { className: 'ivlyrics-marketplace-container' },
             // Header
-            react.createElement('div', { className: 'marketplace-header' },
-                react.createElement('div', { className: 'marketplace-header-left' },
+            react.createElement('div', { className: 'ivlyrics-marketplace-header' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-header-left' },
                     react.createElement('button', {
-                        className: 'marketplace-back-btn',
+                        className: 'ivlyrics-marketplace-back-btn',
                         onClick: onClose,
                     },
                         react.createElement('svg', {
@@ -326,14 +326,14 @@ const MarketplacePage = (() => {
                             react.createElement('path', { d: 'M19 12H5m0 0l7 7m-7-7l7-7' })
                         )
                     ),
-                    react.createElement('h1', { className: 'marketplace-title' },
+                    react.createElement('h1', { className: 'ivlyrics-marketplace-title' },
                         I18n.t('marketplace.title')
                     )
                 ),
                 // Search
-                react.createElement('div', { className: 'marketplace-search-wrapper' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-search-wrapper' },
                     react.createElement('svg', {
-                        className: 'marketplace-search-icon',
+                        className: 'ivlyrics-marketplace-search-icon',
                         width: 16, height: 16, viewBox: '0 0 24 24',
                         fill: 'none', stroke: 'currentColor', strokeWidth: 2
                     },
@@ -342,7 +342,7 @@ const MarketplacePage = (() => {
                     ),
                     react.createElement('input', {
                         ref: searchInputRef,
-                        className: 'marketplace-search-input',
+                        className: 'ivlyrics-marketplace-search-input',
                         type: 'text',
                         placeholder: I18n.t('marketplace.search'),
                         value: searchQuery,
@@ -352,7 +352,7 @@ const MarketplacePage = (() => {
             ),
 
             // Filter Tabs
-            react.createElement('div', { className: 'marketplace-filter-tabs' },
+            react.createElement('div', { className: 'ivlyrics-marketplace-filter-tabs' },
                 [
                     { key: FILTER_ALL, label: I18n.t('marketplace.filterAll') },
                     { key: FILTER_LYRICS, label: I18n.t('marketplace.filterLyrics') },
@@ -360,7 +360,7 @@ const MarketplacePage = (() => {
                 ].map(tab =>
                     react.createElement('button', {
                         key: tab.key,
-                        className: `marketplace-filter-tab ${filter === tab.key ? 'active' : ''}`,
+                        className: `ivlyrics-marketplace-filter-tab ${filter === tab.key ? 'active' : ''}`,
                         onClick: () => setFilter(tab.key)
                     }, tab.label)
                 )
@@ -368,24 +368,24 @@ const MarketplacePage = (() => {
 
             // Content
             loading
-                ? react.createElement('div', { className: 'marketplace-loading' },
-                    react.createElement('div', { className: 'marketplace-spinner' }),
+                ? react.createElement('div', { className: 'ivlyrics-marketplace-loading' },
+                    react.createElement('div', { className: 'ivlyrics-marketplace-spinner' }),
                     react.createElement('span', null, I18n.t('marketplace.installing'))
                 )
                 : error
-                    ? react.createElement('div', { className: 'marketplace-error' },
+                    ? react.createElement('div', { className: 'ivlyrics-marketplace-error' },
                         react.createElement('p', null, I18n.t('marketplace.loadError')),
-                        react.createElement('p', { className: 'marketplace-error-detail' }, error),
+                        react.createElement('p', { className: 'ivlyrics-marketplace-error-detail' }, error),
                         react.createElement('button', {
-                            className: 'marketplace-btn marketplace-btn-install',
+                            className: 'ivlyrics-marketplace-btn ivlyrics-marketplace-btn-install',
                             onClick: () => loadAddons(true)
                         }, I18n.t('marketplace.retry'))
                     )
                     : filteredAddons.length === 0
-                        ? react.createElement('div', { className: 'marketplace-empty' },
+                        ? react.createElement('div', { className: 'ivlyrics-marketplace-empty' },
                             react.createElement('p', null, I18n.t('marketplace.noAddons'))
                         )
-                        : react.createElement('div', { className: 'marketplace-grid' },
+                        : react.createElement('div', { className: 'ivlyrics-marketplace-grid' },
                             filteredAddons.map(addon =>
                                 react.createElement(AddonCard, {
                                     key: addon.id,
