@@ -1,4 +1,20 @@
 {
   "version": 1,
-  "addons": []
+  "addons": [
+    {
+      "id": "example_lyrics_provider",
+      "name": "Example Lyrics Provider",
+      "type": "lyrics",
+      "author": "AuthorName",
+      "version": "1.0.0",
+      "updated": "2025-01-15",
+      "description": {
+        "en": "An example lyrics provider addon that fetches lyrics from ExampleDB.",
+        "ko": "ExampleDB에서 가사를 가져오는 예제 가사 제공자 에드온입니다."
+      },
+      "preview": "https://raw.githubusercontent.com/ivLis-Studio/ivLyrics/refs/heads/main/addons/previews/example_lyrics_provider.png",
+      "downloadUrl": "https://raw.githubusercontent.com/ivLis-Studio/ivLyrics/refs/heads/main/addons/Addon_Lyrics_Example.js",
+      "minAppVersion": "4.0.0"
+    }
+  ]
 }
