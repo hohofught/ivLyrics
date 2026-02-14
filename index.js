@@ -4453,6 +4453,8 @@ class LyricsContainer extends react.Component {
   }
 
   componentDidMount() {
+    document.body.classList.add('ivlyrics-page-active');
+
     // Prevent duplicate global registration
     if (window.lyricContainer && window.lyricContainer !== this) {
       if (typeof window.lyricContainer.componentWillUnmount === "function") {
@@ -4759,6 +4761,8 @@ class LyricsContainer extends react.Component {
   }
 
   componentWillUnmount() {
+    document.body.classList.remove('ivlyrics-page-active');
+
     // Core cleanup
     Utils.removeQueueListener(this.onQueueChange);
     this.configButton?.deregister();

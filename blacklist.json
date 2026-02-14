@@ -1,0 +1,7 @@
+{
+  "blockedRepos": [
+    "example-user/example-ivlyrics-addon"
+  ],
+  "blockedAuthors": [],
+  "blockedAddonIds": []
+}

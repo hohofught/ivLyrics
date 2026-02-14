@@ -297,104 +297,103 @@ const MarketplacePage = (() => {
             }
         }, []);
 
-        // 상세 보기
+        let pageContent = null;
+
         if (selectedAddon) {
-            // 최신 설치 상태로 갱신
             const updatedAddon = addons.find(a => a.id === selectedAddon.id) || selectedAddon;
-            return react.createElement(AddonDetail, {
+            pageContent = react.createElement(AddonDetail, {
                 addon: updatedAddon,
                 onBack: () => setSelectedAddon(null),
                 onInstall: handleInstall,
                 onUninstall: handleUninstall,
                 onUpdate: handleUpdate
             });
-        }
-
-        // 메인 마켓플레이스 뷰
-        return react.createElement('div', { className: 'ivlyrics-marketplace-container' },
-            // Header
-            react.createElement('div', { className: 'ivlyrics-marketplace-header' },
-                react.createElement('div', { className: 'ivlyrics-marketplace-header-left' },
-                    react.createElement('button', {
-                        className: 'ivlyrics-marketplace-back-btn',
-                        onClick: onClose,
-                    },
-                        react.createElement('svg', {
-                            width: 20, height: 20, viewBox: '0 0 24 24',
-                            fill: 'none', stroke: 'currentColor', strokeWidth: 2
-                        },
-                            react.createElement('path', { d: 'M19 12H5m0 0l7 7m-7-7l7-7' })
+        } else {
+            pageContent = react.createElement('div', { className: 'ivlyrics-marketplace-container' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-top' },
+                    react.createElement('div', { className: 'ivlyrics-marketplace-header' },
+                        react.createElement('div', { className: 'ivlyrics-marketplace-header-left' },
+                            react.createElement('button', {
+                                className: 'ivlyrics-marketplace-back-btn',
+                                onClick: onClose,
+                            },
+                                react.createElement('svg', {
+                                    width: 20, height: 20, viewBox: '0 0 24 24',
+                                    fill: 'none', stroke: 'currentColor', strokeWidth: 2
+                                },
+                                    react.createElement('path', { d: 'M19 12H5m0 0l7 7m-7-7l7-7' })
+                                )
+                            ),
+                            react.createElement('h1', { className: 'ivlyrics-marketplace-title' },
+                                I18n.t('marketplace.title')
+                            )
+                        ),
+                        react.createElement('div', { className: 'ivlyrics-marketplace-search-wrapper' },
+                            react.createElement('svg', {
+                                className: 'ivlyrics-marketplace-search-icon',
+                                width: 16, height: 16, viewBox: '0 0 24 24',
+                                fill: 'none', stroke: 'currentColor', strokeWidth: 2
+                            },
+                                react.createElement('circle', { cx: 11, cy: 11, r: 8 }),
+                                react.createElement('path', { d: 'M21 21l-4.35-4.35' })
+                            ),
+                            react.createElement('input', {
+                                ref: searchInputRef,
+                                className: 'ivlyrics-marketplace-search-input',
+                                type: 'text',
+                                placeholder: I18n.t('marketplace.search'),
+                                value: searchQuery,
+                                onChange: (e) => setSearchQuery(e.target.value),
+                            })
                         )
                     ),
-                    react.createElement('h1', { className: 'ivlyrics-marketplace-title' },
-                        I18n.t('marketplace.title')
+                    react.createElement('div', { className: 'ivlyrics-marketplace-filter-tabs' },
+                        [
+                            { key: FILTER_ALL, label: I18n.t('marketplace.filterAll') },
+                            { key: FILTER_LYRICS, label: I18n.t('marketplace.filterLyrics') },
+                            { key: FILTER_AI, label: I18n.t('marketplace.filterAI') },
+                        ].map(tab =>
+                            react.createElement('button', {
+                                key: tab.key,
+                                className: `ivlyrics-marketplace-filter-tab ${filter === tab.key ? 'active' : ''}`,
+                                onClick: () => setFilter(tab.key)
+                            }, tab.label)
+                        )
                     )
                 ),
-                // Search
-                react.createElement('div', { className: 'ivlyrics-marketplace-search-wrapper' },
-                    react.createElement('svg', {
-                        className: 'ivlyrics-marketplace-search-icon',
-                        width: 16, height: 16, viewBox: '0 0 24 24',
-                        fill: 'none', stroke: 'currentColor', strokeWidth: 2
-                    },
-                        react.createElement('circle', { cx: 11, cy: 11, r: 8 }),
-                        react.createElement('path', { d: 'M21 21l-4.35-4.35' })
-                    ),
-                    react.createElement('input', {
-                        ref: searchInputRef,
-                        className: 'ivlyrics-marketplace-search-input',
-                        type: 'text',
-                        placeholder: I18n.t('marketplace.search'),
-                        value: searchQuery,
-                        onChange: (e) => setSearchQuery(e.target.value),
-                    })
-                )
-            ),
-
-            // Filter Tabs
-            react.createElement('div', { className: 'ivlyrics-marketplace-filter-tabs' },
-                [
-                    { key: FILTER_ALL, label: I18n.t('marketplace.filterAll') },
-                    { key: FILTER_LYRICS, label: I18n.t('marketplace.filterLyrics') },
-                    { key: FILTER_AI, label: I18n.t('marketplace.filterAI') },
-                ].map(tab =>
-                    react.createElement('button', {
-                        key: tab.key,
-                        className: `ivlyrics-marketplace-filter-tab ${filter === tab.key ? 'active' : ''}`,
-                        onClick: () => setFilter(tab.key)
-                    }, tab.label)
-                )
-            ),
-
-            // Content
-            loading
-                ? react.createElement('div', { className: 'ivlyrics-marketplace-loading' },
-                    react.createElement('div', { className: 'ivlyrics-marketplace-spinner' }),
-                    react.createElement('span', null, I18n.t('marketplace.installing'))
-                )
-                : error
-                    ? react.createElement('div', { className: 'ivlyrics-marketplace-error' },
-                        react.createElement('p', null, I18n.t('marketplace.loadError')),
-                        react.createElement('p', { className: 'ivlyrics-marketplace-error-detail' }, error),
-                        react.createElement('button', {
-                            className: 'ivlyrics-marketplace-btn ivlyrics-marketplace-btn-install',
-                            onClick: () => loadAddons(true)
-                        }, I18n.t('marketplace.retry'))
-                    )
-                    : filteredAddons.length === 0
-                        ? react.createElement('div', { className: 'ivlyrics-marketplace-empty' },
-                            react.createElement('p', null, I18n.t('marketplace.noAddons'))
+                react.createElement('div', { className: 'ivlyrics-marketplace-content' },
+                    loading
+                        ? react.createElement('div', { className: 'ivlyrics-marketplace-loading' },
+                            react.createElement('div', { className: 'ivlyrics-marketplace-spinner' }),
+                            react.createElement('span', null, I18n.t('marketplace.installing'))
                         )
-                        : react.createElement('div', { className: 'ivlyrics-marketplace-grid' },
-                            filteredAddons.map(addon =>
-                                react.createElement(AddonCard, {
-                                    key: addon.id,
-                                    addon,
-                                    onClick: setSelectedAddon
-                                })
+                        : error
+                            ? react.createElement('div', { className: 'ivlyrics-marketplace-error' },
+                                react.createElement('p', null, I18n.t('marketplace.loadError')),
+                                react.createElement('p', { className: 'ivlyrics-marketplace-error-detail' }, error),
+                                react.createElement('button', {
+                                    className: 'ivlyrics-marketplace-btn ivlyrics-marketplace-btn-install',
+                                    onClick: () => loadAddons(true)
+                                }, I18n.t('marketplace.retry'))
                             )
-                        )
-        );
+                            : filteredAddons.length === 0
+                                ? react.createElement('div', { className: 'ivlyrics-marketplace-empty' },
+                                    react.createElement('p', null, I18n.t('marketplace.noAddons'))
+                                )
+                                : react.createElement('div', { className: 'ivlyrics-marketplace-grid' },
+                                    filteredAddons.map(addon =>
+                                        react.createElement(AddonCard, {
+                                            key: addon.id,
+                                            addon,
+                                            onClick: setSelectedAddon
+                                        })
+                                    )
+                                )
+                )
+            );
+        }
+
+        return react.createElement('div', { className: 'ivlyrics-marketplace-root' }, pageContent);
     });
 
     return MarketplacePageComponent;

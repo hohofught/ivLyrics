@@ -22,9 +22,12 @@
     const DB_NAME = 'ivLyrics_marketplace';
     const DB_VERSION = 1;
     const STORE_NAME = 'addons';
-    const ADDON_LIST_URL = 'https://raw.githubusercontent.com/ivLis-Studio/ivLyrics/refs/heads/main/AddonList.json';
     const STORAGE_PREFIX = 'ivLyrics:marketplace:';
     const FETCH_TIMEOUT = 15000;
+    const GITHUB_TOPIC = 'ivlyrics-addon';
+    const GITHUB_SEARCH_URL = `https://api.github.com/search/repositories?q=topic:${encodeURIComponent(GITHUB_TOPIC)}&per_page=100&sort=updated&order=desc`;
+    const BLACKLIST_URL_LOCAL = 'blacklist.json';
+    const BLACKLIST_URL_REMOTE = 'https://raw.githubusercontent.com/ivLis-Studio/ivLyrics/refs/heads/main/blacklist.json';
 
     // ============================================
     // MarketplaceManager Class
@@ -33,10 +36,10 @@
     class MarketplaceManager {
         constructor() {
             this._db = null;
-            this._addonList = null;
             this._addonListCache = null;
             this._addonListCacheTime = 0;
             this._addonListCacheTTL = 5 * 60 * 1000; // 5분 캐시
+            this._blacklistCache = null;
             this._installedAddons = new Map(); // id -> { metadata, code }
             this._loadedScripts = new Map(); // id -> script element
             this._events = new Map();
@@ -265,43 +268,215 @@
         // Addon List Fetching
         // ============================================
 
-        async fetchAddonList(forceRefresh = false) {
-            // 캐시 확인
-            if (!forceRefresh && this._addonListCache && (Date.now() - this._addonListCacheTime < this._addonListCacheTTL)) {
-                return this._addonListCache;
-            }
+        _toNormalizedSet(values) {
+            if (!Array.isArray(values)) return new Set();
+            return new Set(
+                values
+                    .map(v => String(v || '').trim().toLowerCase())
+                    .filter(Boolean)
+            );
+        }
+
+        _normalizeRepoId(owner, repo) {
+            const o = String(owner || '').trim().toLowerCase();
+            const r = String(repo || '').trim().toLowerCase();
+            return `${o}/${r}`.replace(/^\/+|\/+$/g, '');
+        }
+
+        _isRepoBlocked(repo, blacklist) {
+            const owner = repo?.owner?.login || '';
+            const repoName = repo?.name || '';
+            const fullName = this._normalizeRepoId(owner, repoName);
+            return blacklist.blockedRepos.has(fullName) || blacklist.blockedAuthors.has(owner.toLowerCase());
+        }
+
+        _buildManifestUrl(repo) {
+            const defaultBranch = repo?.default_branch || 'main';
+            const fullName = `${repo.owner?.login}/${repo.name}`;
+            return `https://raw.githubusercontent.com/${fullName}/${defaultBranch}/manifest.json`;
+        }
+
+        _manifestAddonToMarketplaceAddon(manifestAddon, repo) {
+            if (!manifestAddon || typeof manifestAddon !== 'object') return null;
+
+            const owner = repo?.owner?.login || '';
+            const repoName = repo?.name || '';
+            const baseId = this._normalizeRepoId(owner, repoName);
+            const id = baseId;
+            const type = String(manifestAddon.type || '').toLowerCase();
+
+            if (!manifestAddon.name || !manifestAddon.downloadUrl) return null;
+            if (type !== 'lyrics' && type !== 'ai') return null;
+
+            const description = manifestAddon.description || repo.description || '';
+
+            return {
+                id,
+                name: manifestAddon.name,
+                type,
+                author: manifestAddon.author || owner || baseId,
+                version: manifestAddon.version || '0.0.0',
+                updated: manifestAddon.updated || '',
+                description,
+                githubUrl: manifestAddon.githubUrl || repo.html_url || '',
+                preview: manifestAddon.preview || '',
+                downloadUrl: manifestAddon.downloadUrl,
+                minAppVersion: manifestAddon.minAppVersion || '',
+                sourceRepo: baseId
+            };
+        }
+
+        async _fetchRepoManifestAddons(repo) {
+            const manifestUrl = this._buildManifestUrl(repo);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-
-                const response = await fetch(ADDON_LIST_URL, {
+                const response = await fetch(manifestUrl, {
                     signal: controller.signal,
                     cache: 'no-cache'
                 });
 
+                if (!response.ok) {
+                    return [];
+                }
+
+                const data = await response.json();
+                if (!data || !Array.isArray(data.addons)) {
+                    return [];
+                }
+
+                for (const manifestAddon of data.addons) {
+                    const addon = this._manifestAddonToMarketplaceAddon(manifestAddon, repo);
+                    if (addon) return [addon];
+                }
+
+                return [];
+            } catch {
+                return [];
+            } finally {
                 clearTimeout(timeoutId);
+            }
+        }
+
+        async _loadBlacklist(forceRefresh = false) {
+            if (!forceRefresh && this._blacklistCache) {
+                return this._blacklistCache;
+            }
+
+            try {
+                const urls = [BLACKLIST_URL_REMOTE, BLACKLIST_URL_LOCAL];
+                let data = null;
+
+                for (const url of urls) {
+                    try {
+                        const response = await fetch(url, { cache: 'no-cache' });
+                        if (!response.ok) continue;
+                        data = await response.json();
+                        break;
+                    } catch {
+                        // Try next source
+                    }
+                }
+
+                if (!data) {
+                    this._blacklistCache = {
+                        blockedRepos: new Set(),
+                        blockedAuthors: new Set(),
+                        blockedAddonIds: new Set()
+                    };
+                    return this._blacklistCache;
+                }
+
+                this._blacklistCache = {
+                    blockedRepos: this._toNormalizedSet(data?.blockedRepos),
+                    blockedAuthors: this._toNormalizedSet(data?.blockedAuthors),
+                    blockedAddonIds: this._toNormalizedSet(data?.blockedAddonIds)
+                };
+
+                return this._blacklistCache;
+            } catch {
+                this._blacklistCache = {
+                    blockedRepos: new Set(),
+                    blockedAuthors: new Set(),
+                    blockedAddonIds: new Set()
+                };
+                return this._blacklistCache;
+            }
+        }
+
+        async _fetchTopicRepositories() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+            try {
+                const response = await fetch(GITHUB_SEARCH_URL, {
+                    signal: controller.signal,
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/vnd.github+json'
+                    }
+                });
 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
-
-                if (!data || !Array.isArray(data.addons)) {
-                    throw new Error('Invalid AddonList.json format');
+                if (!data || !Array.isArray(data.items)) {
+                    throw new Error('Invalid GitHub topic response');
                 }
 
-                // 설치 상태를 각 에드온에 추가
-                const addons = data.addons.map(addon => ({
-                    ...addon,
-                    isInstalled: this._installedAddons.has(addon.id),
-                    installedVersion: this._installedAddons.get(addon.id)?.metadata?.version || null,
-                    hasUpdate: this._installedAddons.has(addon.id) &&
-                        this._compareVersions(addon.version, this._installedAddons.get(addon.id)?.metadata?.version) > 0
-                }));
+                return data.items.filter(repo => !repo.archived && !repo.disabled);
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
 
-                this._addonListCache = { ...data, addons };
+        async fetchAddonList(forceRefresh = false) {
+            if (!forceRefresh && this._addonListCache && (Date.now() - this._addonListCacheTime < this._addonListCacheTTL)) {
+                return this._addonListCache;
+            }
+
+            try {
+                const blacklist = await this._loadBlacklist(forceRefresh);
+                const repos = await this._fetchTopicRepositories();
+                const allowedRepos = repos.filter(repo => !this._isRepoBlocked(repo, blacklist));
+
+                const manifestResults = await Promise.allSettled(
+                    allowedRepos.map(repo => this._fetchRepoManifestAddons(repo))
+                );
+
+                const discoveredAddons = [];
+                for (const result of manifestResults) {
+                    if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+                        discoveredAddons.push(...result.value);
+                    }
+                }
+
+                const seenIds = new Set();
+                const addons = [];
+                for (const addon of discoveredAddons) {
+                    const normalizedId = String(addon.id || '').toLowerCase();
+                    if (!normalizedId) continue;
+                    if (blacklist.blockedAddonIds.has(normalizedId)) continue;
+                    if (seenIds.has(normalizedId)) continue;
+                    seenIds.add(normalizedId);
+
+                    addons.push({
+                        ...addon,
+                        isInstalled: this._installedAddons.has(addon.id),
+                        installedVersion: this._installedAddons.get(addon.id)?.metadata?.version || null,
+                        hasUpdate: this._installedAddons.has(addon.id) &&
+                            this._compareVersions(addon.version, this._installedAddons.get(addon.id)?.metadata?.version) > 0
+                    });
+                }
+
+                this._addonListCache = {
+                    version: 2,
+                    source: `github-topic:${GITHUB_TOPIC}`,
+                    addons
+                };
                 this._addonListCacheTime = Date.now();
 
                 return this._addonListCache;
@@ -310,7 +485,6 @@
                 throw e;
             }
         }
-
         // ============================================
         // Install / Uninstall / Update
         // ============================================

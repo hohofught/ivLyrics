@@ -110,6 +110,12 @@
   animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Hide Spotify top bar on ivLyrics page to prevent click interception */
+body.ivlyrics-page-active .main-topBar-container {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 /* 전체화면 모드에서 업데이트 배너 숨기기 */
 #lyrics-fullscreen-container .ivLyrics-update-banner {
   display: none !important;
@@ -6096,16 +6102,36 @@ ruby .lyrics-karaoke-char.sung {
    Marketplace Styles
    ============================================ */
 
+.ivlyrics-marketplace-root {
+  grid-area: 1 / 1 / -1 / -1;
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
 .ivlyrics-marketplace-container {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   padding: 24px 32px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   color: var(--spice-text);
   animation: fadeInSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ivlyrics-marketplace-top {
+  flex-shrink: 0;
+}
+
+.ivlyrics-marketplace-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @keyframes fadeInSlide {
@@ -6362,8 +6388,9 @@ ruby .lyrics-karaoke-char.sung {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   padding: 24px 32px;
-  overflow-y: auto;
+  overflow: hidden;
   color: var(--spice-text);
   animation: fadeInSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -6396,7 +6423,11 @@ ruby .lyrics-karaoke-char.sung {
 .ivlyrics-marketplace-detail-content {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-bottom: 80px;
 }
 
