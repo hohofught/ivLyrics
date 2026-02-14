@@ -1735,5 +1735,31 @@ window.LANG_TH = {
     "importSuccess": "นำเข้าข้อมูลซิงค์แล้ว",
     "importError": "นำเข้าล้มเหลว",
     "importDifferentTrack": "นี่คือข้อมูลซิงค์จากเพลงอื่น ต้องการนำเข้าหรือไม่?"
+  },
+  "marketplace": {
+    "title": "ร้านค้าส่วนเสริม",
+    "search": "ค้นหาส่วนเสริม...",
+    "filterAll": "ทั้งหมด",
+    "filterLyrics": "เนื้อเพลง",
+    "filterAI": "AI",
+    "install": "ติดตั้ง",
+    "uninstall": "ถอนการติดตั้ง",
+    "update": "อัปเดต",
+    "installed": "ติดตั้งแล้ว",
+    "installing": "กำลังติดตั้ง...",
+    "uninstalling": "กำลังถอนการติดตั้ง...",
+    "updateAvailable": "มีอัปเดต",
+    "by": "โดย {author}",
+    "updated": "อัปเดต {date}",
+    "version": "v{version}",
+    "noAddons": "ไม่มีส่วนเสริม",
+    "loadError": "โหลดรายการส่วนเสริมไม่สำเร็จ",
+    "installSuccess": "ติดตั้ง {name} สำเร็จ",
+    "installError": "ติดตั้งส่วนเสริมไม่สำเร็จ",
+    "uninstallSuccess": "ถอนการติดตั้ง {name} แล้ว",
+    "uninstallConfirm": "คุณแน่ใจหรือไม่ว่าต้องการถอนการติดตั้ง {name}?",
+    "backToLyrics": "กลับ",
+    "retry": "ลองอีกครั้ง",
+    "addonDetail": "รายละเอียดส่วนเสริม"
   }
 };

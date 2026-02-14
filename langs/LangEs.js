@@ -1735,5 +1735,31 @@ window.LANG_ES = {
     "importSuccess": "Datos de sincronización importados",
     "importError": "Error al importar",
     "importDifferentTrack": "Estos son datos de sincronización de otra pista. ¿Desea importar de todos modos?"
+  },
+  "marketplace": {
+    "title": "Tienda de Complementos",
+    "search": "Buscar complementos...",
+    "filterAll": "Todos",
+    "filterLyrics": "Letras",
+    "filterAI": "IA",
+    "install": "Instalar",
+    "uninstall": "Desinstalar",
+    "update": "Actualizar",
+    "installed": "Instalado",
+    "installing": "Instalando...",
+    "uninstalling": "Desinstalando...",
+    "updateAvailable": "Actualización disponible",
+    "by": "por {author}",
+    "updated": "Actualizado {date}",
+    "version": "v{version}",
+    "noAddons": "No hay complementos disponibles",
+    "loadError": "Error al cargar la lista de complementos",
+    "installSuccess": "{name} instalado correctamente",
+    "installError": "Error al instalar el complemento",
+    "uninstallSuccess": "{name} desinstalado",
+    "uninstallConfirm": "¿Estás seguro de que quieres desinstalar {name}?",
+    "backToLyrics": "Volver",
+    "retry": "Reintentar",
+    "addonDetail": "Detalles del complemento"
   }
 };

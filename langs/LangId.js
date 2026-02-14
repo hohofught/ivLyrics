@@ -1734,5 +1734,31 @@ window.LANG_ID = {
     "importSuccess": "Data sinkronisasi diimpor",
     "importError": "Gagal mengimpor",
     "importDifferentTrack": "Ini adalah data sinkronisasi dari lagu lain. Tetap impor?"
+  },
+  "marketplace": {
+    "title": "Toko Addon",
+    "search": "Cari addon...",
+    "filterAll": "Semua",
+    "filterLyrics": "Lirik",
+    "filterAI": "AI",
+    "install": "Pasang",
+    "uninstall": "Hapus",
+    "update": "Perbarui",
+    "installed": "Terpasang",
+    "installing": "Memasang...",
+    "uninstalling": "Menghapus...",
+    "updateAvailable": "Pembaruan tersedia",
+    "by": "oleh {author}",
+    "updated": "Diperbarui {date}",
+    "version": "v{version}",
+    "noAddons": "Tidak ada addon tersedia",
+    "loadError": "Gagal memuat daftar addon",
+    "installSuccess": "{name} berhasil dipasang",
+    "installError": "Gagal memasang addon",
+    "uninstallSuccess": "{name} dihapus",
+    "uninstallConfirm": "Apakah Anda yakin ingin menghapus {name}?",
+    "backToLyrics": "Kembali",
+    "retry": "Coba lagi",
+    "addonDetail": "Detail Addon"
   }
 };

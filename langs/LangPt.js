@@ -1735,5 +1735,31 @@ window.LANG_PT = {
     "importSuccess": "Dados de sincronização importados",
     "importError": "Falha na importação",
     "importDifferentTrack": "Estes são dados de sincronização de outra faixa. Deseja importar mesmo assim?"
+  },
+  "marketplace": {
+    "title": "Loja de Extensões",
+    "search": "Buscar extensões...",
+    "filterAll": "Todos",
+    "filterLyrics": "Letras",
+    "filterAI": "IA",
+    "install": "Instalar",
+    "uninstall": "Desinstalar",
+    "update": "Atualizar",
+    "installed": "Instalado",
+    "installing": "Instalando...",
+    "uninstalling": "Desinstalando...",
+    "updateAvailable": "Atualização disponível",
+    "by": "por {author}",
+    "updated": "Atualizado {date}",
+    "version": "v{version}",
+    "noAddons": "Nenhuma extensão disponível",
+    "loadError": "Falha ao carregar a lista de extensões",
+    "installSuccess": "{name} instalado com sucesso",
+    "installError": "Falha ao instalar a extensão",
+    "uninstallSuccess": "{name} desinstalado",
+    "uninstallConfirm": "Tem certeza que deseja desinstalar {name}?",
+    "backToLyrics": "Voltar",
+    "retry": "Tentar novamente",
+    "addonDetail": "Detalhes da extensão"
   }
 };

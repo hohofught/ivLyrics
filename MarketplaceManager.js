@@ -1,0 +1,624 @@
+/**
+ * Marketplace Manager for ivLyrics
+ * 마켓플레이스 에드온 설치, 저장, 동적 로딩을 관리하는 시스템
+ *
+ * @author ivLis STUDIO
+ * @description IndexedDB에 에드온 코드를 저장하고, 앱 시작 시 동적으로 로드
+ */
+
+(function MarketplaceManagerInit() {
+    'use strict';
+
+    // Spicetify가 준비될 때까지 대기
+    if (!window.Spicetify || !Spicetify.LocalStorage) {
+        setTimeout(MarketplaceManagerInit, 300);
+        return;
+    }
+
+    // ============================================
+    // Constants
+    // ============================================
+
+    const DB_NAME = 'ivLyrics_marketplace';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'addons';
+    const ADDON_LIST_URL = 'https://raw.githubusercontent.com/ivLis-Studio/ivLyrics/refs/heads/main/AddonList.json';
+    const STORAGE_PREFIX = 'ivLyrics:marketplace:';
+    const FETCH_TIMEOUT = 15000;
+
+    // ============================================
+    // MarketplaceManager Class
+    // ============================================
+
+    class MarketplaceManager {
+        constructor() {
+            this._db = null;
+            this._addonList = null;
+            this._addonListCache = null;
+            this._addonListCacheTime = 0;
+            this._addonListCacheTTL = 5 * 60 * 1000; // 5분 캐시
+            this._installedAddons = new Map(); // id -> { metadata, code }
+            this._loadedScripts = new Map(); // id -> script element
+            this._events = new Map();
+            this._onceEvents = new Map();
+
+            // Readiness tracking
+            this._readyResolve = null;
+            this.readyPromise = new Promise((resolve) => {
+                this._readyResolve = resolve;
+            });
+
+            this._init();
+        }
+
+        // ============================================
+        // EventEmitter Methods
+        // ============================================
+
+        on(event, listener) {
+            if (!this._events.has(event)) {
+                this._events.set(event, new Set());
+            }
+            this._events.get(event).add(listener);
+            return () => this.off(event, listener);
+        }
+
+        once(event, listener) {
+            if (!this._onceEvents.has(event)) {
+                this._onceEvents.set(event, new Set());
+            }
+            this._onceEvents.get(event).add(listener);
+        }
+
+        off(event, listener) {
+            if (this._events.has(event)) {
+                this._events.get(event).delete(listener);
+            }
+            if (this._onceEvents.has(event)) {
+                this._onceEvents.get(event).delete(listener);
+            }
+        }
+
+        emit(event, ...args) {
+            if (this._events.has(event)) {
+                for (const listener of this._events.get(event)) {
+                    try { listener(...args); } catch (e) {
+                        console.error(`[MarketplaceManager] Event listener error (${event}):`, e);
+                    }
+                }
+            }
+            if (this._onceEvents.has(event)) {
+                for (const listener of this._onceEvents.get(event)) {
+                    try { listener(...args); } catch (e) {
+                        console.error(`[MarketplaceManager] Once listener error (${event}):`, e);
+                    }
+                }
+                this._onceEvents.delete(event);
+            }
+        }
+
+        // ============================================
+        // Initialization
+        // ============================================
+
+        async _init() {
+            try {
+                await this._openDB();
+                await this._loadInstalledAddons();
+                console.log('[MarketplaceManager] Initialized successfully');
+            } catch (e) {
+                console.error('[MarketplaceManager] Initialization error:', e);
+            } finally {
+                // readyPromise는 항상 resolve (에러가 있어도 앱이 멈추면 안 됨)
+                this._readyResolve();
+            }
+        }
+
+        // ============================================
+        // IndexedDB Operations
+        // ============================================
+
+        _openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        store.createIndex('type', 'metadata.type', { unique: false });
+                        store.createIndex('installedAt', 'installedAt', { unique: false });
+                    }
+                };
+
+                request.onsuccess = (event) => {
+                    this._db = event.target.result;
+                    resolve();
+                };
+
+                request.onerror = (event) => {
+                    console.error('[MarketplaceManager] IndexedDB open error:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        _dbGet(id) {
+            return new Promise((resolve, reject) => {
+                if (!this._db) { resolve(null); return; }
+                const tx = this._db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result || null);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        _dbPut(data) {
+            return new Promise((resolve, reject) => {
+                if (!this._db) { reject(new Error('DB not open')); return; }
+                const tx = this._db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.put(data);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        _dbDelete(id) {
+            return new Promise((resolve, reject) => {
+                if (!this._db) { reject(new Error('DB not open')); return; }
+                const tx = this._db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        _dbGetAll() {
+            return new Promise((resolve, reject) => {
+                if (!this._db) { resolve([]); return; }
+                const tx = this._db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // ============================================
+        // Addon Loading (Startup)
+        // ============================================
+
+        async _loadInstalledAddons() {
+            const addons = await this._dbGetAll();
+
+            if (addons.length === 0) {
+                console.log('[MarketplaceManager] No marketplace addons installed');
+                return;
+            }
+
+            console.log(`[MarketplaceManager] Loading ${addons.length} marketplace addon(s)...`);
+
+            const loadPromises = addons.map(addon => this._executeAddonCode(addon));
+            const results = await Promise.allSettled(loadPromises);
+
+            let loaded = 0;
+            let failed = 0;
+            results.forEach((result, i) => {
+                if (result.status === 'fulfilled') {
+                    this._installedAddons.set(addons[i].id, addons[i]);
+                    loaded++;
+                } else {
+                    console.error(`[MarketplaceManager] Failed to load addon "${addons[i].id}":`, result.reason);
+                    failed++;
+                }
+            });
+
+            // 매니저에 마켓플레이스 에드온으로 표시 (약간의 지연 - 에드온이 매니저에 등록될 시간 확보)
+            setTimeout(() => {
+                for (const addon of addons) {
+                    const type = addon.metadata?.type;
+                    if (type === 'lyrics' && window.LyricsAddonManager) {
+                        window.LyricsAddonManager.markAsMarketplaceAddon(addon.id);
+                    } else if (type === 'ai' && window.AIAddonManager) {
+                        window.AIAddonManager.markAsMarketplaceAddon(addon.id);
+                    }
+                }
+            }, 500);
+
+            console.log(`[MarketplaceManager] Loaded: ${loaded}, Failed: ${failed}`);
+        }
+
+        _executeAddonCode(addon) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const blob = new Blob([addon.code], { type: 'text/javascript' });
+                    const url = URL.createObjectURL(blob);
+                    const script = document.createElement('script');
+
+                    script.src = url;
+                    script.dataset.marketplaceAddon = addon.id;
+
+                    script.onload = () => {
+                        URL.revokeObjectURL(url);
+                        this._loadedScripts.set(addon.id, script);
+                        console.log(`[MarketplaceManager] Loaded addon: ${addon.id}`);
+                        resolve();
+                    };
+
+                    script.onerror = (e) => {
+                        URL.revokeObjectURL(url);
+                        script.remove();
+                        reject(new Error(`Script load failed for ${addon.id}`));
+                    };
+
+                    document.head.appendChild(script);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+
+        // ============================================
+        // Addon List Fetching
+        // ============================================
+
+        async fetchAddonList(forceRefresh = false) {
+            // 캐시 확인
+            if (!forceRefresh && this._addonListCache && (Date.now() - this._addonListCacheTime < this._addonListCacheTTL)) {
+                return this._addonListCache;
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+                const response = await fetch(ADDON_LIST_URL, {
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data || !Array.isArray(data.addons)) {
+                    throw new Error('Invalid AddonList.json format');
+                }
+
+                // 설치 상태를 각 에드온에 추가
+                const addons = data.addons.map(addon => ({
+                    ...addon,
+                    isInstalled: this._installedAddons.has(addon.id),
+                    installedVersion: this._installedAddons.get(addon.id)?.metadata?.version || null,
+                    hasUpdate: this._installedAddons.has(addon.id) &&
+                        this._compareVersions(addon.version, this._installedAddons.get(addon.id)?.metadata?.version) > 0
+                }));
+
+                this._addonListCache = { ...data, addons };
+                this._addonListCacheTime = Date.now();
+
+                return this._addonListCache;
+            } catch (e) {
+                console.error('[MarketplaceManager] Failed to fetch addon list:', e);
+                throw e;
+            }
+        }
+
+        // ============================================
+        // Install / Uninstall / Update
+        // ============================================
+
+        async installAddon(addonInfo) {
+            const { id, downloadUrl, type } = addonInfo;
+
+            if (this._installedAddons.has(id)) {
+                console.warn(`[MarketplaceManager] Addon "${id}" is already installed`);
+                return false;
+            }
+
+            try {
+                this.emit('addon:installing', { id });
+
+                // JS 코드 다운로드
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+                const response = await fetch(downloadUrl, {
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Download failed: HTTP ${response.status}`);
+                }
+
+                const code = await response.text();
+
+                if (!code || code.trim().length === 0) {
+                    throw new Error('Downloaded addon code is empty');
+                }
+
+                // IndexedDB에 저장
+                const entry = {
+                    id,
+                    code,
+                    metadata: {
+                        name: addonInfo.name,
+                        type: addonInfo.type,
+                        author: addonInfo.author,
+                        version: addonInfo.version,
+                        description: addonInfo.description,
+                        preview: addonInfo.preview,
+                        downloadUrl: addonInfo.downloadUrl,
+                        updated: addonInfo.updated,
+                        minAppVersion: addonInfo.minAppVersion
+                    },
+                    installedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                await this._dbPut(entry);
+
+                // 즉시 실행
+                await this._executeAddonCode(entry);
+                this._installedAddons.set(id, entry);
+
+                // 매니저에 마켓플레이스 에드온으로 표시
+                setTimeout(() => {
+                    if (type === 'lyrics' && window.LyricsAddonManager) {
+                        window.LyricsAddonManager.markAsMarketplaceAddon(id);
+                    } else if (type === 'ai' && window.AIAddonManager) {
+                        window.AIAddonManager.markAsMarketplaceAddon(id);
+                    }
+                }, 300);
+
+                // Provider 순서에 추가 (맨 앞에)
+                this._addToProviderOrder(id, type);
+
+                // 캐시 무효화
+                this._addonListCacheTime = 0;
+
+                this.emit('addon:installed', { id, name: addonInfo.name, type });
+                console.log(`[MarketplaceManager] Installed addon: ${id}`);
+                return true;
+            } catch (e) {
+                console.error(`[MarketplaceManager] Install failed for "${id}":`, e);
+                this.emit('addon:install-error', { id, error: e.message });
+                throw e;
+            }
+        }
+
+        async uninstallAddon(addonId) {
+            if (!this._installedAddons.has(addonId)) {
+                console.warn(`[MarketplaceManager] Addon "${addonId}" is not installed`);
+                return false;
+            }
+
+            try {
+                const addon = this._installedAddons.get(addonId);
+                const type = addon?.metadata?.type;
+
+                // IndexedDB에서 삭제
+                await this._dbDelete(addonId);
+
+                // 스크립트 태그 제거
+                const script = this._loadedScripts.get(addonId);
+                if (script) {
+                    script.remove();
+                    this._loadedScripts.delete(addonId);
+                }
+
+                // 매니저에서 등록 해제
+                if (type === 'lyrics' && window.LyricsAddonManager) {
+                    window.LyricsAddonManager.unregister(addonId);
+                } else if (type === 'ai' && window.AIAddonManager) {
+                    window.AIAddonManager.unregister(addonId);
+                }
+
+                // Provider 순서에서 제거
+                this._removeFromProviderOrder(addonId, type);
+
+                this._installedAddons.delete(addonId);
+
+                // 캐시 무효화
+                this._addonListCacheTime = 0;
+
+                this.emit('addon:uninstalled', { id: addonId, name: addon?.metadata?.name });
+                console.log(`[MarketplaceManager] Uninstalled addon: ${addonId}`);
+                return true;
+            } catch (e) {
+                console.error(`[MarketplaceManager] Uninstall failed for "${addonId}":`, e);
+                throw e;
+            }
+        }
+
+        async updateAddon(addonInfo) {
+            const { id } = addonInfo;
+
+            if (!this._installedAddons.has(id)) {
+                console.warn(`[MarketplaceManager] Addon "${id}" is not installed, cannot update`);
+                return false;
+            }
+
+            try {
+                this.emit('addon:updating', { id });
+
+                // 기존 스크립트 제거
+                const oldScript = this._loadedScripts.get(id);
+                if (oldScript) {
+                    oldScript.remove();
+                    this._loadedScripts.delete(id);
+                }
+
+                // 매니저에서 기존 등록 해제
+                const type = addonInfo.type;
+                if (type === 'lyrics' && window.LyricsAddonManager) {
+                    window.LyricsAddonManager.unregister(id);
+                } else if (type === 'ai' && window.AIAddonManager) {
+                    window.AIAddonManager.unregister(id);
+                }
+
+                // 새 코드 다운로드
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+                const response = await fetch(addonInfo.downloadUrl, {
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Download failed: HTTP ${response.status}`);
+                }
+
+                const code = await response.text();
+
+                // IndexedDB 업데이트
+                const entry = {
+                    id,
+                    code,
+                    metadata: {
+                        name: addonInfo.name,
+                        type: addonInfo.type,
+                        author: addonInfo.author,
+                        version: addonInfo.version,
+                        description: addonInfo.description,
+                        preview: addonInfo.preview,
+                        downloadUrl: addonInfo.downloadUrl,
+                        updated: addonInfo.updated,
+                        minAppVersion: addonInfo.minAppVersion
+                    },
+                    installedAt: this._installedAddons.get(id)?.installedAt || new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                await this._dbPut(entry);
+
+                // 새 코드 실행
+                await this._executeAddonCode(entry);
+                this._installedAddons.set(id, entry);
+
+                // 캐시 무효화
+                this._addonListCacheTime = 0;
+
+                this.emit('addon:updated', { id, name: addonInfo.name, version: addonInfo.version });
+                console.log(`[MarketplaceManager] Updated addon: ${id} to v${addonInfo.version}`);
+                return true;
+            } catch (e) {
+                console.error(`[MarketplaceManager] Update failed for "${id}":`, e);
+                this.emit('addon:update-error', { id, error: e.message });
+                throw e;
+            }
+        }
+
+        // ============================================
+        // Provider Order Integration
+        // ============================================
+
+        _addToProviderOrder(addonId, type) {
+            try {
+                if (type === 'lyrics' && window.LyricsAddonManager) {
+                    const order = window.LyricsAddonManager.getProviderOrder();
+                    if (!order.includes(addonId)) {
+                        order.unshift(addonId);
+                        window.LyricsAddonManager.setProviderOrder(order);
+                    }
+                } else if (type === 'ai' && window.AIAddonManager) {
+                    const order = window.AIAddonManager.getProviderOrder();
+                    if (!order.includes(addonId)) {
+                        order.unshift(addonId);
+                        window.AIAddonManager.setProviderOrder(order);
+                    }
+                }
+            } catch (e) {
+                console.warn('[MarketplaceManager] Failed to update provider order:', e);
+            }
+        }
+
+        _removeFromProviderOrder(addonId, type) {
+            try {
+                if (type === 'lyrics' && window.LyricsAddonManager) {
+                    const order = window.LyricsAddonManager.getProviderOrder();
+                    const filtered = order.filter(id => id !== addonId);
+                    window.LyricsAddonManager.setProviderOrder(filtered);
+                } else if (type === 'ai' && window.AIAddonManager) {
+                    const order = window.AIAddonManager.getProviderOrder();
+                    const filtered = order.filter(id => id !== addonId);
+                    window.AIAddonManager.setProviderOrder(filtered);
+                }
+            } catch (e) {
+                console.warn('[MarketplaceManager] Failed to update provider order:', e);
+            }
+        }
+
+        // ============================================
+        // Query Methods
+        // ============================================
+
+        isInstalled(addonId) {
+            return this._installedAddons.has(addonId);
+        }
+
+        getInstalledAddons() {
+            return Array.from(this._installedAddons.values()).map(a => ({
+                id: a.id,
+                ...a.metadata,
+                installedAt: a.installedAt,
+                updatedAt: a.updatedAt
+            }));
+        }
+
+        getInstalledAddon(addonId) {
+            const addon = this._installedAddons.get(addonId);
+            if (!addon) return null;
+            return {
+                id: addon.id,
+                ...addon.metadata,
+                installedAt: addon.installedAt,
+                updatedAt: addon.updatedAt
+            };
+        }
+
+        getInstalledVersion(addonId) {
+            return this._installedAddons.get(addonId)?.metadata?.version || null;
+        }
+
+        // ============================================
+        // Utility Methods
+        // ============================================
+
+        _compareVersions(a, b) {
+            if (!a || !b) return 0;
+            const pa = a.split('.').map(Number);
+            const pb = b.split('.').map(Number);
+            const len = Math.max(pa.length, pb.length);
+            for (let i = 0; i < len; i++) {
+                const na = pa[i] || 0;
+                const nb = pb[i] || 0;
+                if (na > nb) return 1;
+                if (na < nb) return -1;
+            }
+            return 0;
+        }
+    }
+
+    // ============================================
+    // Global Registration
+    // ============================================
+
+    const manager = new MarketplaceManager();
+    window.MarketplaceManager = manager;
+
+    console.log('[MarketplaceManager] MarketplaceManager registered globally');
+})();

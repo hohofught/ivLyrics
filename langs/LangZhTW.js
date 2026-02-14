@@ -1735,5 +1735,31 @@ window.LANG_ZH_TW = {
     "importSuccess": "同步資料已匯入",
     "importError": "匯入失敗",
     "importDifferentTrack": "這是另一首曲目的同步資料。是否仍要匯入？"
+  },
+  "marketplace": {
+    "title": "外掛市集",
+    "search": "搜尋外掛...",
+    "filterAll": "全部",
+    "filterLyrics": "歌詞",
+    "filterAI": "AI",
+    "install": "安裝",
+    "uninstall": "解除安裝",
+    "update": "更新",
+    "installed": "已安裝",
+    "installing": "安裝中...",
+    "uninstalling": "解除安裝中...",
+    "updateAvailable": "可更新",
+    "by": "作者 {author}",
+    "updated": "更新於 {date}",
+    "version": "v{version}",
+    "noAddons": "暫無可用外掛",
+    "loadError": "載入外掛清單失敗",
+    "installSuccess": "{name} 安裝成功",
+    "installError": "外掛安裝失敗",
+    "uninstallSuccess": "{name} 已解除安裝",
+    "uninstallConfirm": "確定要解除安裝 {name} 嗎？",
+    "backToLyrics": "返回",
+    "retry": "重試",
+    "addonDetail": "外掛詳情"
   }
 };

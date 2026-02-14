@@ -1734,5 +1734,31 @@ window.LANG_AR = {
     "importSuccess": "تم استيراد بيانات المزامنة",
     "importError": "فشل الاستيراد",
     "importDifferentTrack": "هذه بيانات مزامنة لمسار آخر. هل تريد الاستيراد على أي حال؟"
+  },
+  "marketplace": {
+    "title": "متجر الإضافات",
+    "search": "البحث عن إضافات...",
+    "filterAll": "الكل",
+    "filterLyrics": "كلمات",
+    "filterAI": "ذكاء اصطناعي",
+    "install": "تثبيت",
+    "uninstall": "إزالة",
+    "update": "تحديث",
+    "installed": "مثبّت",
+    "installing": "جارٍ التثبيت...",
+    "uninstalling": "جارٍ الإزالة...",
+    "updateAvailable": "تحديث متاح",
+    "by": "بواسطة {author}",
+    "updated": "تم التحديث {date}",
+    "version": "v{version}",
+    "noAddons": "لا توجد إضافات متاحة",
+    "loadError": "فشل في تحميل قائمة الإضافات",
+    "installSuccess": "تم تثبيت {name} بنجاح",
+    "installError": "فشل في تثبيت الإضافة",
+    "uninstallSuccess": "تمت إزالة {name}",
+    "uninstallConfirm": "هل أنت متأكد من إزالة {name}؟",
+    "backToLyrics": "رجوع",
+    "retry": "إعادة المحاولة",
+    "addonDetail": "تفاصيل الإضافة"
   }
 };

@@ -1735,5 +1735,31 @@ window.LANG_IT = {
     "importSuccess": "Dati di sincronizzazione importati",
     "importError": "Importazione fallita",
     "importDifferentTrack": "Questi sono dati di sincronizzazione di un'altra traccia. Vuoi importare comunque?"
+  },
+  "marketplace": {
+    "title": "Marketplace Addon",
+    "search": "Cerca addon...",
+    "filterAll": "Tutti",
+    "filterLyrics": "Testi",
+    "filterAI": "IA",
+    "install": "Installa",
+    "uninstall": "Disinstalla",
+    "update": "Aggiorna",
+    "installed": "Installato",
+    "installing": "Installazione...",
+    "uninstalling": "Disinstallazione...",
+    "updateAvailable": "Aggiornamento disponibile",
+    "by": "di {author}",
+    "updated": "Aggiornato {date}",
+    "version": "v{version}",
+    "noAddons": "Nessun addon disponibile",
+    "loadError": "Impossibile caricare la lista degli addon",
+    "installSuccess": "{name} installato con successo",
+    "installError": "Installazione addon fallita",
+    "uninstallSuccess": "{name} disinstallato",
+    "uninstallConfirm": "Sei sicuro di voler disinstallare {name}?",
+    "backToLyrics": "Indietro",
+    "retry": "Riprova",
+    "addonDetail": "Dettagli addon"
   }
 };

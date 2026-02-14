@@ -1734,5 +1734,31 @@ window.LANG_FA = {
     "importSuccess": "داده‌های همگام‌سازی وارد شد",
     "importError": "خطا در وارد کردن",
     "importDifferentTrack": "این داده‌های همگام‌سازی آهنگ دیگری است. آیا می‌خواهید وارد کنید؟"
+  },
+  "marketplace": {
+    "title": "فروشگاه افزونه‌ها",
+    "search": "جستجوی افزونه...",
+    "filterAll": "همه",
+    "filterLyrics": "متن آهنگ",
+    "filterAI": "هوش مصنوعی",
+    "install": "نصب",
+    "uninstall": "حذف",
+    "update": "به‌روزرسانی",
+    "installed": "نصب شده",
+    "installing": "در حال نصب...",
+    "uninstalling": "در حال حذف...",
+    "updateAvailable": "به‌روزرسانی موجود",
+    "by": "توسط {author}",
+    "updated": "به‌روزرسانی {date}",
+    "version": "v{version}",
+    "noAddons": "افزونه‌ای موجود نیست",
+    "loadError": "بارگذاری لیست افزونه‌ها ناموفق بود",
+    "installSuccess": "{name} با موفقیت نصب شد",
+    "installError": "نصب افزونه ناموفق بود",
+    "uninstallSuccess": "{name} حذف شد",
+    "uninstallConfirm": "آیا مطمئنید که می‌خواهید {name} را حذف کنید؟",
+    "backToLyrics": "بازگشت",
+    "retry": "تلاش مجدد",
+    "addonDetail": "جزئیات افزونه"
   }
 };

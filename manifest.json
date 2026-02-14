@@ -50,9 +50,11 @@
 		"SetupWizard.js",
 		"SongInfoTicker.js",
 		"NoticeSystem.js",
-		"SyncDataCreator.js"
+		"SyncDataCreator.js",
+		"Marketplace.js"
 	],
 	"subfiles_extension": [
+		"MarketplaceManager.js",
 		"Addon_AI_ChatGPT.js",
 		"Addon_AI_Claude.js",
 		"Addon_AI_Gemini.js",

@@ -1735,5 +1735,31 @@ window.LANG_BN = {
     "importSuccess": "সিঙ্ক ডেটা আমদানি হয়েছে",
     "importError": "আমদানি ব্যর্থ",
     "importDifferentTrack": "এটি অন্য ট্র্যাকের সিঙ্ক ডেটা। তাও কি আমদানি করতে চান?"
+  },
+  "marketplace": {
+    "title": "অ্যাডঅন মার্কেটপ্লেস",
+    "search": "অ্যাডঅন খুঁজুন...",
+    "filterAll": "সব",
+    "filterLyrics": "গানের কথা",
+    "filterAI": "AI",
+    "install": "ইনস্টল করুন",
+    "uninstall": "আনইনস্টল করুন",
+    "update": "আপডেট করুন",
+    "installed": "ইনস্টল করা হয়েছে",
+    "installing": "ইনস্টল হচ্ছে...",
+    "uninstalling": "আনইনস্টল হচ্ছে...",
+    "updateAvailable": "আপডেট উপলব্ধ",
+    "by": "{author} দ্বারা",
+    "updated": "{date} আপডেট করা হয়েছে",
+    "version": "v{version}",
+    "noAddons": "কোনো অ্যাডঅন উপলব্ধ নেই",
+    "loadError": "অ্যাডঅন তালিকা লোড করতে ব্যর্থ",
+    "installSuccess": "{name} সফলভাবে ইনস্টল করা হয়েছে",
+    "installError": "অ্যাডঅন ইনস্টল করতে ব্যর্থ",
+    "uninstallSuccess": "{name} আনইনস্টল করা হয়েছে",
+    "uninstallConfirm": "আপনি কি নিশ্চিত যে আপনি {name} আনইনস্টল করতে চান?",
+    "backToLyrics": "ফিরে যান",
+    "retry": "পুনরায় চেষ্টা",
+    "addonDetail": "অ্যাডঅন বিবরণ"
   }
 };

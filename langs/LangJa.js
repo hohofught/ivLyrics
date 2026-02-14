@@ -1735,5 +1735,31 @@ window.LANG_JA = {
     "importSuccess": "シンクデータをインポートしました",
     "importError": "インポート失敗",
     "importDifferentTrack": "別のトラックのシンクデータです。それでもインポートしますか？"
+  },
+  "marketplace": {
+    "title": "アドオンマーケットプレイス",
+    "search": "アドオンを検索...",
+    "filterAll": "すべて",
+    "filterLyrics": "歌詞",
+    "filterAI": "AI",
+    "install": "インストール",
+    "uninstall": "アンインストール",
+    "update": "アップデート",
+    "installed": "インストール済み",
+    "installing": "インストール中...",
+    "uninstalling": "アンインストール中...",
+    "updateAvailable": "アップデート可能",
+    "by": "{author}",
+    "updated": "{date} 更新",
+    "version": "v{version}",
+    "noAddons": "利用可能なアドオンがありません",
+    "loadError": "アドオンリストの読み込みに失敗しました",
+    "installSuccess": "{name} をインストールしました",
+    "installError": "アドオンのインストールに失敗しました",
+    "uninstallSuccess": "{name} をアンインストールしました",
+    "uninstallConfirm": "{name} をアンインストールしますか？",
+    "backToLyrics": "戻る",
+    "retry": "再試行",
+    "addonDetail": "アドオン詳細"
   }
 };

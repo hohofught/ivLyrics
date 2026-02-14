@@ -1735,5 +1735,31 @@ window.LANG_ZH_CN = {
     "importSuccess": "同步数据已导入",
     "importError": "导入失败",
     "importDifferentTrack": "这是另一首曲目的同步数据。是否仍要导入？"
+  },
+  "marketplace": {
+    "title": "插件市场",
+    "search": "搜索插件...",
+    "filterAll": "全部",
+    "filterLyrics": "歌词",
+    "filterAI": "AI",
+    "install": "安装",
+    "uninstall": "卸载",
+    "update": "更新",
+    "installed": "已安装",
+    "installing": "安装中...",
+    "uninstalling": "卸载中...",
+    "updateAvailable": "可更新",
+    "by": "作者 {author}",
+    "updated": "更新于 {date}",
+    "version": "v{version}",
+    "noAddons": "暂无可用插件",
+    "loadError": "加载插件列表失败",
+    "installSuccess": "{name} 安装成功",
+    "installError": "插件安装失败",
+    "uninstallSuccess": "{name} 已卸载",
+    "uninstallConfirm": "确定要卸载 {name} 吗？",
+    "backToLyrics": "返回",
+    "retry": "重试",
+    "addonDetail": "插件详情"
   }
 };

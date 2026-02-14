@@ -1735,5 +1735,31 @@ window.LANG_RU = {
     "importSuccess": "Данные синхронизации импортированы",
     "importError": "Ошибка импорта",
     "importDifferentTrack": "Это данные синхронизации другого трека. Всё равно импортировать?"
+  },
+  "marketplace": {
+    "title": "Магазин дополнений",
+    "search": "Поиск дополнений...",
+    "filterAll": "Все",
+    "filterLyrics": "Тексты",
+    "filterAI": "ИИ",
+    "install": "Установить",
+    "uninstall": "Удалить",
+    "update": "Обновить",
+    "installed": "Установлено",
+    "installing": "Установка...",
+    "uninstalling": "Удаление...",
+    "updateAvailable": "Доступно обновление",
+    "by": "от {author}",
+    "updated": "Обновлено {date}",
+    "version": "v{version}",
+    "noAddons": "Нет доступных дополнений",
+    "loadError": "Не удалось загрузить список дополнений",
+    "installSuccess": "{name} успешно установлено",
+    "installError": "Не удалось установить дополнение",
+    "uninstallSuccess": "{name} удалено",
+    "uninstallConfirm": "Вы уверены, что хотите удалить {name}?",
+    "backToLyrics": "Назад",
+    "retry": "Повторить",
+    "addonDetail": "Подробности дополнения"
   }
 };

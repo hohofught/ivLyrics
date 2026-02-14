@@ -2072,6 +2072,11 @@ const Prefetcher = {
       try {
         console.log(`[Prefetcher] Fetching lyrics for: ${trackInfo.title}`);
 
+        // 마켓플레이스 에드온 로드 대기
+        if (window.MarketplaceManager?.readyPromise) {
+          await window.MarketplaceManager.readyPromise;
+        }
+
         // LyricsService Extension을 통해 가사 로드 (LyricsAddonManager 사용)
         const resp = await window.LyricsService.getLyricsFromProviders(trackInfo);
         if (!resp.uri) resp.uri = trackInfo.uri;
@@ -2499,6 +2504,7 @@ class LyricsContainer extends react.Component {
       lockMode: -1, // Lock mode deprecated - always auto-detect
       mode: -1,
       isLoading: false,
+      showMarketplace: false,
       versionIndex: 0,
       versionIndex2: 0,
       isFullscreen: false,
@@ -3134,6 +3140,11 @@ class LyricsContainer extends react.Component {
         const currentMode = this.getCurrentMode();
         this.lastModeBeforeLoading = currentMode !== -1 ? currentMode : SYNCED;
         this.setState({ ...emptyState, provider: "", contributors: null, isLoading: true, isCached: false });
+
+        // 마켓플레이스 에드온 로드 대기
+        if (window.MarketplaceManager?.readyPromise) {
+          await window.MarketplaceManager.readyPromise;
+        }
 
         // LyricsService Extension을 통해 가사 로드 (LyricsAddonManager 사용)
         const resp = await window.LyricsService.getLyricsFromProviders(info);
@@ -5234,6 +5245,13 @@ class LyricsContainer extends react.Component {
 
     this.state.mode = mode;
 
+    // 마켓플레이스 표시 시 activeItem 오버라이드
+    if (this.state.showMarketplace && typeof MarketplacePage !== 'undefined') {
+      activeItem = react.createElement(MarketplacePage, {
+        onClose: () => this.setState({ showMarketplace: false })
+      });
+    }
+
     // Tab bar removed - modes are now auto-detected
     const topBarContent = null;
 
@@ -5475,6 +5493,31 @@ class LyricsContainer extends react.Component {
                 Spicetify.Player.data?.item?.album?.images?.[0]?.url || '',
             },
           }),
+          // 마켓플레이스 버튼
+          react.createElement(
+            Spicetify.ReactComponent.TooltipWrapper,
+            { label: I18n.t("marketplace.title") },
+            react.createElement(
+              "button",
+              {
+                className: `lyrics-config-button lyrics-marketplace-button${this.state.showMarketplace ? " active" : ""}`,
+                onClick: () => this.setState({ showMarketplace: !this.state.showMarketplace }),
+              },
+              react.createElement("svg", {
+                width: 18,
+                height: 18,
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: 2,
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                dangerouslySetInnerHTML: {
+                  __html: '<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 01-8 0"></path>',
+                },
+              })
+            )
+          ),
           react.createElement(SettingsMenu),
           // 전체화면 토글 버튼
           (() => !document.getElementById("fad-ivLyrics-container"))() && react.createElement(

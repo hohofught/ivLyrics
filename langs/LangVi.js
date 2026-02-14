@@ -1735,5 +1735,31 @@ window.LANG_VI = {
     "importSuccess": "Đã nhập dữ liệu đồng bộ",
     "importError": "Nhập thất bại",
     "importDifferentTrack": "Đây là dữ liệu đồng bộ của bài hát khác. Vẫn muốn nhập?"
+  },
+  "marketplace": {
+    "title": "Cửa hàng Addon",
+    "search": "Tìm kiếm addon...",
+    "filterAll": "Tất cả",
+    "filterLyrics": "Lời bài hát",
+    "filterAI": "AI",
+    "install": "Cài đặt",
+    "uninstall": "Gỡ cài đặt",
+    "update": "Cập nhật",
+    "installed": "Đã cài đặt",
+    "installing": "Đang cài đặt...",
+    "uninstalling": "Đang gỡ cài đặt...",
+    "updateAvailable": "Có bản cập nhật",
+    "by": "bởi {author}",
+    "updated": "Cập nhật {date}",
+    "version": "v{version}",
+    "noAddons": "Không có addon nào",
+    "loadError": "Không thể tải danh sách addon",
+    "installSuccess": "Đã cài đặt {name} thành công",
+    "installError": "Cài đặt addon thất bại",
+    "uninstallSuccess": "Đã gỡ cài đặt {name}",
+    "uninstallConfirm": "Bạn có chắc muốn gỡ cài đặt {name}?",
+    "backToLyrics": "Quay lại",
+    "retry": "Thử lại",
+    "addonDetail": "Chi tiết Addon"
   }
 };

@@ -1743,5 +1743,31 @@ window.LANG_KO = {
     "importSuccess": "싱크 데이터를 불러왔습니다",
     "importError": "불러오기 실패",
     "importDifferentTrack": "다른 트랙의 싱크 데이터입니다. 그래도 불러오시겠습니까?"
+  },
+  "marketplace": {
+    "title": "에드온 마켓플레이스",
+    "search": "에드온 검색...",
+    "filterAll": "전체",
+    "filterLyrics": "가사",
+    "filterAI": "AI",
+    "install": "설치",
+    "uninstall": "제거",
+    "update": "업데이트",
+    "installed": "설치됨",
+    "installing": "설치 중...",
+    "uninstalling": "제거 중...",
+    "updateAvailable": "업데이트 가능",
+    "by": "{author}",
+    "updated": "{date} 업데이트",
+    "version": "v{version}",
+    "noAddons": "사용 가능한 에드온이 없습니다",
+    "loadError": "에드온 목록을 불러오지 못했습니다",
+    "installSuccess": "{name} 설치 완료",
+    "installError": "에드온 설치에 실패했습니다",
+    "uninstallSuccess": "{name} 제거 완료",
+    "uninstallConfirm": "{name}을(를) 제거하시겠습니까?",
+    "backToLyrics": "돌아가기",
+    "retry": "재시도",
+    "addonDetail": "에드온 상세"
   }
 };

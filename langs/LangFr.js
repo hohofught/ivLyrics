@@ -1735,5 +1735,31 @@ window.LANG_FR = {
     "importSuccess": "Données de sync importées",
     "importError": "Échec de l'importation",
     "importDifferentTrack": "Ces données de sync proviennent d'une autre piste. Voulez-vous importer quand même?"
+  },
+  "marketplace": {
+    "title": "Boutique d'extensions",
+    "search": "Rechercher des extensions...",
+    "filterAll": "Tout",
+    "filterLyrics": "Paroles",
+    "filterAI": "IA",
+    "install": "Installer",
+    "uninstall": "Désinstaller",
+    "update": "Mettre à jour",
+    "installed": "Installé",
+    "installing": "Installation...",
+    "uninstalling": "Désinstallation...",
+    "updateAvailable": "Mise à jour disponible",
+    "by": "par {author}",
+    "updated": "Mis à jour {date}",
+    "version": "v{version}",
+    "noAddons": "Aucune extension disponible",
+    "loadError": "Échec du chargement de la liste des extensions",
+    "installSuccess": "{name} installé avec succès",
+    "installError": "Échec de l'installation de l'extension",
+    "uninstallSuccess": "{name} désinstallé",
+    "uninstallConfirm": "Êtes-vous sûr de vouloir désinstaller {name} ?",
+    "backToLyrics": "Retour",
+    "retry": "Réessayer",
+    "addonDetail": "Détails de l'extension"
   }
 };

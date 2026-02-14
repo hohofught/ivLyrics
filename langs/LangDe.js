@@ -1734,5 +1734,31 @@ window.LANG_DE = {
     "importSuccess": "Sync-Daten importiert",
     "importError": "Import fehlgeschlagen",
     "importDifferentTrack": "Dies sind Sync-Daten eines anderen Titels. Trotzdem importieren?"
+  },
+  "marketplace": {
+    "title": "Addon-Marktplatz",
+    "search": "Addons suchen...",
+    "filterAll": "Alle",
+    "filterLyrics": "Texte",
+    "filterAI": "KI",
+    "install": "Installieren",
+    "uninstall": "Deinstallieren",
+    "update": "Aktualisieren",
+    "installed": "Installiert",
+    "installing": "Wird installiert...",
+    "uninstalling": "Wird deinstalliert...",
+    "updateAvailable": "Update verfügbar",
+    "by": "von {author}",
+    "updated": "Aktualisiert {date}",
+    "version": "v{version}",
+    "noAddons": "Keine Addons verfügbar",
+    "loadError": "Addon-Liste konnte nicht geladen werden",
+    "installSuccess": "{name} erfolgreich installiert",
+    "installError": "Addon-Installation fehlgeschlagen",
+    "uninstallSuccess": "{name} deinstalliert",
+    "uninstallConfirm": "Möchten Sie {name} wirklich deinstallieren?",
+    "backToLyrics": "Zurück",
+    "retry": "Erneut versuchen",
+    "addonDetail": "Addon-Details"
   }
 };

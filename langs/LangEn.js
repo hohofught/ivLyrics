@@ -1743,5 +1743,31 @@ window.LANG_EN = {
     "importSuccess": "Sync data imported",
     "importError": "Import failed",
     "importDifferentTrack": "This sync data is from a different track. Do you want to import anyway?"
+  },
+  "marketplace": {
+    "title": "Addon Marketplace",
+    "search": "Search addons...",
+    "filterAll": "All",
+    "filterLyrics": "Lyrics",
+    "filterAI": "AI",
+    "install": "Install",
+    "uninstall": "Uninstall",
+    "update": "Update",
+    "installed": "Installed",
+    "installing": "Installing...",
+    "uninstalling": "Uninstalling...",
+    "updateAvailable": "Update Available",
+    "by": "by {author}",
+    "updated": "Updated {date}",
+    "version": "v{version}",
+    "noAddons": "No addons available",
+    "loadError": "Failed to load addon list",
+    "installSuccess": "{name} installed successfully",
+    "installError": "Failed to install addon",
+    "uninstallSuccess": "{name} uninstalled",
+    "uninstallConfirm": "Are you sure you want to uninstall {name}?",
+    "backToLyrics": "Back",
+    "retry": "Retry",
+    "addonDetail": "Addon Details"
   }
 };

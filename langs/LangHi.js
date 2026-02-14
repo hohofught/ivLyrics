@@ -1734,5 +1734,31 @@ window.LANG_HI = {
     "importSuccess": "सिंक डेटा आयात किया गया",
     "importError": "आयात विफल",
     "importDifferentTrack": "यह दूसरे ट्रैक का सिंक डेटा है। क्या फिर भी आयात करना चाहते हैं?"
+  },
+  "marketplace": {
+    "title": "ऐडऑन मार्केटप्लेस",
+    "search": "ऐडऑन खोजें...",
+    "filterAll": "सभी",
+    "filterLyrics": "गीत",
+    "filterAI": "AI",
+    "install": "इंस्टॉल करें",
+    "uninstall": "अनइंस्टॉल करें",
+    "update": "अपडेट करें",
+    "installed": "इंस्टॉल किया गया",
+    "installing": "इंस्टॉल हो रहा है...",
+    "uninstalling": "अनइंस्टॉल हो रहा है...",
+    "updateAvailable": "अपडेट उपलब्ध",
+    "by": "{author} द्वारा",
+    "updated": "{date} को अपडेट किया",
+    "version": "v{version}",
+    "noAddons": "कोई ऐडऑन उपलब्ध नहीं",
+    "loadError": "ऐडऑन सूची लोड करने में विफल",
+    "installSuccess": "{name} सफलतापूर्वक इंस्टॉल किया गया",
+    "installError": "ऐडऑन इंस्टॉल करने में विफल",
+    "uninstallSuccess": "{name} अनइंस्टॉल किया गया",
+    "uninstallConfirm": "क्या आप वाकई {name} को अनइंस्टॉल करना चाहते हैं?",
+    "backToLyrics": "वापस",
+    "retry": "पुनः प्रयास",
+    "addonDetail": "ऐडऑन विवरण"
   }
 };
