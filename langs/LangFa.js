@@ -1759,6 +1759,11 @@ window.LANG_FA = {
     "uninstallConfirm": "آیا مطمئنید که می‌خواهید {name} را حذف کنید؟",
     "backToLyrics": "بازگشت",
     "retry": "تلاش مجدد",
-    "addonDetail": "جزئیات افزونه"
+    "addonDetail": "جزئیات افزونه",
+    "addonCount": "{count} افزونه",
+    "developerAddons": "افزونه‌های این توسعه‌دهنده",
+    "developer": "توسعه‌دهنده",
+    "moreByDeveloper": "موارد بیشتر از این توسعه‌دهنده",
+    "popular": "محبوب"
   }
 };

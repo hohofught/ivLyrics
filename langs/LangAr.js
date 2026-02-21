@@ -1759,6 +1759,11 @@ window.LANG_AR = {
     "uninstallConfirm": "هل أنت متأكد من إزالة {name}؟",
     "backToLyrics": "رجوع",
     "retry": "إعادة المحاولة",
-    "addonDetail": "تفاصيل الإضافة"
+    "addonDetail": "تفاصيل الإضافة",
+    "addonCount": "{count} إضافة",
+    "developerAddons": "إضافات هذا المطور",
+    "developer": "المطور",
+    "moreByDeveloper": "المزيد من هذا المطور",
+    "popular": "شائع"
   }
 };

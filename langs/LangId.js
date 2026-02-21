@@ -1759,6 +1759,11 @@ window.LANG_ID = {
     "uninstallConfirm": "Apakah Anda yakin ingin menghapus {name}?",
     "backToLyrics": "Kembali",
     "retry": "Coba lagi",
-    "addonDetail": "Detail Addon"
+    "addonDetail": "Detail Addon",
+    "addonCount": "{count} addon",
+    "developerAddons": "Addon oleh pengembang ini",
+    "developer": "Pengembang",
+    "moreByDeveloper": "Lainnya dari pengembang ini",
+    "popular": "Populer"
   }
 };

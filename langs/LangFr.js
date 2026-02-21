@@ -1760,6 +1760,11 @@ window.LANG_FR = {
     "uninstallConfirm": "Êtes-vous sûr de vouloir désinstaller {name} ?",
     "backToLyrics": "Retour",
     "retry": "Réessayer",
-    "addonDetail": "Détails de l'extension"
+    "addonDetail": "Détails de l'extension",
+    "addonCount": "{count} extension(s)",
+    "developerAddons": "Extensions de ce développeur",
+    "developer": "Développeur",
+    "moreByDeveloper": "Plus de ce développeur",
+    "popular": "Populaire"
   }
 };

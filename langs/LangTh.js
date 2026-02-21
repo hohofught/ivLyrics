@@ -1760,6 +1760,11 @@ window.LANG_TH = {
     "uninstallConfirm": "คุณแน่ใจหรือไม่ว่าต้องการถอนการติดตั้ง {name}?",
     "backToLyrics": "กลับ",
     "retry": "ลองอีกครั้ง",
-    "addonDetail": "รายละเอียดส่วนเสริม"
+    "addonDetail": "รายละเอียดส่วนเสริม",
+    "addonCount": "{count} ส่วนเสริม",
+    "developerAddons": "ส่วนเสริมของผู้พัฒนานี้",
+    "developer": "ผู้พัฒนา",
+    "moreByDeveloper": "เพิ่มเติมจากผู้พัฒนานี้",
+    "popular": "ยอดนิยม"
   }
 };

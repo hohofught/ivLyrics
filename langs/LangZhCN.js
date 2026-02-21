@@ -1760,6 +1760,11 @@ window.LANG_ZH_CN = {
     "uninstallConfirm": "确定要卸载 {name} 吗？",
     "backToLyrics": "返回",
     "retry": "重试",
-    "addonDetail": "插件详情"
+    "addonDetail": "插件详情",
+    "addonCount": "{count} 个插件",
+    "developerAddons": "该开发者的插件",
+    "developer": "开发者",
+    "moreByDeveloper": "该开发者的更多插件",
+    "popular": "热门"
   }
 };

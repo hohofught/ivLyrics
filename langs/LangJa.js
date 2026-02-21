@@ -1760,6 +1760,11 @@ window.LANG_JA = {
     "uninstallConfirm": "{name} をアンインストールしますか？",
     "backToLyrics": "戻る",
     "retry": "再試行",
-    "addonDetail": "アドオン詳細"
+    "addonDetail": "アドオン詳細",
+    "addonCount": "アドオン {count}個",
+    "developerAddons": "この開発者のアドオン",
+    "developer": "開発者",
+    "moreByDeveloper": "この開発者の他のアドオン",
+    "popular": "人気"
   }
 };

@@ -1759,6 +1759,11 @@ window.LANG_HI = {
     "uninstallConfirm": "क्या आप वाकई {name} को अनइंस्टॉल करना चाहते हैं?",
     "backToLyrics": "वापस",
     "retry": "पुनः प्रयास",
-    "addonDetail": "ऐडऑन विवरण"
+    "addonDetail": "ऐडऑन विवरण",
+    "addonCount": "{count} ऐडऑन",
+    "developerAddons": "इस डेवलपर के ऐडऑन",
+    "developer": "डेवलपर",
+    "moreByDeveloper": "इस डेवलपर के और ऐडऑन",
+    "popular": "लोकप्रिय"
   }
 };

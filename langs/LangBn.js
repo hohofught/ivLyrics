@@ -1760,6 +1760,11 @@ window.LANG_BN = {
     "uninstallConfirm": "আপনি কি নিশ্চিত যে আপনি {name} আনইনস্টল করতে চান?",
     "backToLyrics": "ফিরে যান",
     "retry": "পুনরায় চেষ্টা",
-    "addonDetail": "অ্যাডঅন বিবরণ"
+    "addonDetail": "অ্যাডঅন বিবরণ",
+    "addonCount": "{count}টি অ্যাডঅন",
+    "developerAddons": "এই ডেভেলপারের অ্যাডঅন",
+    "developer": "ডেভেলপার",
+    "moreByDeveloper": "এই ডেভেলপারের আরও অ্যাডঅন",
+    "popular": "জনপ্রিয়"
   }
 };

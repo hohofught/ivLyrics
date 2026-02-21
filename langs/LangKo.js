@@ -1768,6 +1768,11 @@ window.LANG_KO = {
     "uninstallConfirm": "{name}을(를) 제거하시겠습니까?",
     "backToLyrics": "돌아가기",
     "retry": "재시도",
-    "addonDetail": "에드온 상세"
+    "addonDetail": "에드온 상세",
+    "addonCount": "에드온 {count}개",
+    "developerAddons": "이 개발자의 에드온",
+    "developer": "개발자",
+    "moreByDeveloper": "이 개발자의 다른 에드온",
+    "popular": "인기 에드온"
   }
 };

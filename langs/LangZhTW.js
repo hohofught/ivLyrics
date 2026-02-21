@@ -1760,6 +1760,11 @@ window.LANG_ZH_TW = {
     "uninstallConfirm": "確定要解除安裝 {name} 嗎？",
     "backToLyrics": "返回",
     "retry": "重試",
-    "addonDetail": "外掛詳情"
+    "addonDetail": "外掛詳情",
+    "addonCount": "{count} 個外掛",
+    "developerAddons": "這位開發者的外掛",
+    "developer": "開發者",
+    "moreByDeveloper": "更多來自這位開發者的外掛",
+    "popular": "熱門"
   }
 };

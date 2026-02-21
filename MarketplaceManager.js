@@ -25,7 +25,7 @@
     const STORAGE_PREFIX = 'ivLyrics:marketplace:';
     const FETCH_TIMEOUT = 15000;
     const GITHUB_TOPIC = 'ivlyrics-addon';
-    const GITHUB_SEARCH_URL = `https://api.github.com/search/repositories?q=topic:${encodeURIComponent(GITHUB_TOPIC)}&per_page=100&sort=updated&order=desc`;
+    const GITHUB_SEARCH_URL = `https://api.github.com/search/repositories?q=topic:${encodeURIComponent(GITHUB_TOPIC)}&per_page=100&sort=stars&order=desc`;
     const BLACKLIST_URL_LOCAL = 'blacklist.json';
     const BLACKLIST_URL_REMOTE = 'https://raw.githubusercontent.com/ivLis-Studio/ivLyrics/refs/heads/main/blacklist.json';
 
@@ -302,19 +302,25 @@
             const owner = repo?.owner?.login || '';
             const repoName = repo?.name || '';
             const baseId = this._normalizeRepoId(owner, repoName);
-            const id = baseId;
             const type = String(manifestAddon.type || '').toLowerCase();
 
             if (!manifestAddon.name || !manifestAddon.downloadUrl) return null;
             if (type !== 'lyrics' && type !== 'ai') return null;
 
+            // Generate unique ID per addon by slugifying the addon name
+            const addonSlug = manifestAddon.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            const id = `${baseId}/${addonSlug}`;
+
             const description = manifestAddon.description || repo.description || '';
+            const ownerAvatarUrl = repo?.owner?.avatar_url || '';
 
             return {
                 id,
                 name: manifestAddon.name,
                 type,
                 author: manifestAddon.author || owner || baseId,
+                authorLogin: owner,
+                authorAvatar: ownerAvatarUrl,
                 version: manifestAddon.version || '0.0.0',
                 updated: manifestAddon.updated || '',
                 description,
@@ -322,7 +328,8 @@
                 preview: manifestAddon.preview || '',
                 downloadUrl: manifestAddon.downloadUrl,
                 minAppVersion: manifestAddon.minAppVersion || '',
-                sourceRepo: baseId
+                sourceRepo: baseId,
+                stars: repo?.stargazers_count || 0
             };
         }
 
@@ -346,12 +353,13 @@
                     return [];
                 }
 
+                const results = [];
                 for (const manifestAddon of data.addons) {
                     const addon = this._manifestAddonToMarketplaceAddon(manifestAddon, repo);
-                    if (addon) return [addon];
+                    if (addon) results.push(addon);
                 }
 
-                return [];
+                return results;
             } catch {
                 return [];
             } finally {
@@ -471,6 +479,9 @@
                             this._compareVersions(addon.version, this._installedAddons.get(addon.id)?.metadata?.version) > 0
                     });
                 }
+
+                // Sort by stars descending
+                addons.sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
                 this._addonListCache = {
                     version: 2,

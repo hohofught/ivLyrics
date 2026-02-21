@@ -1768,6 +1768,11 @@ window.LANG_EN = {
     "uninstallConfirm": "Are you sure you want to uninstall {name}?",
     "backToLyrics": "Back",
     "retry": "Retry",
-    "addonDetail": "Addon Details"
+    "addonDetail": "Addon Details",
+    "addonCount": "{count} addon(s)",
+    "developerAddons": "Addons by this developer",
+    "developer": "Developer",
+    "moreByDeveloper": "More by this developer",
+    "popular": "Popular"
   }
 };

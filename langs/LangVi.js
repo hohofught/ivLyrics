@@ -1760,6 +1760,11 @@ window.LANG_VI = {
     "uninstallConfirm": "Bạn có chắc muốn gỡ cài đặt {name}?",
     "backToLyrics": "Quay lại",
     "retry": "Thử lại",
-    "addonDetail": "Chi tiết Addon"
+    "addonDetail": "Chi tiết Addon",
+    "addonCount": "{count} addon",
+    "developerAddons": "Addon của nhà phát triển này",
+    "developer": "Nhà phát triển",
+    "moreByDeveloper": "Thêm từ nhà phát triển này",
+    "popular": "Phổ biến"
   }
 };

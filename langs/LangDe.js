@@ -1759,6 +1759,11 @@ window.LANG_DE = {
     "uninstallConfirm": "Möchten Sie {name} wirklich deinstallieren?",
     "backToLyrics": "Zurück",
     "retry": "Erneut versuchen",
-    "addonDetail": "Addon-Details"
+    "addonDetail": "Addon-Details",
+    "addonCount": "{count} Add-ons",
+    "developerAddons": "Add-ons dieses Entwicklers",
+    "developer": "Entwickler",
+    "moreByDeveloper": "Mehr von diesem Entwickler",
+    "popular": "Beliebt"
   }
 };

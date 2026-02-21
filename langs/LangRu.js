@@ -1760,6 +1760,11 @@ window.LANG_RU = {
     "uninstallConfirm": "Вы уверены, что хотите удалить {name}?",
     "backToLyrics": "Назад",
     "retry": "Повторить",
-    "addonDetail": "Подробности дополнения"
+    "addonDetail": "Подробности дополнения",
+    "addonCount": "{count} дополнений",
+    "developerAddons": "Дополнения этого разработчика",
+    "developer": "Разработчик",
+    "moreByDeveloper": "Другие от этого разработчика",
+    "popular": "Популярное"
   }
 };
