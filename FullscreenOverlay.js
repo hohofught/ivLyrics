@@ -675,10 +675,20 @@ const FullscreenOverlay = (() => {
         useEffect(() => {
             if (!show || !isFullscreen) return;
 
-            const updateQueue = () => {
+            const updateQueue = (queueData = null) => {
                 try {
-                    const queue = Spicetify.Queue;
                     const playerData = Spicetify.Player.data;
+                    const currentContextUri =
+                        playerData?.context?.uri ||
+                        playerData?.item?.metadata?.context_uri ||
+                        "";
+                    const queueState = queueData?.data || Spicetify.Queue || {};
+                    const hasModernQueueShape =
+                        Array.isArray(queueState?.queued) || Array.isArray(queueState?.nextUp);
+                    const nextSource = hasModernQueueShape
+                        ? [...(queueState.queued || []), ...(queueState.nextUp || [])]
+                        : (queueState.nextTracks || []);
+                    const prevSource = queueState.prevTracks || Spicetify.Queue?.prevTracks || [];
 
                     // 현재 재생 중인 곡
                     if (playerData?.item) {
@@ -692,10 +702,10 @@ const FullscreenOverlay = (() => {
                     }
 
                     // 다음 곡들 (최대 15곡) - Unknown 트랙 이후 필터링
-                    if (queue?.nextTracks?.length > 0) {
+                    if (nextSource.length > 0) {
                         // Unknown 트랙의 인덱스 찾기 (컨텍스트 끝 마커)
-                        const unknownIndex = queue.nextTracks.findIndex(track => {
-                            const meta = track?.contextTrack?.metadata || {};
+                        const unknownIndex = nextSource.findIndex(track => {
+                            const meta = track?.contextTrack?.metadata || track?.metadata || {};
                             const title = meta.title || '';
                             const artist = meta.artist_name || '';
                             // Unknown 트랙 감지: 제목과 아티스트 모두 Unknown이거나 비어있는 경우
@@ -706,16 +716,19 @@ const FullscreenOverlay = (() => {
 
                         // Unknown 트랙이 있으면 그 이전까지만, 없으면 전체
                         const tracksToShow = unknownIndex >= 0
-                            ? queue.nextTracks.slice(0, unknownIndex)
-                            : queue.nextTracks;
+                            ? nextSource.slice(0, unknownIndex)
+                            : nextSource;
 
                         const next = tracksToShow.slice(0, 15).map((track, index) => {
-                            const meta = track.contextTrack?.metadata || {};
+                            const contextTrack = track?.contextTrack || track || {};
+                            const meta = contextTrack.metadata || track?.metadata || {};
                             return {
                                 title: meta.title || "Unknown",
                                 artist: meta.artist_name || "Unknown",
                                 image: meta.image_url || "",
-                                uri: track.contextTrack?.uri || "",
+                                uri: contextTrack.uri || track?.uri || "",
+                                uid: contextTrack.uid || track?.uid || "",
+                                contextUri: currentContextUri || meta.context_uri || "",
                                 index: index + 1
                             };
                         });
@@ -725,14 +738,17 @@ const FullscreenOverlay = (() => {
                     }
 
                     // 최근 재생 곡들 (이전 곡 기록)
-                    if (queue?.prevTracks?.length > 0) {
-                        const prev = queue.prevTracks.slice(-10).reverse().map((track, index) => {
-                            const meta = track.contextTrack?.metadata || {};
+                    if (prevSource.length > 0) {
+                        const prev = prevSource.slice(-10).reverse().map((track, index) => {
+                            const contextTrack = track?.contextTrack || track || {};
+                            const meta = contextTrack.metadata || track?.metadata || {};
                             return {
                                 title: meta.title || "Unknown",
                                 artist: meta.artist_name || "Unknown",
                                 image: meta.image_url || "",
-                                uri: track.contextTrack?.uri || "",
+                                uri: contextTrack.uri || track?.uri || "",
+                                uid: contextTrack.uid || track?.uid || "",
+                                contextUri: currentContextUri || meta.context_uri || "",
                                 index: index + 1
                             };
                         });
@@ -752,23 +768,55 @@ const FullscreenOverlay = (() => {
             // 곡 변경 이벤트 리스너 (주요 업데이트 트리거)
             const songChangeHandler = () => updateQueue();
             Spicetify.Player.addEventListener("songchange", songChangeHandler);
+            const queueUpdateHandler = (payload) => updateQueue(payload);
+            Spicetify.Player.origin?._events?.addListener?.("queue_update", queueUpdateHandler);
 
             return () => {
                 clearInterval(interval);
                 Spicetify.Player.removeEventListener("songchange", songChangeHandler);
+                Spicetify.Player.origin?._events?.removeListener?.("queue_update", queueUpdateHandler);
             };
         }, [show, isFullscreen]);
 
         // 곡 클릭 시 재생
-        const handleTrackClick = useCallback((uri) => {
-            if (!uri) return;
+        const handleTrackClick = useCallback((track) => {
+            if (!track?.uri) return;
             try {
+                const selectedIndex = nextTracks.findIndex((t) =>
+                    (track.uid && t.uid === track.uid) || t.uri === track.uri
+                );
+                if (selectedIndex >= 0) {
+                    const selected = nextTracks[selectedIndex];
+                    setCurrentTrack({
+                        title: selected.title || "Unknown",
+                        artist: selected.artist || "Unknown",
+                        image: selected.image || "",
+                        uri: selected.uri
+                    });
+                    setNextTracks(nextTracks.slice(selectedIndex + 1));
+                }
                 // URI로 직접 재생 (불필요한 스킵 요청 방지)
-                Spicetify.Player.playUri(uri);
+                const currentContextUri =
+                    Spicetify.Player.data?.context?.uri ||
+                    Spicetify.Player.data?.item?.metadata?.context_uri ||
+                    "";
+                const contextUri = currentContextUri || track.contextUri;
+                const canKeepContext = contextUri && contextUri !== track.uri;
+
+                if (canKeepContext) {
+                    const options = { skipTo: { uri: track.uri } };
+                    if (track.uid) {
+                        options.skipTo.uid = track.uid;
+                    }
+                    Spicetify.Player.playUri(contextUri, {}, options);
+                    return;
+                }
+
+                Spicetify.Player.playUri(track.uri);
             } catch (e) {
                 console.warn('[FullscreenOverlay] Failed to play track:', e);
             }
-        }, []);
+        }, [nextTracks]);
 
         if (!show || !isFullscreen) return null;
 
@@ -820,7 +868,7 @@ const FullscreenOverlay = (() => {
                                     react.createElement("div", {
                                         key: `next-${idx}`,
                                         className: "fullscreen-queue-item",
-                                        onClick: () => handleTrackClick(track.uri)
+                                        onClick: () => handleTrackClick(track)
                                     },
                                         track.image && react.createElement("img", {
                                             src: track.image,
@@ -846,7 +894,7 @@ const FullscreenOverlay = (() => {
                                 react.createElement("div", {
                                     key: `recent-${idx}`,
                                     className: "fullscreen-queue-item",
-                                    onClick: () => handleTrackClick(track.uri)
+                                    onClick: () => handleTrackClick(track)
                                 },
                                     track.image && react.createElement("img", {
                                         src: track.image,
