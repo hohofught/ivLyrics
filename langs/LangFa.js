@@ -1741,6 +1741,7 @@ window.LANG_FA = {
     "filterAll": "همه",
     "filterLyrics": "متن آهنگ",
     "filterAI": "هوش مصنوعی",
+    "filterStyle": "استایل",
     "install": "نصب",
     "uninstall": "حذف",
     "update": "به‌روزرسانی",

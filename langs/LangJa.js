@@ -1742,6 +1742,7 @@ window.LANG_JA = {
     "filterAll": "すべて",
     "filterLyrics": "歌詞",
     "filterAI": "AI",
+    "filterStyle": "スタイル",
     "install": "インストール",
     "uninstall": "アンインストール",
     "update": "アップデート",

@@ -1750,6 +1750,7 @@ window.LANG_EN = {
     "filterAll": "All",
     "filterLyrics": "Lyrics",
     "filterAI": "AI",
+    "filterStyle": "Style",
     "install": "Install",
     "uninstall": "Uninstall",
     "update": "Update",

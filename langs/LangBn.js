@@ -1742,6 +1742,7 @@ window.LANG_BN = {
     "filterAll": "সব",
     "filterLyrics": "গানের কথা",
     "filterAI": "AI",
+    "filterStyle": "স্টাইল",
     "install": "ইনস্টল করুন",
     "uninstall": "আনইনস্টল করুন",
     "update": "আপডেট করুন",

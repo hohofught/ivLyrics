@@ -1742,6 +1742,7 @@ window.LANG_IT = {
     "filterAll": "Tutti",
     "filterLyrics": "Testi",
     "filterAI": "IA",
+    "filterStyle": "Stile",
     "install": "Installa",
     "uninstall": "Disinstalla",
     "update": "Aggiorna",

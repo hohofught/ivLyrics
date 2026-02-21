@@ -1750,6 +1750,7 @@ window.LANG_KO = {
     "filterAll": "전체",
     "filterLyrics": "가사",
     "filterAI": "AI",
+    "filterStyle": "스타일",
     "install": "설치",
     "uninstall": "제거",
     "update": "업데이트",

@@ -1742,6 +1742,7 @@ window.LANG_FR = {
     "filterAll": "Tout",
     "filterLyrics": "Paroles",
     "filterAI": "IA",
+    "filterStyle": "Style",
     "install": "Installer",
     "uninstall": "Désinstaller",
     "update": "Mettre à jour",

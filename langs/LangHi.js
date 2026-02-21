@@ -1741,6 +1741,7 @@ window.LANG_HI = {
     "filterAll": "सभी",
     "filterLyrics": "गीत",
     "filterAI": "AI",
+    "filterStyle": "स्टाइल",
     "install": "इंस्टॉल करें",
     "uninstall": "अनइंस्टॉल करें",
     "update": "अपडेट करें",

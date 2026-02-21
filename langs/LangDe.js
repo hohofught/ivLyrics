@@ -1741,6 +1741,7 @@ window.LANG_DE = {
     "filterAll": "Alle",
     "filterLyrics": "Texte",
     "filterAI": "KI",
+    "filterStyle": "Stil",
     "install": "Installieren",
     "uninstall": "Deinstallieren",
     "update": "Aktualisieren",

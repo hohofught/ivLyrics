@@ -1742,6 +1742,7 @@ window.LANG_VI = {
     "filterAll": "Tất cả",
     "filterLyrics": "Lời bài hát",
     "filterAI": "AI",
+    "filterStyle": "Phong cách",
     "install": "Cài đặt",
     "uninstall": "Gỡ cài đặt",
     "update": "Cập nhật",

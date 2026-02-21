@@ -17,6 +17,7 @@ const MarketplacePage = (() => {
     const FILTER_ALL = 'all';
     const FILTER_LYRICS = 'lyrics';
     const FILTER_AI = 'ai';
+    const FILTER_STYLE = 'style';
 
     // ============================================
     // Markdown Renderer
@@ -196,6 +197,18 @@ const MarketplacePage = (() => {
         return String(count);
     }
 
+    function tWithFallback(key, fallbackValue) {
+        const value = I18n.t(key);
+        return value === key ? fallbackValue : value;
+    }
+
+    function getAddonTypeLabel(type) {
+        if (type === 'lyrics') return tWithFallback('marketplace.filterLyrics', 'Lyrics');
+        if (type === 'ai') return tWithFallback('marketplace.filterAI', 'AI');
+        if (type === 'style') return tWithFallback('marketplace.filterStyle', 'Style');
+        return String(type || '').toUpperCase();
+    }
+
     // ============================================
     // AddonCard Component
     // ============================================
@@ -251,12 +264,12 @@ const MarketplacePage = (() => {
                 react.createElement('div', { className: 'ivlyrics-marketplace-card-meta' },
                     react.createElement('span', { className: 'ivlyrics-marketplace-card-version' },
                         I18n.t('marketplace.version', { version: addon.version })
-                    ),
-                    addon.type && react.createElement('span', {
-                        className: `ivlyrics-marketplace-card-type ivlyrics-marketplace-card-type-${addon.type}`
-                    }, addon.type === 'lyrics' ? 'Lyrics' : 'AI')
+                    )
                 )
             ),
+            addon.type && react.createElement('div', {
+                className: `ivlyrics-marketplace-card-type ivlyrics-marketplace-card-type-${addon.type} ivlyrics-marketplace-card-type-overlay`
+            }, getAddonTypeLabel(addon.type)),
             // Star Count (top-right)
             react.createElement('div', { className: 'ivlyrics-marketplace-stars' },
                 react.createElement('svg', {
@@ -570,7 +583,7 @@ const MarketplacePage = (() => {
                         ),
                         addon.type && react.createElement('span', {
                             className: `ivlyrics-marketplace-card-type ivlyrics-marketplace-card-type-${addon.type}`
-                        }, addon.type === 'lyrics' ? 'Lyrics' : 'AI'),
+                        }, getAddonTypeLabel(addon.type)),
                         react.createElement('span', { className: 'ivlyrics-marketplace-detail-stars' },
                             react.createElement('svg', {
                                 width: 14, height: 14, viewBox: '0 0 24 24',
@@ -912,6 +925,7 @@ const MarketplacePage = (() => {
                             { key: FILTER_ALL, label: I18n.t('marketplace.filterAll') },
                             { key: FILTER_LYRICS, label: I18n.t('marketplace.filterLyrics') },
                             { key: FILTER_AI, label: I18n.t('marketplace.filterAI') },
+                            { key: FILTER_STYLE, label: getAddonTypeLabel(FILTER_STYLE) },
                         ].map(tab =>
                             react.createElement('button', {
                                 key: tab.key,

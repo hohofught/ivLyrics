@@ -41,7 +41,7 @@
             this._addonListCacheTTL = 5 * 60 * 1000; // 5분 캐시
             this._blacklistCache = null;
             this._installedAddons = new Map(); // id -> { metadata, code }
-            this._loadedScripts = new Map(); // id -> script element
+            this._loadedScripts = new Map(); // id -> loaded script/style element
             this._events = new Map();
             this._onceEvents = new Map();
 
@@ -237,6 +237,24 @@
         _executeAddonCode(addon) {
             return new Promise((resolve, reject) => {
                 try {
+                    const type = String(addon?.metadata?.type || '').toLowerCase();
+
+                    if (type === 'style') {
+                        const style = document.createElement('style');
+                        style.dataset.marketplaceAddon = addon.id;
+                        style.textContent = addon.code || '';
+                        document.head.appendChild(style);
+                        this._loadedScripts.set(addon.id, style);
+                        console.log(`[MarketplaceManager] Loaded style addon: ${addon.id}`);
+                        resolve();
+                        return;
+                    }
+
+                    if (type !== 'lyrics' && type !== 'ai') {
+                        reject(new Error(`Unsupported addon type: ${type || 'unknown'}`));
+                        return;
+                    }
+
                     const blob = new Blob([addon.code], { type: 'text/javascript' });
                     const url = URL.createObjectURL(blob);
                     const script = document.createElement('script');
@@ -305,7 +323,7 @@
             const type = String(manifestAddon.type || '').toLowerCase();
 
             if (!manifestAddon.name || !manifestAddon.downloadUrl) return null;
-            if (type !== 'lyrics' && type !== 'ai') return null;
+            if (type !== 'lyrics' && type !== 'ai' && type !== 'style') return null;
 
             // Generate unique ID per addon by slugifying the addon name
             const addonSlug = manifestAddon.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -596,9 +614,9 @@
                 await this._dbDelete(addonId);
 
                 // 스크립트 태그 제거
-                const script = this._loadedScripts.get(addonId);
-                if (script) {
-                    script.remove();
+                const loadedElement = this._loadedScripts.get(addonId);
+                if (loadedElement) {
+                    loadedElement.remove();
                     this._loadedScripts.delete(addonId);
                 }
 
@@ -638,9 +656,9 @@
                 this.emit('addon:updating', { id });
 
                 // 기존 스크립트 제거
-                const oldScript = this._loadedScripts.get(id);
-                if (oldScript) {
-                    oldScript.remove();
+                const oldLoadedElement = this._loadedScripts.get(id);
+                if (oldLoadedElement) {
+                    oldLoadedElement.remove();
                     this._loadedScripts.delete(id);
                 }
 

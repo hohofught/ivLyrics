@@ -1741,6 +1741,7 @@ window.LANG_AR = {
     "filterAll": "الكل",
     "filterLyrics": "كلمات",
     "filterAI": "ذكاء اصطناعي",
+    "filterStyle": "النمط",
     "install": "تثبيت",
     "uninstall": "إزالة",
     "update": "تحديث",

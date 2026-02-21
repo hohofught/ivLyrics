@@ -1742,6 +1742,7 @@ window.LANG_ZH_TW = {
     "filterAll": "全部",
     "filterLyrics": "歌詞",
     "filterAI": "AI",
+    "filterStyle": "樣式",
     "install": "安裝",
     "uninstall": "解除安裝",
     "update": "更新",

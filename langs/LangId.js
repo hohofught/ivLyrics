@@ -1741,6 +1741,7 @@ window.LANG_ID = {
     "filterAll": "Semua",
     "filterLyrics": "Lirik",
     "filterAI": "AI",
+    "filterStyle": "Gaya",
     "install": "Pasang",
     "uninstall": "Hapus",
     "update": "Perbarui",

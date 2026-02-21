@@ -1742,6 +1742,7 @@ window.LANG_RU = {
     "filterAll": "Все",
     "filterLyrics": "Тексты",
     "filterAI": "ИИ",
+    "filterStyle": "Стиль",
     "install": "Установить",
     "uninstall": "Удалить",
     "update": "Обновить",

@@ -1742,6 +1742,7 @@ window.LANG_TH = {
     "filterAll": "ทั้งหมด",
     "filterLyrics": "เนื้อเพลง",
     "filterAI": "AI",
+    "filterStyle": "สไตล์",
     "install": "ติดตั้ง",
     "uninstall": "ถอนการติดตั้ง",
     "update": "อัปเดต",
