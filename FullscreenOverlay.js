@@ -897,6 +897,12 @@ const FullscreenOverlay = (() => {
         const [isPlaying, setIsPlaying] = useState(false);
         const [position, setPosition] = useState(0);
         const [duration, setDuration] = useState(0);
+        const [isPortraitViewport, setIsPortraitViewport] = useState(() => {
+            if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+                return false;
+            }
+            return window.matchMedia("(orientation: portrait)").matches;
+        });
         const hideTimerRef = useRef(null);
 
         // Track playback state for TV mode controls
@@ -984,6 +990,26 @@ const FullscreenOverlay = (() => {
         const tvShowAlbumName = CONFIG?.visual?.["fullscreen-tv-show-album-name"] !== false;
         const tvShowControls = CONFIG?.visual?.["fullscreen-tv-show-controls"] !== false;
         const tvShowProgress = CONFIG?.visual?.["fullscreen-tv-show-progress"] !== false;
+        const isLayoutReversed = CONFIG?.visual?.["fullscreen-layout-reverse"] === true;
+
+        useEffect(() => {
+            if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+
+            const media = window.matchMedia("(orientation: portrait)");
+            const handleChange = (event) => setIsPortraitViewport(!!event.matches);
+
+            setIsPortraitViewport(media.matches);
+
+            if (typeof media.addEventListener === "function") {
+                media.addEventListener("change", handleChange);
+                return () => media.removeEventListener("change", handleChange);
+            }
+
+            if (typeof media.addListener === "function") {
+                media.addListener(handleChange);
+                return () => media.removeListener(handleChange);
+            }
+        }, []);
 
         // Auto-hide UI on mouse inactivity
         useEffect(() => {
@@ -1089,10 +1115,27 @@ const FullscreenOverlay = (() => {
 
         if (!isFullscreen) return null;
 
+        const isPortraitFullscreen = isFullscreen && isPortraitViewport && !tvModeEnabled;
         const isTwoColumn = CONFIG?.visual?.["fullscreen-two-column"] !== false;
         const hideLeftPanel = !showAlbum && !showInfo && controlsPosition !== "left-panel";
         const showControlsInLeftPanel = controlsPosition === "left-panel" && showControls;
         const showControlsInBottom = controlsPosition === "bottom" && showControls;
+        const showContextInOverlay = !isPortraitFullscreen && showContext;
+        const showNextTrackInOverlay = !isPortraitFullscreen && showNextTrack;
+        const showQueueInOverlay = !isPortraitFullscreen && showQueue;
+        const showInfoInOverlay = !isPortraitFullscreen && showInfo;
+        const normalShowAlbumNameInOverlay = !isPortraitFullscreen && normalShowAlbumName;
+        const showClockInOverlay = showClock;
+        const clockSizeInOverlay = isPortraitFullscreen ? Math.min(clockSize, 32) : clockSize;
+        const leftPanelShowVolume = isPortraitFullscreen ? false : showVolume;
+        const leftPanelControlsBackground = isPortraitFullscreen ? false : controlsBackground;
+        const leftPanelControlButtonSize = isPortraitFullscreen ? Math.min(controlButtonSize, 32) : controlButtonSize;
+        const leftControlsClass = [
+            "fullscreen-left-controls",
+            !uiVisible ? "hidden" : "",
+            isPortraitFullscreen && controlsPosition === "left-panel" ? "boundary-dock" : "",
+            isPortraitFullscreen && controlsPosition === "left-panel" && isLayoutReversed ? "layout-reversed" : ""
+        ].filter(Boolean).join(" ");
 
         // In TV mode, hide the left panel (album/info shown at bottom-left instead)
         const hideLeftPanelForTvMode = tvModeEnabled;
@@ -1326,7 +1369,7 @@ const FullscreenOverlay = (() => {
             ) : react.createElement("div", {
                 className: `fullscreen-bottom-left ${!uiVisible ? 'hidden' : ''}`
             },
-                react.createElement(ContextInfo, { show: showContext, showImage: showContextImage })
+                react.createElement(ContextInfo, { show: showContextInOverlay, showImage: showContextImage })
             ),
             // Top-right: Clock & Next track
             react.createElement("div", {
@@ -1336,14 +1379,14 @@ const FullscreenOverlay = (() => {
                     className: `fullscreen-clock-wrapper ${!uiVisible ? 'hidden' : ''}`
                 },
                     react.createElement(Clock, {
-                        show: showClock,
+                        show: showClockInOverlay,
                         showSeconds: clockShowSeconds,
-                        size: clockSize
+                        size: clockSizeInOverlay
                     })
                 ),
                 // NextTrackPreview는 UI 숨김과 관계없이 항상 표시
                 react.createElement(NextTrackPreview, {
-                    show: showNextTrack,
+                    show: showNextTrackInOverlay,
                     secondsBeforeEnd: nextTrackSeconds
                 })
             ),
@@ -1437,7 +1480,7 @@ const FullscreenOverlay = (() => {
                             )
                         ),
                         // Track info with translated metadata support
-                        showInfo && react.createElement("div", { className: "lyrics-fullscreen-track-info" },
+                        showInfoInOverlay && react.createElement("div", { className: "lyrics-fullscreen-track-info" },
                             // Title (based on display mode)
                             react.createElement("div", { className: "lyrics-fullscreen-title-container" },
                                 (() => {
@@ -1609,7 +1652,7 @@ const FullscreenOverlay = (() => {
                                 })()
                             ),
                             // Album name (optional)
-                            normalShowAlbumName && react.createElement("div", {
+                            normalShowAlbumNameInOverlay && react.createElement("div", {
                                 className: "lyrics-fullscreen-album-name",
                                 style: { fontSize: `${Math.round(artistSize * 0.85)}px` }
                             },
@@ -1623,21 +1666,21 @@ const FullscreenOverlay = (() => {
                         ),
                         // Controls in left panel (under album)
                         showControlsInLeftPanel && react.createElement("div", {
-                            className: `fullscreen-left-controls ${!uiVisible ? 'hidden' : ''}`
+                            className: leftControlsClass
                         },
                             // Progress bar (독립적으로 표시)
                             showProgress && react.createElement(ProgressBar, { show: true }),
                             // Player controls
                             react.createElement(PlayerControls, {
                                 show: true,
-                                showVolume: showVolume,
-                                buttonSize: controlButtonSize,
-                                showBackground: controlsBackground
+                                showVolume: leftPanelShowVolume,
+                                buttonSize: leftPanelControlButtonSize,
+                                showBackground: leftPanelControlsBackground
                             })
                         ),
                         // Progress bar only (컨트롤 없이 진행바만 표시)
                         !showControls && showProgress && react.createElement("div", {
-                            className: `fullscreen-left-controls ${!uiVisible ? 'hidden' : ''}`
+                            className: leftControlsClass
                         },
                             react.createElement(ProgressBar, { show: true })
                         )
@@ -1673,7 +1716,7 @@ const FullscreenOverlay = (() => {
             ),
             // Queue panel (right side hover)
             react.createElement(QueuePanel, {
-                show: showQueue,
+                show: showQueueInOverlay,
                 isFullscreen: isFullscreen
             })
         );

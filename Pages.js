@@ -877,7 +877,16 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 		);
 	}
 
-	let offset = lyricContainerEle.current ? lyricContainerEle.current.clientHeight / 2 : 0;
+	let offset = 0;
+	if (lyricContainerEle.current) {
+		const container = lyricContainerEle.current;
+		const rawAnchorRatio = window.getComputedStyle(container).getPropertyValue("--ivfs-lyrics-anchor-ratio").trim();
+		const parsedAnchorRatio = Number.parseFloat(rawAnchorRatio);
+		const anchorRatio = Number.isFinite(parsedAnchorRatio)
+			? Math.min(0.95, Math.max(0.05, parsedAnchorRatio))
+			: 0.5;
+		offset = container.clientHeight * anchorRatio;
+	}
 	if (activeLineEle.current) {
 		offset += -(activeLineEle.current.offsetTop + activeLineEle.current.clientHeight / 2);
 	}
@@ -1279,6 +1288,31 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 	const activeLineRef = useRef(null);
 	const pageRef = useRef(null);
 	const scrollTimeout = useRef(null);
+	const lyricsId = useMemo(() => lyrics[0]?.text || "no-lyrics", [lyrics]);
+
+	const scrollToActiveLineAnchor = useCallback((behavior = "smooth") => {
+		const container = pageRef.current;
+		const activeLine = activeLineRef.current;
+		if (!container || !activeLine) return;
+
+		const rawAnchorRatio = window.getComputedStyle(container).getPropertyValue("--ivfs-lyrics-anchor-ratio").trim();
+		const parsedAnchorRatio = Number.parseFloat(rawAnchorRatio);
+		const anchorRatio = Number.isFinite(parsedAnchorRatio)
+			? Math.min(0.95, Math.max(0.05, parsedAnchorRatio))
+			: 0.5;
+
+		const containerHeight = container.clientHeight || 0;
+		const lineHeight = activeLine.clientHeight || activeLine.getBoundingClientRect().height || 0;
+		const targetTop = activeLine.offsetTop - (containerHeight * anchorRatio - lineHeight / 2);
+		const maxScrollTop = Math.max(0, container.scrollHeight - containerHeight);
+		const nextTop = Math.max(0, Math.min(targetTop, maxScrollTop));
+
+		if (typeof container.scrollTo === "function") {
+			container.scrollTo({ top: nextTop, behavior });
+			return;
+		}
+		container.scrollTop = nextTop;
+	}, []);
 
 	useEffect(() => {
 		const container = pageRef.current;
@@ -1346,8 +1380,6 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 
 	const intialScroll = useMemo(() => [false], [lyrics]);
 
-	const lyricsId = useMemo(() => lyrics[0]?.text || "no-lyrics", [lyrics]);
-
 	// Optimize active line calculation with memoization
 	const activeLineIndex = useMemo(() => {
 		for (let i = padded.length - 1; i >= 0; i--) {
@@ -1361,14 +1393,10 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 
 	useEffect(() => {
 		if (!isScrolling && activeLineRef.current && (!intialScroll[0] || isInViewport(activeLineRef.current))) {
-			activeLineRef.current.scrollIntoView({
-				behavior: "smooth",
-				block: "center",
-				inline: "nearest",
-			});
+			scrollToActiveLineAnchor(intialScroll[0] ? "smooth" : "auto");
 			intialScroll[0] = true;
 		}
-	}, [activeLineRef.current, isScrolling]);
+	}, [activeLineIndex, isScrolling, scrollToActiveLineAnchor]);
 
 	// 스크롤 모드 진입 시 현재 가사 위치로 이동
 	useEffect(() => {
@@ -1376,11 +1404,11 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 			// 렌더링 후 위치를 잡기 위해 약간의 지연
 			setTimeout(() => {
 				if (activeLineRef.current) {
-					activeLineRef.current.scrollIntoView({ block: "center", behavior: "auto" });
+					scrollToActiveLineAnchor("auto");
 				}
 			}, 0);
 		}
-	}, [isScrolling]);
+	}, [activeLineIndex, isScrolling, scrollToActiveLineAnchor]);
 
 	// 유효성 검사는 Hook 호출 후에 수행
 	if (!Array.isArray(lyrics) || lyrics.length === 0) {
