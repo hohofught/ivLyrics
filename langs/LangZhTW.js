@@ -1765,6 +1765,10 @@ window.LANG_ZH_TW = {
     "developerAddons": "這位開發者的外掛",
     "developer": "開發者",
     "moreByDeveloper": "更多來自這位開發者的外掛",
-    "popular": "熱門"
+    "popular": "熱門",
+    "disclaimerNotice": "以下外掛自動列出自帶有 ivlyrics-addon 標籤的 GitHub 儲存庫。這些是第三方外掛，與 ivLyrics 及其開發者 ivLis STUDIO 無關。如有疑問，請聯繫各外掛的開發者。",
+    "disclaimerTitle": "第三方外掛",
+    "disclaimerInstall": "這是一個未經 ivLis STUDIO 開發或驗證的第三方外掛。安裝風險自負。如有任何問題，請聯繫外掛開發者。",
+    "dontShowAgain": "不再顯示"
   }
 };

@@ -1765,6 +1765,10 @@ window.LANG_FR = {
     "developerAddons": "Extensions de ce développeur",
     "developer": "Développeur",
     "moreByDeveloper": "Plus de ce développeur",
-    "popular": "Populaire"
+    "popular": "Populaire",
+    "disclaimerNotice": "Les extensions ci-dessous sont automatiquement listées depuis les dépôts GitHub tagués ivlyrics-addon. Ce sont des extensions tierces sans lien avec ivLyrics ni avec son développeur ivLis STUDIO. Pour toute question, veuillez contacter le développeur de chaque extension.",
+    "disclaimerTitle": "Extension tierce",
+    "disclaimerInstall": "Cette extension tierce n'a pas été développée ni vérifiée par ivLis STUDIO. Installez-la à vos propres risques. Pour tout problème, veuillez contacter le développeur de l'extension.",
+    "dontShowAgain": "Ne plus afficher"
   }
 };

@@ -1765,6 +1765,10 @@ window.LANG_VI = {
     "developerAddons": "Addon của nhà phát triển này",
     "developer": "Nhà phát triển",
     "moreByDeveloper": "Thêm từ nhà phát triển này",
-    "popular": "Phổ biến"
+    "popular": "Phổ biến",
+    "disclaimerNotice": "Các addon dưới đây được liệt kê tự động từ các kho GitHub gắn thẻ ivlyrics-addon. Đây là các addon của bên thứ ba, không liên quan đến ivLyrics hay nhà phát triển ivLis STUDIO. Mọi thắc mắc xin vui lòng liên hệ nhà phát triển của từng addon.",
+    "disclaimerTitle": "Addon bên thứ ba",
+    "disclaimerInstall": "Đây là addon của bên thứ ba, không được phát triển hoặc xác minh bởi ivLis STUDIO. Cài đặt theo rủi ro của bạn. Nếu có vấn đề, vui lòng liên hệ nhà phát triển addon.",
+    "dontShowAgain": "Không hiển thị lại"
   }
 };

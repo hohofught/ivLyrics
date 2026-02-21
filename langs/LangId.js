@@ -1764,6 +1764,10 @@ window.LANG_ID = {
     "developerAddons": "Addon oleh pengembang ini",
     "developer": "Pengembang",
     "moreByDeveloper": "Lainnya dari pengembang ini",
-    "popular": "Populer"
+    "popular": "Populer",
+    "disclaimerNotice": "Addon di bawah ini secara otomatis terdaftar dari repositori GitHub yang diberi tag ivlyrics-addon. Ini adalah addon pihak ketiga yang tidak terkait dengan ivLyrics maupun pengembangnya ivLis STUDIO. Untuk pertanyaan, silakan hubungi pengembang masing-masing addon.",
+    "disclaimerTitle": "Addon Pihak Ketiga",
+    "disclaimerInstall": "Ini adalah addon pihak ketiga yang tidak dikembangkan atau diverifikasi oleh ivLis STUDIO. Instal dengan risiko Anda sendiri. Untuk masalah apa pun, silakan hubungi pengembang addon.",
+    "dontShowAgain": "Jangan tampilkan lagi"
   }
 };

@@ -1765,6 +1765,10 @@ window.LANG_JA = {
     "developerAddons": "この開発者のアドオン",
     "developer": "開発者",
     "moreByDeveloper": "この開発者の他のアドオン",
-    "popular": "人気"
+    "popular": "人気",
+    "disclaimerNotice": "以下のアドオンは、GitHubでivlyrics-addonトピックに登録されたリポジトリから自動的に表示されます。これらはivLyrics及び開発者ivLis STUDIOとは無関係のサードパーティ製アドオンです。お問い合わせは各アドオンの開発者にお願いします。",
+    "disclaimerTitle": "サードパーティ製アドオン",
+    "disclaimerInstall": "このアドオンはivLis STUDIOが開発・検証したものではないサードパーティ製です。自己責任でインストールしてください。問題が発生した場合は、アドオンの開発者にお問い合わせください。",
+    "dontShowAgain": "今後表示しない"
   }
 };

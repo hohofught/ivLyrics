@@ -361,6 +361,77 @@ const MarketplacePage = (() => {
     });
 
     // ============================================
+    // DisclaimerModal Component (install warning)
+    // ============================================
+
+    const DISCLAIMER_STORAGE_KEY = 'ivlyrics-marketplace-disclaimer-dismissed';
+
+    const DisclaimerModal = react.memo(({ onConfirm, onCancel }) => {
+        const [dontShowAgain, setDontShowAgain] = useState(false);
+
+        const handleOverlayClick = useCallback((e) => {
+            if (e.target === e.currentTarget) onCancel();
+        }, [onCancel]);
+
+        useEffect(() => {
+            const handleKey = (e) => {
+                if (e.key === 'Escape') onCancel();
+            };
+            window.addEventListener('keydown', handleKey);
+            return () => window.removeEventListener('keydown', handleKey);
+        }, [onCancel]);
+
+        const handleConfirm = useCallback(() => {
+            if (dontShowAgain) {
+                try { localStorage.setItem(DISCLAIMER_STORAGE_KEY, '1'); } catch (e) {}
+            }
+            onConfirm();
+        }, [dontShowAgain, onConfirm]);
+
+        return react.createElement('div', {
+            className: 'ivlyrics-marketplace-confirm-overlay',
+            onClick: handleOverlayClick
+        },
+            react.createElement('div', { className: 'ivlyrics-marketplace-confirm-modal ivlyrics-marketplace-disclaimer-modal' },
+                react.createElement('div', { className: 'ivlyrics-marketplace-disclaimer-icon' },
+                    react.createElement('svg', {
+                        width: 32, height: 32, viewBox: '0 0 24 24',
+                        fill: 'none', stroke: '#f59e0b', strokeWidth: 2
+                    },
+                        react.createElement('path', { d: 'M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z' }),
+                        react.createElement('line', { x1: 12, y1: 9, x2: 12, y2: 13, stroke: '#f59e0b' }),
+                        react.createElement('line', { x1: 12, y1: 17, x2: 12.01, y2: 17, stroke: '#f59e0b' })
+                    )
+                ),
+                react.createElement('div', { className: 'ivlyrics-marketplace-disclaimer-title' },
+                    I18n.t('marketplace.disclaimerTitle')
+                ),
+                react.createElement('div', { className: 'ivlyrics-marketplace-confirm-message' },
+                    I18n.t('marketplace.disclaimerInstall')
+                ),
+                react.createElement('label', { className: 'ivlyrics-marketplace-disclaimer-checkbox' },
+                    react.createElement('input', {
+                        type: 'checkbox',
+                        checked: dontShowAgain,
+                        onChange: (e) => setDontShowAgain(e.target.checked)
+                    }),
+                    react.createElement('span', null, I18n.t('marketplace.dontShowAgain'))
+                ),
+                react.createElement('div', { className: 'ivlyrics-marketplace-confirm-buttons' },
+                    react.createElement('button', {
+                        className: 'ivlyrics-marketplace-confirm-btn ivlyrics-marketplace-confirm-btn-cancel',
+                        onClick: onCancel
+                    }, I18n.t('cancel')),
+                    react.createElement('button', {
+                        className: 'ivlyrics-marketplace-confirm-btn ivlyrics-marketplace-confirm-btn-ok ivlyrics-marketplace-confirm-btn-warn',
+                        onClick: handleConfirm
+                    }, I18n.t('marketplace.install'))
+                )
+            )
+        );
+    });
+
+    // ============================================
     // AddonDetail Component
     // ============================================
 
@@ -727,13 +798,34 @@ const MarketplacePage = (() => {
             setSelectedAddon(null);
         }, []);
 
-        const handleInstall = useCallback(async (addon) => {
+        const [disclaimerAddon, setDisclaimerAddon] = useState(null);
+
+        const doInstall = useCallback(async (addon) => {
             try {
                 await window.MarketplaceManager.installAddon(addon);
                 Toast.success(I18n.t('marketplace.installSuccess', { name: addon.name }));
             } catch (e) {
                 Toast.error(I18n.t('marketplace.installError'));
             }
+        }, []);
+
+        const handleInstall = useCallback((addon) => {
+            const dismissed = localStorage.getItem(DISCLAIMER_STORAGE_KEY) === '1';
+            if (dismissed) {
+                doInstall(addon);
+            } else {
+                setDisclaimerAddon(addon);
+            }
+        }, [doInstall]);
+
+        const handleDisclaimerConfirm = useCallback(() => {
+            const addon = disclaimerAddon;
+            setDisclaimerAddon(null);
+            if (addon) doInstall(addon);
+        }, [disclaimerAddon, doInstall]);
+
+        const handleDisclaimerCancel = useCallback(() => {
+            setDisclaimerAddon(null);
         }, []);
 
         const handleUninstall = useCallback(async (addonId) => {
@@ -829,6 +921,19 @@ const MarketplacePage = (() => {
                         )
                     )
                 ),
+                // Disclaimer notice banner
+                react.createElement('div', { className: 'ivlyrics-marketplace-notice' },
+                    react.createElement('svg', {
+                        width: 16, height: 16, viewBox: '0 0 24 24',
+                        fill: 'none', stroke: 'currentColor', strokeWidth: 2,
+                        className: 'ivlyrics-marketplace-notice-icon'
+                    },
+                        react.createElement('circle', { cx: 12, cy: 12, r: 10 }),
+                        react.createElement('line', { x1: 12, y1: 16, x2: 12, y2: 12 }),
+                        react.createElement('line', { x1: 12, y1: 8, x2: 12.01, y2: 8 })
+                    ),
+                    react.createElement('span', null, I18n.t('marketplace.disclaimerNotice'))
+                ),
                 react.createElement('div', { className: 'ivlyrics-marketplace-content' },
                     loading
                         ? react.createElement('div', { className: 'ivlyrics-marketplace-loading' },
@@ -862,7 +967,13 @@ const MarketplacePage = (() => {
             );
         }
 
-        return react.createElement('div', { className: 'ivlyrics-marketplace-root' }, pageContent);
+        return react.createElement('div', { className: 'ivlyrics-marketplace-root' },
+            pageContent,
+            disclaimerAddon && react.createElement(DisclaimerModal, {
+                onConfirm: handleDisclaimerConfirm,
+                onCancel: handleDisclaimerCancel
+            })
+        );
     });
 
     return MarketplacePageComponent;

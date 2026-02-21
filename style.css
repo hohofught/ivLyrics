@@ -7095,6 +7095,69 @@ ruby .lyrics-karaoke-char.sung {
   color: #fff;
 }
 
+.ivlyrics-marketplace-confirm-btn-warn {
+  background: #f59e0b;
+  color: #000;
+}
+
+/* Disclaimer Notice Banner */
+.ivlyrics-marketplace-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  margin: 0 0 16px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--spice-text, #fff);
+  opacity: 0.75;
+}
+
+.ivlyrics-marketplace-notice-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #f59e0b;
+}
+
+/* Disclaimer Modal */
+.ivlyrics-marketplace-disclaimer-modal {
+  max-width: 440px;
+  text-align: center;
+}
+
+.ivlyrics-marketplace-disclaimer-icon {
+  margin-bottom: 12px;
+}
+
+.ivlyrics-marketplace-disclaimer-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--spice-text, #fff);
+  margin-bottom: 12px;
+}
+
+.ivlyrics-marketplace-disclaimer-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--spice-text, #fff);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.ivlyrics-marketplace-disclaimer-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #f59e0b;
+  cursor: pointer;
+}
+
 /* Marketplace button active state */
 .lyrics-marketplace-button.active {
   background: rgba(var(--spice-rgb-text), 0.2) !important;

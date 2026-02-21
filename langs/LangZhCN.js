@@ -1765,6 +1765,10 @@ window.LANG_ZH_CN = {
     "developerAddons": "该开发者的插件",
     "developer": "开发者",
     "moreByDeveloper": "该开发者的更多插件",
-    "popular": "热门"
+    "popular": "热门",
+    "disclaimerNotice": "以下插件自动列出自带有 ivlyrics-addon 标签的 GitHub 仓库。这些是第三方插件，与 ivLyrics 及其开发者 ivLis STUDIO 无关。如有疑问，请联系各插件的开发者。",
+    "disclaimerTitle": "第三方插件",
+    "disclaimerInstall": "这是一个未经 ivLis STUDIO 开发或验证的第三方插件。安装风险自负。如有任何问题，请联系插件开发者。",
+    "dontShowAgain": "不再显示"
   }
 };

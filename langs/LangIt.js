@@ -1765,6 +1765,10 @@ window.LANG_IT = {
     "developerAddons": "Addon di questo sviluppatore",
     "developer": "Sviluppatore",
     "moreByDeveloper": "Altro da questo sviluppatore",
-    "popular": "Popolari"
+    "popular": "Popolari",
+    "disclaimerNotice": "Gli addon qui sotto sono elencati automaticamente dai repository GitHub con il tag ivlyrics-addon. Sono addon di terze parti non correlati a ivLyrics né al suo sviluppatore ivLis STUDIO. Per domande, contattare lo sviluppatore di ciascun addon.",
+    "disclaimerTitle": "Addon di terze parti",
+    "disclaimerInstall": "Questo è un addon di terze parti non sviluppato né verificato da ivLis STUDIO. Installa a tuo rischio. Per qualsiasi problema, contatta lo sviluppatore dell'addon.",
+    "dontShowAgain": "Non mostrare più"
   }
 };

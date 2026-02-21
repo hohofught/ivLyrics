@@ -1773,6 +1773,10 @@ window.LANG_KO = {
     "developerAddons": "이 개발자의 에드온",
     "developer": "개발자",
     "moreByDeveloper": "이 개발자의 다른 에드온",
-    "popular": "인기 에드온"
+    "popular": "인기 에드온",
+    "disclaimerNotice": "아래 에드온은 GitHub에서 ivlyrics-addon 토픽으로 등록된 항목을 자동으로 표시합니다. 이 에드온들은 ivLyrics와 관련 없는 서드파티 에드온이며, ivLyrics 개발자 ivLis STUDIO와 아무런 관련이 없습니다. 관련 문의는 각 에드온 개발자에게 해주세요.",
+    "disclaimerTitle": "서드파티 에드온",
+    "disclaimerInstall": "이 에드온은 ivLis STUDIO에서 개발하거나 검증하지 않은 서드파티 에드온입니다. 설치 시 발생하는 문제에 대한 책임은 사용자에게 있으며, 문제 발생 시 해당 에드온 개발자에게 문의해 주세요.",
+    "dontShowAgain": "다시 보지 않기"
   }
 };

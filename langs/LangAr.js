@@ -1764,6 +1764,10 @@ window.LANG_AR = {
     "developerAddons": "إضافات هذا المطور",
     "developer": "المطور",
     "moreByDeveloper": "المزيد من هذا المطور",
-    "popular": "شائع"
+    "popular": "شائع",
+    "disclaimerNotice": "الإضافات أدناه مدرجة تلقائيًا من مستودعات GitHub المُعلَّمة بـ ivlyrics-addon. هذه إضافات من طرف ثالث لا علاقة لها بـ ivLyrics أو مطوره ivLis STUDIO. للاستفسارات، يرجى التواصل مع مطور كل إضافة.",
+    "disclaimerTitle": "إضافة طرف ثالث",
+    "disclaimerInstall": "هذه إضافة من طرف ثالث لم يتم تطويرها أو التحقق منها بواسطة ivLis STUDIO. التثبيت على مسؤوليتك الخاصة. لأي مشاكل، يرجى التواصل مع مطور الإضافة.",
+    "dontShowAgain": "عدم الإظهار مجددًا"
   }
 };
