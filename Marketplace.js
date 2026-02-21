@@ -350,11 +350,11 @@ const MarketplacePage = (() => {
                     react.createElement('button', {
                         className: 'ivlyrics-marketplace-confirm-btn ivlyrics-marketplace-confirm-btn-cancel',
                         onClick: onCancel
-                    }, I18n.t('cancel')),
+                    }, I18n.t('buttons.cancel')),
                     react.createElement('button', {
                         className: 'ivlyrics-marketplace-confirm-btn ivlyrics-marketplace-confirm-btn-ok',
                         onClick: onConfirm
-                    }, I18n.t('confirm'))
+                    }, I18n.t('buttons.confirm'))
                 )
             )
         );
@@ -421,7 +421,7 @@ const MarketplacePage = (() => {
                     react.createElement('button', {
                         className: 'ivlyrics-marketplace-confirm-btn ivlyrics-marketplace-confirm-btn-cancel',
                         onClick: onCancel
-                    }, I18n.t('cancel')),
+                    }, I18n.t('buttons.cancel')),
                     react.createElement('button', {
                         className: 'ivlyrics-marketplace-confirm-btn ivlyrics-marketplace-confirm-btn-ok ivlyrics-marketplace-confirm-btn-warn',
                         onClick: handleConfirm
