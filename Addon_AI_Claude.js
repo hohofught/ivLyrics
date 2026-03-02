@@ -175,6 +175,15 @@
         return LANGUAGE_DATA[lang] || LANGUAGE_DATA[shortLang] || LANGUAGE_DATA['en'];
     }
 
+    function getAdvancedRequestParams() {
+        const params = {};
+        const useMaxTokens = getSetting('adv-maxTokens-enabled', true);
+        if (useMaxTokens) {
+            params.max_tokens = parseInt(getSetting('adv-maxTokens-value', 16000)) || 16000;
+        }
+        return params;
+    }
+
     // ============================================
     // Prompt Builders
     // ============================================
@@ -321,7 +330,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                         },
                         body: JSON.stringify({
                             model: model,
-                            max_tokens: 16000,
+                            ...getAdvancedRequestParams(),
                             messages: [
                                 { role: 'user', content: prompt }
                             ]
@@ -367,6 +376,134 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                 } catch (e) {
                     lastError = e;
                     console.warn(`[Claude Addon] Attempt ${attempt + 1} failed:`, e.message);
+
+                    if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) {
+                        throw e;
+                    }
+
+                    if (attempt < maxRetries - 1) {
+                        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+                    }
+                }
+            }
+        }
+
+        throw lastError || new Error('[Claude] All API keys and retries exhausted');
+    }
+
+    async function callClaudeAPIStream(prompt, onLine, maxRetries = 3) {
+        const apiKeys = getApiKeys();
+        if (apiKeys.length === 0) {
+            throw new Error('[Claude] API key is required. Please configure your API key in settings.');
+        }
+
+        const model = getSelectedModel();
+        let lastError = null;
+
+        for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
+            const apiKey = apiKeys[keyIndex];
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(`${BASE_URL}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01',
+                            'anthropic-dangerous-direct-browser-access': 'true'
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            ...getAdvancedRequestParams(),
+                            stream: true,
+                            messages: [
+                                { role: 'user', content: prompt }
+                            ]
+                        })
+                    });
+
+                    if (response.status === 429 || response.status === 403) {
+                        console.warn(`[Claude Addon] Stream: API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        break;
+                    }
+
+                    if (response.status === 401) {
+                        let errorMessage = 'Invalid API key or permission denied.';
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.error?.message) errorMessage = errorData.error.message;
+                        } catch (parseError) { }
+                        throw new Error(`[Claude] ${errorMessage}`);
+                    }
+
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}`;
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.error?.message) errorMessage = errorData.error.message;
+                        } catch (parseError) { }
+                        throw new Error(`[Claude] ${errorMessage}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let sseBuffer = '';
+                    let accumulated = '';
+                    let emittedLines = 0;
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        sseBuffer += decoder.decode(value, { stream: true });
+                        const events = sseBuffer.split('\n\n');
+                        sseBuffer = events.pop() || '';
+
+                        for (const event of events) {
+                            const lines = event.split('\n');
+                            let eventType = '';
+                            let eventData = '';
+                            for (const line of lines) {
+                                if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+                                else if (line.startsWith('data: ')) eventData = line.slice(6);
+                            }
+                            if (eventType === 'content_block_delta' && eventData) {
+                                try {
+                                    const parsed = JSON.parse(eventData);
+                                    const text = parsed.delta?.text || '';
+                                    if (text) accumulated += text;
+                                } catch (e) { }
+                            }
+                        }
+
+                        // Emit completed lines
+                        if (onLine) {
+                            const currentLines = accumulated.split('\n');
+                            for (let i = emittedLines; i < currentLines.length - 1; i++) {
+                                onLine(i, currentLines[i]);
+                                emittedLines = i + 1;
+                            }
+                        }
+                    }
+
+                    // Emit final line
+                    if (onLine) {
+                        const finalLines = accumulated.split('\n');
+                        if (finalLines.length > emittedLines) {
+                            onLine(emittedLines, finalLines[emittedLines]);
+                        }
+                    }
+
+                    if (!accumulated) {
+                        throw new Error('[Claude] Empty response from streaming API');
+                    }
+
+                    return accumulated;
+
+                } catch (e) {
+                    lastError = e;
+                    console.warn(`[Claude Addon] Stream attempt ${attempt + 1} failed:`, e.message);
 
                     if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) {
                         throw e;
@@ -538,6 +675,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                             }, modelsLoading ? '...' : '↻')
                         )
                     ),
+                    React.createElement(AdvancedParamsSection),
                     React.createElement('div', { className: 'ai-addon-setting' },
                         React.createElement('button', { onClick: handleTest, className: 'ai-addon-btn-primary' }, 'Test Connection'),
                         testStatus && React.createElement('span', {
@@ -546,9 +684,46 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     )
                 );
             };
+
+            function AdvancedParamsSection() {
+                const [expanded, setExpanded] = useState(getSetting('adv-expanded', false));
+                const [maxTokensEnabled, setMaxTokensEnabled] = useState(getSetting('adv-maxTokens-enabled', true));
+                const [maxTokensValue, setMaxTokensValue] = useState(getSetting('adv-maxTokens-value', 16000));
+
+                const toggleExpanded = useCallback(() => {
+                    const next = !expanded;
+                    setExpanded(next);
+                    setSetting('adv-expanded', next);
+                }, [expanded]);
+
+                return React.createElement('div', { className: 'ai-addon-setting ai-addon-advanced-params' },
+                    React.createElement('div', {
+                        style: { cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none', marginBottom: expanded ? '8px' : '0' },
+                        onClick: toggleExpanded
+                    },
+                        React.createElement('span', { style: { fontSize: '10px', transition: 'transform 0.2s', transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' } }, '▶'),
+                        React.createElement('label', { style: { cursor: 'pointer', margin: 0, fontSize: '12px', opacity: 0.8 } }, 'Advanced API Parameters')
+                    ),
+                    expanded && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '8px', borderLeft: '2px solid rgba(255,255,255,0.1)' } },
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                            React.createElement('input', {
+                                type: 'checkbox', checked: maxTokensEnabled,
+                                onChange: (e) => { setMaxTokensEnabled(e.target.checked); setSetting('adv-maxTokens-enabled', e.target.checked); }
+                            }),
+                            React.createElement('span', { style: { fontSize: '12px', minWidth: '110px' } }, 'Max Tokens'),
+                            React.createElement('input', {
+                                type: 'number', value: maxTokensValue, disabled: !maxTokensEnabled,
+                                style: { width: '80px', fontSize: '12px' },
+                                onChange: (e) => { const v = parseInt(e.target.value) || 16000; setMaxTokensValue(v); setSetting('adv-maxTokens-value', v); }
+                            })
+                        ),
+                        React.createElement('small', { style: { opacity: 0.5, fontSize: '11px' } }, 'Uncheck to exclude parameter from API request.')
+                    )
+                );
+            }
         },
 
-        async translateLyrics({ text, lang, wantSmartPhonetic }) {
+        async translateLyrics({ text, lang, wantSmartPhonetic, onLine }) {
             if (!text?.trim()) {
                 throw new Error('No text provided');
             }
@@ -558,7 +733,12 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                 ? buildPhoneticPrompt(text, lang)
                 : buildTranslationPrompt(text, lang);
 
-            const rawResponse = await callClaudeAPIRaw(prompt);
+            let rawResponse;
+            if (onLine) {
+                rawResponse = await callClaudeAPIStream(prompt, onLine);
+            } else {
+                rawResponse = await callClaudeAPIRaw(prompt);
+            }
             const lines = parseTextLines(rawResponse, expectedLineCount);
 
             if (wantSmartPhonetic) {

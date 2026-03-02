@@ -2543,6 +2543,8 @@ class LyricsContainer extends react.Component {
     // Translation loading timers - separate for phonetic and translation
     this.phoneticLoadingTimer = null;
     this.translationLoadingTimer = null;
+    this.streamingApplyTimer = null;
+    this.pendingStreamingPayload = null;
 
     // Portrait viewport detection
     this._isPortraitViewport = typeof window !== "undefined" && typeof window.matchMedia === "function"
@@ -2698,6 +2700,63 @@ class LyricsContainer extends react.Component {
       this.translationLoadingTimer = null;
     }
     this.setState({ isTranslationLoading: false });
+  }
+
+  applyStreamingTranslation({
+    uri,
+    lyrics,
+    lyricsMode1,
+    lyricsMode2,
+    displayMode1,
+    displayMode2,
+  }) {
+    this.pendingStreamingPayload = {
+      uri,
+      lyrics,
+      lyricsMode1,
+      lyricsMode2,
+      displayMode1,
+      displayMode2,
+    };
+
+    if (this.streamingApplyTimer) {
+      return;
+    }
+
+    this.streamingApplyTimer = setTimeout(() => {
+      this.streamingApplyTimer = null;
+      const payload = this.pendingStreamingPayload;
+      this.pendingStreamingPayload = null;
+      if (!payload || this.state.uri !== payload.uri) {
+        return;
+      }
+
+      const optimizedTranslations = this.optimizeTranslations(
+        payload.lyrics,
+        payload.lyricsMode1,
+        payload.lyricsMode2,
+        payload.lyricsMode1 ? payload.displayMode1 : null,
+        payload.lyricsMode2 ? payload.displayMode2 : null
+      );
+      const finalLyrics = Array.isArray(optimizedTranslations)
+        ? optimizedTranslations
+        : [];
+
+      this.setState({
+        currentLyrics: finalLyrics,
+      });
+
+      window.dispatchEvent(new CustomEvent('ivLyrics:lyrics-ready', {
+        detail: {
+          trackInfo: {
+            uri: payload.uri,
+            title: this.state.title,
+            artist: this.state.artist
+          },
+          lyrics: finalLyrics
+        }
+      }));
+    }, 50);
   }
 
   /**
@@ -3308,6 +3367,11 @@ class LyricsContainer extends react.Component {
       // Reset per-track progressive results and inflight maps
       this._dmResults = {};
       this._inflightGemini = new Map();
+      if (this.streamingApplyTimer) {
+        clearTimeout(this.streamingApplyTimer);
+        this.streamingApplyTimer = null;
+      }
+      this.pendingStreamingPayload = null;
       this.lastCleanedUri = currentUri;
     }
 
@@ -3339,7 +3403,7 @@ class LyricsContainer extends react.Component {
     this.displayMode = displayMode1; // Keep for legacy compatibility
     this.displayMode2 = displayMode2;
 
-    const processMode = async (mode, baseLyrics) => {
+    const processMode = async (mode, baseLyrics, onProgress = null) => {
       if (!mode || mode === "none") {
         console.log("[processMode] Mode is none or empty:", mode);
         return null;
@@ -3350,7 +3414,8 @@ class LyricsContainer extends react.Component {
           const result = await this.getGeminiTranslation(
             lyricsState,
             baseLyrics,
-            mode
+            mode,
+            onProgress
           );
           console.log("[processMode] Gemini result sample:", result?.[0]);
           return result;
@@ -3519,10 +3584,34 @@ class LyricsContainer extends react.Component {
       // 캐시된 결과가 있으면 재사용, 없으면 새로 요청
       const promise1 = lyricsMode1
         ? Promise.resolve(lyricsMode1)
-        : processMode(displayMode1, lyrics);
+        : processMode(displayMode1, lyrics, (partialLyrics) => {
+          if (this.state.uri !== uri || !partialLyrics) return;
+          lyricsMode1 = partialLyrics;
+          this._dmResults[currentUri].mode1 = partialLyrics;
+          this.applyStreamingTranslation({
+            uri,
+            lyrics,
+            lyricsMode1,
+            lyricsMode2,
+            displayMode1,
+            displayMode2,
+          });
+        });
       const promise2 = lyricsMode2
         ? Promise.resolve(lyricsMode2)
-        : processMode(displayMode2, lyrics);
+        : processMode(displayMode2, lyrics, (partialLyrics) => {
+          if (this.state.uri !== uri || !partialLyrics) return;
+          lyricsMode2 = partialLyrics;
+          this._dmResults[currentUri].mode2 = partialLyrics;
+          this.applyStreamingTranslation({
+            uri,
+            lyrics,
+            lyricsMode1,
+            lyricsMode2,
+            displayMode1,
+            displayMode2,
+          });
+        });
 
       // 각 promise가 완료되는 즉시 업데이트
       promise1
@@ -3568,7 +3657,19 @@ class LyricsContainer extends react.Component {
       if (lyricsMode1) {
         updateCombinedLyrics();
       } else {
-        processMode(displayMode1, lyrics)
+        processMode(displayMode1, lyrics, (partialLyrics) => {
+          if (this.state.uri !== uri || !partialLyrics) return;
+          lyricsMode1 = partialLyrics;
+          this._dmResults[currentUri].mode1 = partialLyrics;
+          this.applyStreamingTranslation({
+            uri,
+            lyrics,
+            lyricsMode1,
+            lyricsMode2,
+            displayMode1,
+            displayMode2,
+          });
+        })
           .then((result) => {
             lyricsMode1 = result;
             this._dmResults[currentUri].mode1 = result;
@@ -3589,7 +3690,19 @@ class LyricsContainer extends react.Component {
       if (lyricsMode2) {
         updateCombinedLyrics();
       } else {
-        processMode(displayMode2, lyrics)
+        processMode(displayMode2, lyrics, (partialLyrics) => {
+          if (this.state.uri !== uri || !partialLyrics) return;
+          lyricsMode2 = partialLyrics;
+          this._dmResults[currentUri].mode2 = partialLyrics;
+          this.applyStreamingTranslation({
+            uri,
+            lyrics,
+            lyricsMode1,
+            lyricsMode2,
+            displayMode1,
+            displayMode2,
+          });
+        })
           .then((result) => {
             lyricsMode2 = result;
             this._dmResults[currentUri].mode2 = result;
@@ -3783,7 +3896,7 @@ class LyricsContainer extends react.Component {
     return processedLyrics;
   }
 
-  getGeminiTranslation(lyricsState, lyrics, mode) {
+  getGeminiTranslation(lyricsState, lyrics, mode, onProgress = null) {
     return new Promise((resolve, reject) => {
       const viKey = StorageManager.getPersisted(
         `${APP_NAME}:visual:gemini-api-key`
@@ -3873,6 +3986,70 @@ class LyricsContainer extends react.Component {
       );
       const text = nonSectionLines.join("\n");
 
+      // Create mapping arrays for proper alignment
+      const originalNonSectionIndices = [];
+      lyrics.forEach((line, i) => {
+        const lineText = line?.text || "";
+        if (!Utils.isSectionHeader(lineText) && lineText.trim() !== "") {
+          originalNonSectionIndices.push(i);
+        }
+      });
+
+      const mapResultLinesToLyrics = (linesInput) => {
+        if (!Array.isArray(linesInput)) return null;
+
+        const cleanTranslationLines = linesInput.filter(
+          (line) =>
+            line !== undefined &&
+            line !== null &&
+            String(line).trim() !== "" &&
+            !Utils.isSectionHeader(String(line).trim())
+        );
+
+        return lyrics.map((line, i) => {
+          const originalText = line?.text || "";
+
+          if (Utils.isSectionHeader(originalText)) {
+            return {
+              ...line,
+              text: null,
+              originalText: originalText,
+            };
+          }
+
+          if (originalText.trim() === "") {
+            return {
+              ...line,
+              text: "",
+              originalText: originalText,
+            };
+          }
+
+          const positionInNonSectionLines =
+            originalNonSectionIndices.indexOf(i);
+          const translatedText =
+            cleanTranslationLines[positionInNonSectionLines]?.trim() || "";
+
+          return {
+            ...line,
+            text: translatedText || line?.text || "",
+            originalText: originalText,
+          };
+        });
+      };
+
+      const streamedLines = [];
+      const handleStreamLine = onProgress
+        ? (lineIndex, lineText) => {
+          if (typeof lineIndex !== "number" || lineIndex < 0) return;
+          streamedLines[lineIndex] = typeof lineText === "string" ? lineText : "";
+          const partialMapped = mapResultLinesToLyrics(streamedLines);
+          if (partialMapped && this.state.uri === lyricsState.uri) {
+            onProgress(partialMapped);
+          }
+        }
+        : null;
+
       // Start appropriate loading indicator based on mode type (1초 후 표시)
       if (wantSmartPhonetic) {
         this.startPhoneticLoading();
@@ -3887,6 +4064,7 @@ class LyricsContainer extends react.Component {
         text,
         wantSmartPhonetic,
         provider: lyricsState.provider,
+        onLine: handleStreamLine,
       })
         .then((response) => {
           let outText;
@@ -3927,63 +4105,10 @@ class LyricsContainer extends react.Component {
           } else {
             throw new Error("Invalid translation format received from Gemini.");
           }
-
-          // Create mapping arrays for proper alignment
-          const originalNonSectionLines = [];
-          const originalNonSectionIndices = [];
-
-          // Collect non-section lines from original lyrics (excluding empty lines)
-          lyrics.forEach((line, i) => {
-            const text = line?.text || "";
-            if (!Utils.isSectionHeader(text) && text.trim() !== "") {
-              originalNonSectionLines.push(text);
-              originalNonSectionIndices.push(i);
-            }
-          });
-
-          // Filter out section headers and empty lines from translation results
-          const cleanTranslationLines = lines.filter(
-            (line) =>
-              line && line.trim() !== "" && !Utils.isSectionHeader(line.trim())
-          );
-
-          // Use the clean translation lines for mapping
-          lines = cleanTranslationLines;
-
-          // Smart mapping that accounts for section headers and empty lines
-          const mapped = lyrics.map((line, i) => {
-            const originalText = line?.text || "";
-
-            // If this is a section header, keep original and don't show translation
-            if (Utils.isSectionHeader(originalText)) {
-              return {
-                ...line,
-                text: null,
-                originalText: originalText,
-              };
-            }
-
-            // If this is an empty line, keep it empty
-            if (originalText.trim() === "") {
-              return {
-                ...line,
-                text: "",
-                originalText: originalText,
-              };
-            }
-
-            // Find the translation index for this non-section, non-empty line
-            const positionInNonSectionLines =
-              originalNonSectionIndices.indexOf(i);
-            const translatedText =
-              lines[positionInNonSectionLines]?.trim() || "";
-
-            return {
-              ...line,
-              text: translatedText || line?.text || "",
-              originalText: originalText,
-            };
-          });
+          const mapped = mapResultLinesToLyrics(lines);
+          if (!mapped) {
+            throw new Error("Failed to map streamed translation lines.");
+          }
           CacheManager.set(cacheKey2, mapped);
           return mapped;
         })
@@ -4832,6 +4957,11 @@ class LyricsContainer extends react.Component {
 
     // Clean up translation loading timer
     this.clearTranslationLoading();
+    if (this.streamingApplyTimer) {
+      clearTimeout(this.streamingApplyTimer);
+      this.streamingApplyTimer = null;
+    }
+    this.pendingStreamingPayload = null;
 
     // Clean up cache system
     CacheManager.clear();

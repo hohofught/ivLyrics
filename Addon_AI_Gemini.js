@@ -213,6 +213,31 @@
         return LANGUAGE_DATA[lang] || LANGUAGE_DATA[shortLang] || LANGUAGE_DATA['en'];
     }
 
+    /**
+     * Build generationConfig from advanced parameter settings
+     */
+    function getGenerationConfig() {
+        const config = {};
+
+        // maxOutputTokens
+        const useMaxTokens = getSetting('adv-maxOutputTokens-enabled', true);
+        if (useMaxTokens) {
+            config.maxOutputTokens = parseInt(getSetting('adv-maxOutputTokens-value', 20000)) || 20000;
+        }
+
+        // thinking config
+        const useThinking = getSetting('adv-thinking-enabled', false);
+        if (useThinking) {
+            const budget = parseInt(getSetting('adv-thinking-budget', 1024)) || 1024;
+            config.thinkingConfig = { thinkingBudget: budget };
+        } else {
+            // Disable thinking to enable true streaming
+            config.thinkingConfig = { thinkingBudget: 0 };
+        }
+
+        return config;
+    }
+
     // ============================================
     // Prompt Builders (Plain Text Output - Simplified)
     // ============================================
@@ -373,9 +398,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                                 role: 'user',
                                 parts: [{ text: prompt }]
                             }],
-                            generationConfig: {
-                                maxOutputTokens: 20000
-                            }
+                            generationConfig: getGenerationConfig()
                         })
                     });
 
@@ -418,6 +441,87 @@ Even if the song is English, the description and trivia MUST be written in ${lan
             }
         }
 
+        throw lastError || new Error('[Gemini] All API keys and retries exhausted');
+    }
+
+    async function callGeminiAPIStream(prompt, onLine, maxRetries = 3) {
+        const apiKeys = getApiKeys();
+        if (apiKeys.length === 0) throw new Error('[Gemini] API key is required.');
+        const model = getSelectedModel();
+        if (!model) throw new Error('[Gemini] Model is not selected.');
+        let lastError = null;
+
+        for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
+            const apiKey = apiKeys[keyIndex];
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const baseUrl = getBaseUrl();
+                    const endpoint = `${baseUrl.replace(/\/$/, '')}/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                            generationConfig: getGenerationConfig()
+                        })
+                    });
+
+                    if (response.status === 429 || response.status === 403) { break; }
+                    if (!response.ok) {
+                        let msg = `HTTP ${response.status}`;
+                        try { const d = await response.json(); if (d.error?.message) msg = d.error.message; } catch (e) { }
+                        throw new Error(`[Gemini] ${msg}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let sseBuffer = '';
+                    let accumulated = '';
+                    let emittedLines = 0;
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        sseBuffer += decoder.decode(value, { stream: true });
+                        const parts = sseBuffer.split('\n');
+                        sseBuffer = parts.pop() || '';
+
+                        for (const line of parts) {
+                            if (!line.startsWith('data: ')) continue;
+                            try {
+                                const parsed = JSON.parse(line.slice(6));
+                                const text = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                                if (text) accumulated += text;
+                            } catch (e) { }
+                        }
+
+                        if (onLine) {
+                            const currentLines = accumulated.split('\n');
+                            for (let i = emittedLines; i < currentLines.length - 1; i++) {
+                                onLine(i, currentLines[i]);
+                                emittedLines = i + 1;
+                            }
+                        }
+                    }
+
+                    if (onLine) {
+                        const finalLines = accumulated.split('\n');
+                        if (finalLines.length > emittedLines) {
+                            onLine(emittedLines, finalLines[emittedLines]);
+                        }
+                    }
+
+                    if (!accumulated) throw new Error('[Gemini] Empty response from streaming API');
+                    return accumulated;
+
+                } catch (e) {
+                    lastError = e;
+                    if (attempt < maxRetries - 1) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+                }
+            }
+        }
         throw lastError || new Error('[Gemini] All API keys and retries exhausted');
     }
 
@@ -643,6 +747,9 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                         ),
                         availableModels.length > 0 && React.createElement('small', null, `${availableModels.length} models available`)
                     ),
+                    // Advanced API Parameters
+                    React.createElement(AdvancedParamsSection)
+                    ,
                     React.createElement('div', { className: 'ai-addon-setting' },
                         React.createElement('button', { onClick: handleTest, className: 'ai-addon-btn-primary' }, 'Test Connection'),
                         testStatus && React.createElement('span', {
@@ -651,9 +758,63 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     )
                 );
             };
+
+            function AdvancedParamsSection() {
+                const [expanded, setExpanded] = useState(getSetting('adv-expanded', false));
+                const [maxTokensEnabled, setMaxTokensEnabled] = useState(getSetting('adv-maxOutputTokens-enabled', true));
+                const [maxTokensValue, setMaxTokensValue] = useState(getSetting('adv-maxOutputTokens-value', 20000));
+                const [thinkingEnabled, setThinkingEnabled] = useState(getSetting('adv-thinking-enabled', false));
+                const [thinkingBudget, setThinkingBudget] = useState(getSetting('adv-thinking-budget', 1024));
+
+                const toggleExpanded = useCallback(() => {
+                    const next = !expanded;
+                    setExpanded(next);
+                    setSetting('adv-expanded', next);
+                }, [expanded]);
+
+                return React.createElement('div', { className: 'ai-addon-setting ai-addon-advanced-params' },
+                    React.createElement('div', {
+                        style: { cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none', marginBottom: expanded ? '8px' : '0' },
+                        onClick: toggleExpanded
+                    },
+                        React.createElement('span', { style: { fontSize: '10px', transition: 'transform 0.2s', transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' } }, '▶'),
+                        React.createElement('label', { style: { cursor: 'pointer', margin: 0, fontSize: '12px', opacity: 0.8 } }, 'Advanced API Parameters')
+                    ),
+                    expanded && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '8px', borderLeft: '2px solid rgba(255,255,255,0.1)' } },
+                        // Max Output Tokens
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                            React.createElement('input', {
+                                type: 'checkbox', checked: maxTokensEnabled,
+                                onChange: (e) => { setMaxTokensEnabled(e.target.checked); setSetting('adv-maxOutputTokens-enabled', e.target.checked); }
+                            }),
+                            React.createElement('span', { style: { fontSize: '12px', minWidth: '110px' } }, 'Max Output Tokens'),
+                            React.createElement('input', {
+                                type: 'number', value: maxTokensValue, disabled: !maxTokensEnabled,
+                                style: { width: '80px', fontSize: '12px' },
+                                onChange: (e) => { const v = parseInt(e.target.value) || 20000; setMaxTokensValue(v); setSetting('adv-maxOutputTokens-value', v); }
+                            })
+                        ),
+                        // Thinking
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                            React.createElement('input', {
+                                type: 'checkbox', checked: thinkingEnabled,
+                                onChange: (e) => { setThinkingEnabled(e.target.checked); setSetting('adv-thinking-enabled', e.target.checked); }
+                            }),
+                            React.createElement('span', { style: { fontSize: '12px', minWidth: '110px' } }, 'Thinking'),
+                            React.createElement('input', {
+                                type: 'number', value: thinkingBudget, disabled: !thinkingEnabled,
+                                style: { width: '80px', fontSize: '12px' },
+                                placeholder: 'Budget',
+                                onChange: (e) => { const v = parseInt(e.target.value) || 1024; setThinkingBudget(v); setSetting('adv-thinking-budget', v); }
+                            })
+                        ),
+                        React.createElement('small', { style: { opacity: 0.5, fontSize: '11px' } }, 'Uncheck to exclude parameter from API request. Thinking OFF enables real-time streaming.')
+                    )
+                );
+            }
         },
 
-        async translateLyrics({ text, lang, wantSmartPhonetic }) {
+        async translateLyrics({ text, lang, wantSmartPhonetic, onLine }) {
             if (!text?.trim()) {
                 throw new Error('No text provided');
             }
@@ -664,7 +825,9 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                 : buildTranslationPrompt(text, lang);
 
             // Get raw text response and parse lines
-            const rawResponse = await callGeminiAPIRaw(prompt);
+            const rawResponse = onLine
+                ? await callGeminiAPIStream(prompt, onLine)
+                : await callGeminiAPIRaw(prompt);
             const lines = parseTextLines(rawResponse, expectedLineCount);
 
             // Return in the format expected by LyricsService

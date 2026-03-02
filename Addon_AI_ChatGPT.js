@@ -242,6 +242,27 @@
         return LANGUAGE_DATA[lang] || LANGUAGE_DATA[shortLang] || LANGUAGE_DATA['en'];
     }
 
+    /**
+     * Build request body params from advanced settings
+     */
+    function getAdvancedRequestParams() {
+        const params = {};
+
+        // max_tokens (OFF by default - some models don't support it)
+        const useMaxTokens = getSetting('adv-maxTokens-enabled', false);
+        if (useMaxTokens) {
+            params.max_tokens = parseInt(getSetting('adv-maxTokens-value', 16000)) || 16000;
+        }
+
+        // temperature
+        const useTemperature = getSetting('adv-temperature-enabled', true);
+        if (useTemperature) {
+            params.temperature = parseFloat(getSetting('adv-temperature-value', 0.3)) || 0.3;
+        }
+
+        return params;
+    }
+
     // ============================================
     // Prompt Builders (Plain Text Output - Simplified)
     // ============================================
@@ -398,8 +419,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                             messages: [
                                 { role: 'user', content: prompt }
                             ],
-                            temperature: 0.3,
-                            max_tokens: 16000
+                            ...getAdvancedRequestParams()
                         })
                     });
 
@@ -450,6 +470,113 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     if (attempt < maxRetries - 1) {
                         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
                     }
+                }
+            }
+        }
+
+        throw lastError || new Error('[ChatGPT] All API keys and retries exhausted');
+    }
+
+    async function callChatGPTAPIStream(prompt, onLine, maxRetries = 3) {
+        const apiKeys = getApiKeys();
+        if (apiKeys.length === 0) {
+            throw new Error('[ChatGPT] API key is required. Please configure your API key in settings.');
+        }
+
+        const baseUrl = getBaseUrl();
+        const model = getSelectedModel();
+        if (!model) {
+            throw new Error('[ChatGPT] Model is not selected. Please select a model in settings.');
+        }
+        let lastError = null;
+
+        for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
+            const apiKey = apiKeys[keyIndex];
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`;
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: [
+                                { role: 'user', content: prompt }
+                            ],
+                            ...getAdvancedRequestParams(),
+                            stream: true
+                        })
+                    });
+
+                    if (response.status === 429 || response.status === 403) {
+                        console.warn(`[ChatGPT Addon] Stream: API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        break;
+                    }
+
+                    if (response.status === 401) {
+                        let errorMessage = 'Invalid API key or permission denied.';
+                        try { const d = await response.json(); if (d.error?.message) errorMessage = d.error.message; } catch (e) { }
+                        throw new Error(`[ChatGPT] ${errorMessage}`);
+                    }
+
+                    if (!response.ok) {
+                        let errorMessage = `HTTP ${response.status}`;
+                        try { const d = await response.json(); if (d.error?.message) errorMessage = d.error.message; } catch (e) { }
+                        throw new Error(`[ChatGPT] ${errorMessage}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let sseBuffer = '';
+                    let accumulated = '';
+                    let emittedLines = 0;
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        sseBuffer += decoder.decode(value, { stream: true });
+                        const parts = sseBuffer.split('\n');
+                        sseBuffer = parts.pop() || '';
+
+                        for (const line of parts) {
+                            if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+                            try {
+                                const parsed = JSON.parse(line.slice(6));
+                                const text = parsed.choices?.[0]?.delta?.content || '';
+                                if (text) accumulated += text;
+                            } catch (e) { }
+                        }
+
+                        if (onLine) {
+                            const currentLines = accumulated.split('\n');
+                            for (let i = emittedLines; i < currentLines.length - 1; i++) {
+                                onLine(i, currentLines[i]);
+                                emittedLines = i + 1;
+                            }
+                        }
+                    }
+
+                    if (onLine) {
+                        const finalLines = accumulated.split('\n');
+                        if (finalLines.length > emittedLines) {
+                            onLine(emittedLines, finalLines[emittedLines]);
+                        }
+                    }
+
+                    if (!accumulated) throw new Error('[ChatGPT] Empty response from streaming API');
+                    return accumulated;
+
+                } catch (e) {
+                    lastError = e;
+                    console.warn(`[ChatGPT Addon] Stream attempt ${attempt + 1} failed:`, e.message);
+                    if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) throw e;
+                    if (attempt < maxRetries - 1) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
                 }
             }
         }
@@ -677,6 +804,9 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                         React.createElement('label', null, 'Custom Model ID'),
                         React.createElement('input', { type: 'text', value: customModel, onChange: handleCustomModelChange, placeholder: 'e.g., gpt-4-turbo' })
                     ),
+                    // Advanced API Parameters
+                    React.createElement(AdvancedParamsSection)
+                    ,
                     React.createElement('div', { className: 'ai-addon-setting' },
                         React.createElement('button', { onClick: handleTest, className: 'ai-addon-btn-primary' }, 'Test Connection'),
                         testStatus && React.createElement('span', {
@@ -685,9 +815,62 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     )
                 );
             };
+
+            function AdvancedParamsSection() {
+                const [expanded, setExpanded] = useState(getSetting('adv-expanded', false));
+                const [maxTokensEnabled, setMaxTokensEnabled] = useState(getSetting('adv-maxTokens-enabled', false));
+                const [maxTokensValue, setMaxTokensValue] = useState(getSetting('adv-maxTokens-value', 16000));
+                const [temperatureEnabled, setTemperatureEnabled] = useState(getSetting('adv-temperature-enabled', true));
+                const [temperatureValue, setTemperatureValue] = useState(getSetting('adv-temperature-value', 0.3));
+
+                const toggleExpanded = useCallback(() => {
+                    const next = !expanded;
+                    setExpanded(next);
+                    setSetting('adv-expanded', next);
+                }, [expanded]);
+
+                return React.createElement('div', { className: 'ai-addon-setting ai-addon-advanced-params' },
+                    React.createElement('div', {
+                        style: { cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', userSelect: 'none', marginBottom: expanded ? '8px' : '0' },
+                        onClick: toggleExpanded
+                    },
+                        React.createElement('span', { style: { fontSize: '10px', transition: 'transform 0.2s', transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', display: 'inline-block' } }, '▶'),
+                        React.createElement('label', { style: { cursor: 'pointer', margin: 0, fontSize: '12px', opacity: 0.8 } }, 'Advanced API Parameters')
+                    ),
+                    expanded && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '8px', borderLeft: '2px solid rgba(255,255,255,0.1)' } },
+                        // Max Tokens
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                            React.createElement('input', {
+                                type: 'checkbox', checked: maxTokensEnabled,
+                                onChange: (e) => { setMaxTokensEnabled(e.target.checked); setSetting('adv-maxTokens-enabled', e.target.checked); }
+                            }),
+                            React.createElement('span', { style: { fontSize: '12px', minWidth: '110px' } }, 'Max Tokens'),
+                            React.createElement('input', {
+                                type: 'number', value: maxTokensValue, disabled: !maxTokensEnabled,
+                                style: { width: '80px', fontSize: '12px' },
+                                onChange: (e) => { const v = parseInt(e.target.value) || 16000; setMaxTokensValue(v); setSetting('adv-maxTokens-value', v); }
+                            })
+                        ),
+                        // Temperature
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                            React.createElement('input', {
+                                type: 'checkbox', checked: temperatureEnabled,
+                                onChange: (e) => { setTemperatureEnabled(e.target.checked); setSetting('adv-temperature-enabled', e.target.checked); }
+                            }),
+                            React.createElement('span', { style: { fontSize: '12px', minWidth: '110px' } }, 'Temperature'),
+                            React.createElement('input', {
+                                type: 'number', value: temperatureValue, disabled: !temperatureEnabled,
+                                style: { width: '80px', fontSize: '12px' }, step: '0.1', min: '0', max: '2',
+                                onChange: (e) => { const v = parseFloat(e.target.value) || 0.3; setTemperatureValue(v); setSetting('adv-temperature-value', v); }
+                            })
+                        ),
+                        React.createElement('small', { style: { opacity: 0.5, fontSize: '11px' } }, 'Uncheck to exclude parameter from API request. Some models may not support max_tokens.')
+                    )
+                );
+            }
         },
 
-        async translateLyrics({ text, lang, wantSmartPhonetic }) {
+        async translateLyrics({ text, lang, wantSmartPhonetic, onLine }) {
             if (!text?.trim()) {
                 throw new Error('No text provided');
             }
@@ -698,7 +881,9 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                 : buildTranslationPrompt(text, lang);
 
             // Get raw text response and parse lines
-            const rawResponse = await callChatGPTAPIRaw(prompt);
+            const rawResponse = onLine
+                ? await callChatGPTAPIStream(prompt, onLine)
+                : await callChatGPTAPIRaw(prompt);
             const lines = parseTextLines(rawResponse, expectedLineCount);
 
             // Return in the format expected by LyricsService

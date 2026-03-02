@@ -2098,6 +2098,7 @@
             wantSmartPhonetic = false,
             provider = null,
             ignoreCache = false,
+            onLine = null,
         }) {
             if (!text?.trim()) throw new Error("No text provided for translation");
 
@@ -2148,7 +2149,8 @@
                             text,
                             lang: userLang,
                             wantSmartPhonetic,
-                            provider
+                            provider,
+                            onLine
                         });
 
                         if (result) {
