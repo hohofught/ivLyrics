@@ -2544,6 +2544,11 @@ class LyricsContainer extends react.Component {
     this.phoneticLoadingTimer = null;
     this.translationLoadingTimer = null;
 
+    // Portrait viewport detection
+    this._isPortraitViewport = typeof window !== "undefined" && typeof window.matchMedia === "function"
+      ? window.matchMedia("(orientation: portrait)").matches
+      : false;
+
     // Mouse idle timer for auto-hiding controls
     this.mouseIdleTimer = null;
     this.isMouseActive = true;
@@ -2554,6 +2559,7 @@ class LyricsContainer extends react.Component {
       const container = this.containerRef.current;
       if (container) {
         container.classList.remove('controls-hidden');
+        container.classList.remove('ui-hidden');
       }
 
       // Clear existing timer
@@ -2567,6 +2573,7 @@ class LyricsContainer extends react.Component {
         const container = this.containerRef.current;
         if (container) {
           container.classList.add('controls-hidden');
+          container.classList.add('ui-hidden');
         }
       }, 3000);
     };
@@ -2578,6 +2585,7 @@ class LyricsContainer extends react.Component {
       const container = this.containerRef.current;
       if (container) {
         container.classList.add('controls-hidden');
+        container.classList.add('ui-hidden');
       }
     };
 
@@ -4758,6 +4766,20 @@ class LyricsContainer extends react.Component {
       }
     };
     window.addEventListener("ivLyrics:lyric-index-changed", this.handleLyricIndexChange);
+
+    // Portrait viewport detection listener
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      this._portraitMql = window.matchMedia("(orientation: portrait)");
+      this._portraitChangeHandler = (e) => {
+        this._isPortraitViewport = e.matches;
+        this.forceUpdate();
+      };
+      if (this._portraitMql.addEventListener) {
+        this._portraitMql.addEventListener("change", this._portraitChangeHandler);
+      } else if (this._portraitMql.addListener) {
+        this._portraitMql.addListener(this._portraitChangeHandler);
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -4784,6 +4806,17 @@ class LyricsContainer extends react.Component {
     }
     this._handleMouseMove = null;
     this._handleMouseLeave = null;
+
+    // Portrait viewport listener cleanup
+    if (this._portraitMql && this._portraitChangeHandler) {
+      if (this._portraitMql.removeEventListener) {
+        this._portraitMql.removeEventListener("change", this._portraitChangeHandler);
+      } else if (this._portraitMql.removeListener) {
+        this._portraitMql.removeListener(this._portraitChangeHandler);
+      }
+      this._portraitMql = null;
+      this._portraitChangeHandler = null;
+    }
 
     // ESC 키 리스너 정리
     if (this._escHandler) {
@@ -5285,6 +5318,10 @@ class LyricsContainer extends react.Component {
       }
       if (!hasLyrics && centerWhenNoLyrics) {
         fullscreenClasses += " fullscreen-no-lyrics";
+      }
+      // Portrait mode class (not in TV mode)
+      if (this._isPortraitViewport && CONFIG.visual["fullscreen-tv-mode"] !== true) {
+        fullscreenClasses += " portrait-mode";
       }
       // TV Mode class
       if (CONFIG.visual["fullscreen-tv-mode"] === true) {

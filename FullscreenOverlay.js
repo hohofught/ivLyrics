@@ -1168,29 +1168,27 @@ const FullscreenOverlay = (() => {
         const hideLeftPanel = !showAlbum && !showInfo && controlsPosition !== "left-panel";
         const showControlsInLeftPanel = controlsPosition === "left-panel" && showControls;
         const showControlsInBottom = controlsPosition === "bottom" && showControls;
-        const showContextInOverlay = !isPortraitFullscreen && showContext;
-        const showNextTrackInOverlay = !isPortraitFullscreen && showNextTrack;
-        const showQueueInOverlay = !isPortraitFullscreen && showQueue;
-        const showInfoInOverlay = !isPortraitFullscreen && showInfo;
-        const normalShowAlbumNameInOverlay = !isPortraitFullscreen && normalShowAlbumName;
+        const showContextInOverlay = showContext;
+        const showNextTrackInOverlay = showNextTrack;
+        const showQueueInOverlay = showQueue;
+        const showInfoInOverlay = showInfo;
+        const normalShowAlbumNameInOverlay = normalShowAlbumName;
         const showClockInOverlay = showClock;
-        const clockSizeInOverlay = isPortraitFullscreen ? Math.min(clockSize, 32) : clockSize;
-        const leftPanelShowVolume = isPortraitFullscreen ? false : showVolume;
-        const leftPanelControlsBackground = isPortraitFullscreen ? false : controlsBackground;
-        const leftPanelControlButtonSize = isPortraitFullscreen ? Math.min(controlButtonSize, 32) : controlButtonSize;
+        const clockSizeInOverlay = clockSize;
+        const leftPanelShowVolume = showVolume;
+        const leftPanelControlsBackground = controlsBackground;
+        const leftPanelControlButtonSize = controlButtonSize;
         const leftControlsClass = [
             "fullscreen-left-controls",
-            !uiVisible ? "hidden" : "",
-            isPortraitFullscreen && controlsPosition === "left-panel" ? "boundary-dock" : "",
-            isPortraitFullscreen && controlsPosition === "left-panel" && isLayoutReversed ? "layout-reversed" : ""
+            !uiVisible ? "hidden" : ""
         ].filter(Boolean).join(" ");
 
         // In TV mode, hide the left panel (album/info shown at bottom-left instead)
         const hideLeftPanelForTvMode = tvModeEnabled;
 
         return react.createElement(react.Fragment, null,
-            // TMI Overlay for TV Mode (rendered above everything when active)
-            tvModeEnabled && tmiMode && react.createElement("div", {
+            // TMI Overlay for TV Mode & Portrait Mode (rendered above everything when active)
+            (tvModeEnabled || isPortraitFullscreen) && tmiMode && react.createElement("div", {
                 className: "fullscreen-tv-tmi-overlay"
             },
                 tmiLoading ?
@@ -1438,8 +1436,176 @@ const FullscreenOverlay = (() => {
                     secondsBeforeEnd: nextTrackSeconds
                 })
             ),
-            // Left panel (Album, Info & Controls) OR TMI View - Hidden in TV Mode
-            isTwoColumn && !hideLeftPanel && !hideLeftPanelForTvMode && react.createElement("div", {
+            // Portrait mode overlays (세로모드 전용 오버레이)
+            isPortraitFullscreen && react.createElement(react.Fragment, null,
+                // [상단 오버레이] 앨범아트 + 곡정보
+                (showAlbum || showInfo) && react.createElement("div", {
+                    className: `portrait-overlay-top ${isLayoutReversed ? 'layout-reversed' : ''}`
+                },
+                    // 앨범아트
+                    showAlbum && react.createElement("div", {
+                        className: "portrait-album-container clickable-album-container",
+                        style: { borderRadius: `${albumRadius}px` },
+                        onClick: handleAlbumClick
+                    },
+                        react.createElement("img", {
+                            src: coverUrl || Spicetify.Player.data?.item?.metadata?.image_url,
+                            className: `portrait-album-art ${albumShadow ? 'with-shadow' : ''}`,
+                            style: { borderRadius: `${albumRadius}px` }
+                        }),
+                        react.createElement("div", {
+                            className: "album-tmi-hint",
+                            style: { borderRadius: `${albumRadius}px` }
+                        },
+                            react.createElement("div", { className: "album-tmi-hint-content" },
+                                react.createElement("span", { className: "album-tmi-text" },
+                                    (window.AIAddonManager?.getEnabledProvidersFor('tmi')?.length > 0)
+                                        ? I18n.t("tmi.viewInfo")
+                                        : I18n.t("tmi.requireKey")
+                                )
+                            )
+                        )
+                    ),
+                    // 곡정보 (메타데이터 번역 지원)
+                    showInfo && react.createElement("div", { className: "portrait-track-info" },
+                        // 제목
+                        (() => {
+                            const mode = CONFIG?.visual?.["translate-metadata-mode"] || "translated";
+                            const originalTitle = title || Spicetify.Player.data?.item?.metadata?.title;
+                            const translatedTitle = translatedMetadata?.translated?.title;
+                            const romanizedTitle = translatedMetadata?.romanized?.title;
+                            const applyTrim = (text) => trimTitleEnabled ? trimTitle(text) : text;
+                            const elements = [];
+
+                            switch (mode) {
+                                case "translated":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-title", className: "portrait-track-title"
+                                    }, applyTrim(translatedTitle || originalTitle)));
+                                    break;
+                                case "romanized":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-title", className: "portrait-track-title"
+                                    }, applyTrim(romanizedTitle || originalTitle)));
+                                    break;
+                                case "original-translated":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-title", className: "portrait-track-title"
+                                    }, applyTrim(originalTitle)));
+                                    if (translatedTitle && translatedTitle !== originalTitle) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-title-sub", className: "portrait-track-title-sub"
+                                        }, applyTrim(translatedTitle)));
+                                    }
+                                    break;
+                                case "original-romanized":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-title", className: "portrait-track-title"
+                                    }, applyTrim(originalTitle)));
+                                    if (romanizedTitle && romanizedTitle !== originalTitle) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-title-sub", className: "portrait-track-title-sub"
+                                        }, applyTrim(romanizedTitle)));
+                                    }
+                                    break;
+                                case "all":
+                                default:
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-title", className: "portrait-track-title"
+                                    }, applyTrim(originalTitle)));
+                                    if (translatedTitle && translatedTitle !== originalTitle) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-title-trans", className: "portrait-track-title-sub"
+                                        }, applyTrim(translatedTitle)));
+                                    }
+                                    if (romanizedTitle && romanizedTitle !== originalTitle && romanizedTitle !== translatedTitle) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-title-rom", className: "portrait-track-title-sub"
+                                        }, applyTrim(romanizedTitle)));
+                                    }
+                                    break;
+                            }
+                            return elements;
+                        })(),
+                        // 아티스트
+                        (() => {
+                            const mode = CONFIG?.visual?.["translate-metadata-mode"] || "translated";
+                            const originalArtist = artist || Spicetify.Player.data?.item?.metadata?.artist_name;
+                            const translatedArtist = translatedMetadata?.translated?.artist;
+                            const romanizedArtist = translatedMetadata?.romanized?.artist;
+                            const applyTrim = (text) => trimTitleEnabled ? trimTitle(text) : text;
+                            const elements = [];
+
+                            switch (mode) {
+                                case "translated":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-artist", className: "portrait-track-artist"
+                                    }, applyTrim(translatedArtist || originalArtist)));
+                                    break;
+                                case "romanized":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-artist", className: "portrait-track-artist"
+                                    }, applyTrim(romanizedArtist || originalArtist)));
+                                    break;
+                                case "original-translated":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-artist", className: "portrait-track-artist"
+                                    }, applyTrim(originalArtist)));
+                                    if (translatedArtist && translatedArtist !== originalArtist) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-artist-sub", className: "portrait-track-artist-sub"
+                                        }, applyTrim(translatedArtist)));
+                                    }
+                                    break;
+                                case "original-romanized":
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-artist", className: "portrait-track-artist"
+                                    }, applyTrim(originalArtist)));
+                                    if (romanizedArtist && romanizedArtist !== originalArtist) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-artist-sub", className: "portrait-track-artist-sub"
+                                        }, applyTrim(romanizedArtist)));
+                                    }
+                                    break;
+                                case "all":
+                                default:
+                                    elements.push(react.createElement("div", {
+                                        key: "pt-artist", className: "portrait-track-artist"
+                                    }, applyTrim(originalArtist)));
+                                    if (translatedArtist && translatedArtist !== originalArtist) {
+                                        elements.push(react.createElement("div", {
+                                            key: "pt-artist-trans", className: "portrait-track-artist-sub"
+                                        }, applyTrim(translatedArtist)));
+                                    }
+                                    break;
+                            }
+                            return elements;
+                        })(),
+                        // 앨범명 (옵션)
+                        normalShowAlbumName && react.createElement("div", {
+                            className: "portrait-track-album-name"
+                        }, (() => {
+                            try {
+                                return Spicetify.Player.data?.item?.metadata?.album_title || '';
+                            } catch (e) { return ''; }
+                        })())
+                    )
+                ),
+                // [하단 오버레이] 컨트롤 + 프로그레스바
+                (showControls || showProgress) && react.createElement("div", {
+                    className: `portrait-overlay-bottom ${!uiVisible ? 'hidden' : ''} ${isLayoutReversed ? 'layout-reversed' : ''}`
+                },
+                    showProgress && react.createElement(ProgressBar, { show: true }),
+                    showControls && react.createElement(PlayerControls, {
+                        show: true,
+                        showVolume: showVolume,
+                        buttonSize: controlButtonSize,
+                        showBackground: controlsBackground
+                    })
+                )
+            ),
+            // Left panel (Album, Info & Controls) OR TMI View - Hidden in TV Mode & Portrait Mode
+            !isPortraitFullscreen && isTwoColumn && !hideLeftPanel && !hideLeftPanelForTvMode && react.createElement("div", {
                 className: `lyrics-fullscreen-left-panel ${!uiVisible && showControlsInLeftPanel ? 'controls-hidden' : ''} ${tmiMode ? 'tmi-mode' : ''}`
             },
                 // TMI Mode View
@@ -1734,8 +1900,8 @@ const FullscreenOverlay = (() => {
                         )
                     )
             ),
-            // Bottom: Player controls (alternative position)
-            showControlsInBottom && react.createElement("div", {
+            // Bottom: Player controls (alternative position) - landscape only
+            !isPortraitFullscreen && showControlsInBottom && react.createElement("div", {
                 className: `fullscreen-bottom ${!uiVisible ? 'hidden' : ''}`
             },
                 showProgress && react.createElement(ProgressBar, { show: true }),
@@ -1746,8 +1912,8 @@ const FullscreenOverlay = (() => {
                     showBackground: controlsBackground
                 })
             ),
-            // Progress bar only at bottom (컨트롤 없이 진행바만 표시, bottom 위치)
-            !showControls && showProgress && controlsPosition === "bottom" && react.createElement("div", {
+            // Progress bar only at bottom (landscape only)
+            !isPortraitFullscreen && !showControls && showProgress && controlsPosition === "bottom" && react.createElement("div", {
                 className: `fullscreen-bottom ${!uiVisible ? 'hidden' : ''}`
             },
                 react.createElement(ProgressBar, { show: true })
