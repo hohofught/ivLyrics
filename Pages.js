@@ -602,6 +602,59 @@ const LyricsLineBlock = react.memo(({
 	);
 });
 
+const SyncedLyricsScrollView = react.memo(({
+	lyrics = [],
+	position = 0,
+	activeLyricIndex = 0,
+	isKara = false,
+	activeLineRef = null,
+	globalCharOffsets = [],
+	activeGlobalCharIndex = -1,
+}) => {
+	if (!Array.isArray(lyrics) || lyrics.length === 0) {
+		return null;
+	}
+
+	return react.createElement(
+		"div",
+		{
+			className: `lyrics-lyricsContainer-SyncedScrollView ${isKara ? "is-karaoke" : "is-synced"}`,
+		},
+		...lyrics.map((line, index) => {
+			const { text, startTime, originalText, text2 } = line;
+			const { mainText, subText, subText2 } = getLyricsDisplayMode(
+				isKara,
+				line,
+				text,
+				originalText,
+				text2
+			);
+			const isActiveLine = index === activeLyricIndex;
+			const hasSubLine = !!subText || !!subText2;
+
+			return react.createElement(LyricsLineBlock, {
+				key: `scroll-line-${startTime ?? index}-${index}`,
+				className: `lyrics-lyricsContainer-LyricsLine lyrics-lyricsContainer-LyricsLine-scrollView${hasSubLine ? " lyrics-lyricsContainer-LyricsLine-hasSubLine" : ""}${isActiveLine ? " lyrics-lyricsContainer-LyricsLine-active lyrics-lyricsContainer-LyricsLine-scrollCurrent" : ""}`,
+				style: {
+					cursor: Number.isFinite(startTime) ? "pointer" : "default",
+				},
+				lineRef: isActiveLine ? activeLineRef : null,
+				onClick: Number.isFinite(startTime) ? () => Spicetify.Player.seek(startTime) : null,
+				mainText,
+				subText,
+				subText2,
+				originalText,
+				isKara,
+				line,
+				position,
+				isActive: isActiveLine,
+				globalCharOffset: globalCharOffsets[index] || 0,
+				activeGlobalCharIndex,
+			});
+		})
+	);
+});
+
 const useSyncedLyricsEngine = ({
 	lyrics,
 	position,
@@ -628,17 +681,15 @@ const useSyncedLyricsEngine = ({
 		[paddedLyrics, position]
 	);
 
-	const compactVisibleLines = useMemo(() => {
-		if (!compact || isScrolling) {
-			return paddedLyrics;
+	const compactWindowStartIndex = useMemo(() => {
+		if (!compact) {
+			return 0;
 		}
 
-		const startIndex = Math.max(activeLineIndex - CONFIG.visual["lines-before"], 0);
-		const visibleCount = CONFIG.visual["lines-before"] + CONFIG.visual["lines-after"] + 1;
-		return paddedLyrics.slice(startIndex, startIndex + visibleCount);
-	}, [compact, isScrolling, paddedLyrics, activeLineIndex]);
+		return Math.max(activeLineIndex - CONFIG.visual["lines-before"], 0);
+	}, [compact, activeLineIndex]);
 
-	const linesToRender = compact ? compactVisibleLines : paddedLyrics;
+	const linesToRender = paddedLyrics;
 	const compactAnchorIndex = compact
 		? Math.min(CONFIG.visual["lines-before"], leadingEmptyLines)
 		: activeLineIndex;
@@ -667,39 +718,9 @@ const useSyncedLyricsEngine = ({
 		}));
 	}, [activeLineIndex, leadingEmptyLines, lyrics.length]);
 
-	const prevCompactScrollingRef = useRef(false);
-	useEffect(() => {
-		if (!compact) {
-			return undefined;
-		}
-
-		const activeLine = activeLineRef.current;
-		if (!isScrolling || prevCompactScrollingRef.current || !activeLine) {
-			prevCompactScrollingRef.current = isScrolling;
-			return undefined;
-		}
-
-		const raf = typeof requestAnimationFrame === "function"
-			? requestAnimationFrame
-			: (callback) => setTimeout(callback, 0);
-
-		raf(() => {
-			if (activeLineRef.current) {
-				activeLineRef.current.scrollIntoView({
-					block: "center",
-					inline: "nearest",
-				});
-			}
-		});
-
-		prevCompactScrollingRef.current = isScrolling;
-		return undefined;
-	}, [compact, isScrolling, activeLineIndex]);
-
 	const hasAutoScrolledRef = useRef(false);
 	useEffect(() => {
 		hasAutoScrolledRef.current = false;
-		prevCompactScrollingRef.current = false;
 	}, [lyricsId]);
 
 	useEffect(() => {
@@ -736,6 +757,9 @@ const useSyncedLyricsEngine = ({
 	const renderItems = useMemo(() => {
 		return linesToRender.map((line, visibleIndex) => {
 			const { lineNumber = visibleIndex, text, startTime, originalText, text2 } = line;
+			const compactVisibleIndex = compact
+				? lineNumber - compactWindowStartIndex
+				: visibleIndex;
 
 			if (compact && lineNumber === 1 && activeLineIndex <= leadingEmptyLines) {
 				const firstLyricStartTime = lyrics[0]?.startTime || 1;
@@ -767,7 +791,7 @@ const useSyncedLyricsEngine = ({
 				isScrolling,
 				activeLineIndex,
 				lineNumber,
-				visibleIndex,
+				visibleIndex: compactVisibleIndex,
 			});
 			const { mainText, subText, subText2 } = getLyricsDisplayMode(isKara, line, text, originalText, text2);
 
@@ -804,7 +828,7 @@ const useSyncedLyricsEngine = ({
 				isActiveLine,
 				trackLineRef: lineNumber === visualAnchorLineNumber,
 				canSeek: lineNumber >= leadingEmptyLines && Number.isFinite(startTime),
-				karaokeActive: compact ? visibleIndex === activeElementIndex : isActiveLine,
+				karaokeActive: compact ? compactVisibleIndex === activeElementIndex : isActiveLine,
 				globalCharOffset: lineNumber >= leadingEmptyLines && lineNumber - leadingEmptyLines < globalCharOffsets.length
 					? globalCharOffsets[lineNumber - leadingEmptyLines]
 					: 0,
@@ -822,6 +846,7 @@ const useSyncedLyricsEngine = ({
 		isScrolling,
 		isKara,
 		activeElementIndex,
+		compactWindowStartIndex,
 		visualAnchorLineNumber,
 		globalCharOffsets,
 		activeGlobalCharIndex,
@@ -832,6 +857,10 @@ const useSyncedLyricsEngine = ({
 		handleContainerClick,
 		renderItems,
 		compactOffset,
+		activeLineIndex,
+		activeLyricIndex: Math.max(0, activeLineIndex - leadingEmptyLines),
+		globalCharOffsets,
+		activeGlobalCharIndex,
 	};
 };
 
@@ -1218,7 +1247,9 @@ const KaraokeLine = react.memo(({ line, position, isActive, globalCharOffset = 0
 const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright, isKara }) => {
 	const position = useLyricsPlaybackPosition();
 	const [containerReady, setContainerReady] = useState(false);
-	const activeLineEle = useRef();
+	const [scrollViewVisible, setScrollViewVisible] = useState(false);
+	const compactActiveLineEle = useRef();
+	const scrollActiveLineEle = useRef();
 	const lyricContainerEle = useRef();
 	const lyricsId = useMemo(() => lyrics[0]?.text || "no-lyrics", [lyrics]);
 
@@ -1233,16 +1264,71 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 		handleContainerClick,
 		renderItems,
 		compactOffset,
+		activeLyricIndex,
+		globalCharOffsets,
+		activeGlobalCharIndex,
 	} = useSyncedLyricsEngine({
 		lyrics,
 		position,
 		compact: true,
 		isKara,
 		containerRef: lyricContainerEle,
-		activeLineRef: activeLineEle,
+		activeLineRef: compactActiveLineEle,
 		lyricsId,
 		containerReady,
 	});
+
+	const prevScrollModeRef = useRef(false);
+	useEffect(() => {
+		if (!isScrolling || prevScrollModeRef.current) {
+			prevScrollModeRef.current = isScrolling;
+			return undefined;
+		}
+
+		const raf = typeof requestAnimationFrame === "function"
+			? requestAnimationFrame
+			: (callback) => setTimeout(callback, 0);
+		const cancelRaf = typeof cancelAnimationFrame === "function"
+			? cancelAnimationFrame
+			: clearTimeout;
+		let nestedFrameId = null;
+		const frameId = raf(() => {
+			nestedFrameId = raf(() => {
+				scrollSyncedContainerToActiveLine(
+					lyricContainerEle.current,
+					scrollActiveLineEle.current,
+					"auto"
+				);
+			});
+		});
+
+		prevScrollModeRef.current = isScrolling;
+		return () => {
+			cancelRaf(frameId);
+			if (nestedFrameId !== null) {
+				cancelRaf(nestedFrameId);
+			}
+		};
+	}, [isScrolling, activeLyricIndex, lyricsId]);
+
+	useEffect(() => {
+		if (isScrolling) {
+			setScrollViewVisible(true);
+			return undefined;
+		}
+
+		const timeoutId = setTimeout(() => {
+			setScrollViewVisible(false);
+		}, 180);
+
+		return () => clearTimeout(timeoutId);
+	}, [isScrolling, lyricsId]);
+
+	useEffect(() => {
+		if (!isScrolling) {
+			prevScrollModeRef.current = false;
+		}
+	}, [isScrolling, lyricsId]);
 
 	if (!Array.isArray(lyrics) || lyrics.length === 0) {
 		return react.createElement("div", { className: "lyrics-lyricsContainer-SyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
@@ -1251,11 +1337,17 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 	return react.createElement(
 		"div",
 		{
-			className: `lyrics-lyricsContainer-SyncedLyricsPage ${isScrolling ? "scrolling-active" : ""}`,
+			className: `lyrics-lyricsContainer-SyncedLyricsPage ${isScrolling ? "scrolling-active" : ""}${scrollViewVisible ? " scroll-view-visible" : ""}`,
 			ref: containerRefCallback,
 			onClick: handleContainerClick,
 		},
 		react.createElement(
+			"div",
+			{
+				className: "lyrics-lyricsContainer-SyncedLyricsCompactView",
+				"aria-hidden": scrollViewVisible ? "true" : "false",
+			},
+			react.createElement(
 			"div",
 			{
 				className: "lyrics-lyricsContainer-SyncedLyrics",
@@ -1278,7 +1370,7 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 					key: item.key,
 					className: item.className,
 					style: item.style,
-					lineRef: item.trackLineRef ? activeLineEle : null,
+					lineRef: item.trackLineRef ? compactActiveLineEle : null,
 					onClick: item.canSeek ? () => Spicetify.Player.seek(item.startTime) : null,
 					mainText: item.mainText,
 					subText: item.subText,
@@ -1292,7 +1384,19 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 					activeGlobalCharIndex: item.activeGlobalCharIndex,
 				});
 			})
-		)
+			)
+		),
+		scrollViewVisible
+			? react.createElement(SyncedLyricsScrollView, {
+				lyrics,
+				position,
+				activeLyricIndex,
+				isKara,
+				activeLineRef: scrollActiveLineEle,
+				globalCharOffsets,
+				activeGlobalCharIndex,
+			})
+			: null
 	);
 });
 
