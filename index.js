@@ -2879,6 +2879,183 @@ class LyricsContainer extends react.Component {
       );
       const text = nonSectionLines.join("\n");
 
+      const currentUri = lyricsState.uri;
+      const currentProvider = lyricsState.provider || "";
+
+      if (!this._dmResults) {
+        this._dmResults = {};
+      }
+      if (!this._dmResults[currentUri]) {
+        this._dmResults[currentUri] = {};
+      }
+
+      this._dmResults[currentUri].lastMode1 = mode1;
+      this._dmResults[currentUri].lastMode2 = mode2;
+      this._dmResults[currentUri].lastProvider = currentProvider;
+
+      const originalNonSectionIndices = [];
+      originalLyrics.forEach((line, i) => {
+        const lineText = line?.text || "";
+        if (!Utils.isSectionHeader(lineText) && lineText.trim() !== "") {
+          originalNonSectionIndices.push(i);
+        }
+      });
+
+      const mapResultLinesToLyrics = (linesInput) => {
+        if (!Array.isArray(linesInput)) return null;
+
+        const cleanTranslationLines = linesInput.filter(
+          (line) =>
+            line !== undefined &&
+            line !== null &&
+            String(line).trim() !== "" &&
+            !Utils.isSectionHeader(String(line).trim())
+        );
+
+        return originalLyrics.map((line, i) => {
+          const originalText = line?.text || "";
+
+          if (Utils.isSectionHeader(originalText)) {
+            return {
+              ...line,
+              text: null,
+              originalText,
+            };
+          }
+
+          if (originalText.trim() === "") {
+            return {
+              ...line,
+              text: "",
+              originalText,
+            };
+          }
+
+          const positionInNonSectionLines =
+            originalNonSectionIndices.indexOf(i);
+          const translatedText =
+            cleanTranslationLines[positionInNonSectionLines]?.trim() || "";
+
+          return {
+            ...line,
+            text: translatedText || line?.text || "",
+            originalText,
+          };
+        });
+      };
+
+      const extractGeminiOutput = (response, wantSmartPhonetic) => {
+        let outText = wantSmartPhonetic
+          ? response?.phonetic
+          : response?.translation || response?.vi;
+
+        if (
+          Array.isArray(outText) &&
+          outText.length === 1 &&
+          typeof outText[0] === "string"
+        ) {
+          try {
+            if (outText[0].trim().startsWith("{")) {
+              const parsed = JSON.parse(outText[0]);
+              if (wantSmartPhonetic && Array.isArray(parsed.phonetic)) {
+                outText = parsed.phonetic;
+              } else if (
+                !wantSmartPhonetic &&
+                Array.isArray(parsed.translation)
+              ) {
+                outText = parsed.translation;
+              } else if (
+                !wantSmartPhonetic &&
+                Array.isArray(parsed.vi)
+              ) {
+                outText = parsed.vi;
+              }
+            }
+          } catch (e) {
+            // Keep the original output when the streamed payload is not JSON-wrapped.
+          }
+        }
+
+        return outText;
+      };
+
+      let streamedLyrics1 = null;
+      let streamedLyrics2 = null;
+      const streamedPhoneticLines = [];
+      const streamedTranslationLines = [];
+
+      const pushStreamingUpdate = () => {
+        if (this.state.uri !== currentUri) {
+          return;
+        }
+
+        this._dmResults[currentUri].mode1 = streamedLyrics1;
+        this._dmResults[currentUri].mode2 = streamedLyrics2;
+
+        this.applyStreamingTranslation({
+          uri: currentUri,
+          lyrics: originalLyrics,
+          lyricsMode1: streamedLyrics1,
+          lyricsMode2: streamedLyrics2,
+          displayMode1: mode1,
+          displayMode2: mode2,
+        });
+      };
+
+      const handlePhoneticStreamLine = needPhonetic
+        ? (lineIndex, lineText) => {
+          if (typeof lineIndex !== "number" || lineIndex < 0) {
+            return;
+          }
+          if (this.state.uri !== currentUri) {
+            return;
+          }
+
+          streamedPhoneticLines[lineIndex] =
+            typeof lineText === "string" ? lineText : String(lineText ?? "");
+
+          const partialMapped = mapResultLinesToLyrics(streamedPhoneticLines);
+          if (!partialMapped) {
+            return;
+          }
+
+          if (mode1 === "gemini_romaji") {
+            streamedLyrics1 = partialMapped;
+          }
+          if (mode2 === "gemini_romaji") {
+            streamedLyrics2 = partialMapped;
+          }
+          pushStreamingUpdate();
+        }
+        : null;
+
+      const handleTranslationStreamLine = needTranslation
+        ? (lineIndex, lineText) => {
+          if (typeof lineIndex !== "number" || lineIndex < 0) {
+            return;
+          }
+          if (this.state.uri !== currentUri) {
+            return;
+          }
+
+          streamedTranslationLines[lineIndex] =
+            typeof lineText === "string" ? lineText : String(lineText ?? "");
+
+          const partialMapped = mapResultLinesToLyrics(streamedTranslationLines);
+          if (!partialMapped) {
+            return;
+          }
+
+          if (mode1 === "gemini_ko") {
+            streamedLyrics1 = partialMapped;
+          }
+          if (mode2 === "gemini_ko") {
+            streamedLyrics2 = partialMapped;
+          }
+          pushStreamingUpdate();
+        }
+        : null;
+
       // 발음과 번역을 별도로 요청 (둘 다 필요한 경우)
       let phoneticResponse = null;
       let translationResponse = null;
@@ -2893,6 +3070,7 @@ class LyricsContainer extends react.Component {
           wantSmartPhonetic: true,
           provider: lyricsState.provider,
           ignoreCache: true,
+          onLine: handlePhoneticStreamLine,
         });
       }
 
@@ -2906,6 +3084,7 @@ class LyricsContainer extends react.Component {
           wantSmartPhonetic: false,
           provider: lyricsState.provider,
           ignoreCache: true,
+          onLine: handleTranslationStreamLine,
         });
       }
 
@@ -2986,30 +3165,25 @@ class LyricsContainer extends react.Component {
       let translatedLyrics1 = null;
       let translatedLyrics2 = null;
 
+      const phoneticOutput = extractGeminiOutput(phoneticResponse, true);
+      const translationOutput = extractGeminiOutput(translationResponse, false);
+
       // mode1 처리
       // mode1 처리
-      if (mode1 === "gemini_romaji" && phoneticResponse?.phonetic) {
-        translatedLyrics1 = processTranslationResult(phoneticResponse.phonetic, originalLyrics);
-      } else if (mode1 === "gemini_ko" && translationResponse?.translation) {
-        translatedLyrics1 = processTranslationResult(translationResponse.translation, originalLyrics);
+      if (mode1 === "gemini_romaji" && phoneticOutput) {
+        translatedLyrics1 = processTranslationResult(phoneticOutput, originalLyrics);
+      } else if (mode1 === "gemini_ko" && translationOutput) {
+        translatedLyrics1 = processTranslationResult(translationOutput, originalLyrics);
       }
 
       // mode2 처리 (mode1과 독립적으로)
-      if (mode2 === "gemini_romaji" && phoneticResponse?.phonetic) {
-        translatedLyrics2 = processTranslationResult(phoneticResponse.phonetic, originalLyrics);
-      } else if (mode2 === "gemini_ko" && translationResponse?.translation) {
-        translatedLyrics2 = processTranslationResult(translationResponse.translation, originalLyrics);
+      if (mode2 === "gemini_romaji" && phoneticOutput) {
+        translatedLyrics2 = processTranslationResult(phoneticOutput, originalLyrics);
+      } else if (mode2 === "gemini_ko" && translationOutput) {
+        translatedLyrics2 = processTranslationResult(translationOutput, originalLyrics);
       }
 
       // _dmResults에 번역 결과 저장
-      const currentUri = this.state.uri;
-      if (!this._dmResults) {
-        this._dmResults = {};
-      }
-      if (!this._dmResults[currentUri]) {
-        this._dmResults[currentUri] = {};
-      }
-
       // mode1과 mode2 결과 저장
       this._dmResults[currentUri].mode1 = translatedLyrics1;
       this._dmResults[currentUri].mode2 = translatedLyrics2;
@@ -3017,7 +3191,6 @@ class LyricsContainer extends react.Component {
       this._dmResults[currentUri].lastMode2 = mode2;
 
       // CacheManager에도 새 결과 저장 (getGeminiTranslation에서 캐시 히트하도록)
-      const currentProvider = lyricsState.provider || '';
       this._dmResults[currentUri].lastProvider = currentProvider;
       if (translatedLyrics1 && mode1) {
         CacheManager.set(`${currentUri}:${currentProvider}:${mode1}`, translatedLyrics1);
