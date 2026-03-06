@@ -7,11 +7,28 @@
 (function LyricsServiceExtension() {
     "use strict";
 
+    const MODULE_KEY = "__ivLyricsLyricsServiceModule";
+    const moduleState = window[MODULE_KEY] || (window[MODULE_KEY] = {
+        initialized: false,
+        waitTimer: null
+    });
+
     // Spicetify가 준비될 때까지 대기
     if (!window.Spicetify || !Spicetify.LocalStorage) {
-        setTimeout(LyricsServiceExtension, 300);
+        if (!moduleState.waitTimer) {
+            moduleState.waitTimer = setTimeout(() => {
+                moduleState.waitTimer = null;
+                LyricsServiceExtension();
+            }, 300);
+        }
         return;
     }
+
+    moduleState.waitTimer = null;
+    if (moduleState.initialized) {
+        return;
+    }
+    moduleState.initialized = true;
 
     console.log("[LyricsService] Initializing LyricsService Extension...");
 

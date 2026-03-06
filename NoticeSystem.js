@@ -8,6 +8,20 @@ const getNoticeUseState = () => Spicetify.React?.useState;
 const NOTICE_STORAGE_KEY = "ivLyrics:recent-notice";
 const NOTICE_URL = "https://ivlis.kr/ivLyrics/notice/";
 
+const sanitizeNoticeUrl = (url) => {
+    if (typeof url !== "string") return null;
+
+    try {
+        const parsed = new URL(url, window.location.origin);
+        if (!["http:", "https:"].includes(parsed.protocol)) {
+            return null;
+        }
+        return parsed.toString();
+    } catch {
+        return null;
+    }
+};
+
 /**
  * 공지사항 데이터 구조:
  * {
@@ -59,7 +73,12 @@ const compareVersions = (a, b) => {
 };
 
 const getCurrentVersion = () => {
-    return "4.0.9";
+    return (
+        window.Utils?.getCurrentVersion?.() ||
+        window.CONFIG?.version ||
+        window.ivLyricsVersion ||
+        "4.0.9"
+    );
 };
 
 /**
@@ -97,6 +116,7 @@ const calculateDismissible = (notice) => {
 const NoticeSystem = (() => {
     let cachedNotices = null;
     let isFetching = false;
+    let fetchPromise = null;
 
     // 저장된 마지막 확인 공지 날짜 가져오기
     const getLastSeenDate = () => {
@@ -119,30 +139,35 @@ const NoticeSystem = (() => {
 
     // 공지사항 가져오기
     const fetchNotices = async () => {
-        if (isFetching) return cachedNotices;
+        if (isFetching) return fetchPromise;
 
         isFetching = true;
-        try {
-            const response = await fetch(NOTICE_URL, {
-                cache: "no-store",
-                headers: {
-                    "Cache-Control": "no-cache"
+        fetchPromise = (async () => {
+            try {
+                const response = await fetch(NOTICE_URL, {
+                    cache: "no-store",
+                    headers: {
+                        "Cache-Control": "no-cache"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
-            });
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            cachedNotices = data;
-            return data;
+                const data = await response.json();
+                cachedNotices = data;
+                return data;
         } catch (error) {
             console.error("[NoticeSystem] Failed to fetch notices:", error);
             return null;
         } finally {
             isFetching = false;
-        }
+            fetchPromise = null;
+            }
+        })();
+
+        return fetchPromise;
     };
 
     // 표시할 공지사항 가져오기 (새로운 것만)
@@ -212,13 +237,13 @@ const NoticeSystem = (() => {
     };
 })();
 
-// 전역 접근 가능하게 등록
-window.NoticeSystem = NoticeSystem;
-
 // NoticeModal 컴포넌트
 const NoticeModal = ({ notices, onClose }) => {
     const [currentIndex, setCurrentIndex] = getNoticeUseState()(0);
     const currentNotice = notices[currentIndex];
+    const safeButtons = Array.isArray(currentNotice?.buttons)
+        ? currentNotice.buttons.filter((btn) => sanitizeNoticeUrl(btn?.url))
+        : [];
 
     if (!currentNotice) return null;
 
@@ -400,8 +425,7 @@ const NoticeModal = ({ notices, onClose }) => {
                     },
                 },
                 // URL 버튼들
-                currentNotice.buttons &&
-                currentNotice.buttons.length > 0 &&
+                safeButtons.length > 0 &&
                 getNoticeReact().createElement(
                     "div",
                     {
@@ -411,12 +435,12 @@ const NoticeModal = ({ notices, onClose }) => {
                             flexWrap: "wrap",
                         },
                     },
-                    currentNotice.buttons.map((btn, idx) =>
+                    safeButtons.map((btn, idx) =>
                         getNoticeReact().createElement(
                             "a",
                             {
                                 key: idx,
-                                href: btn.url,
+                                href: sanitizeNoticeUrl(btn.url),
                                 target: "_blank",
                                 rel: "noopener noreferrer",
                                 style: {
@@ -480,15 +504,15 @@ const NoticeModal = ({ notices, onClose }) => {
                                 flex: 1,
                                 padding: "12px 20px",
                                 background:
-                                    currentNotice.buttons && currentNotice.buttons.length > 0
+                                    safeButtons.length > 0
                                         ? "rgba(255, 255, 255, 0.08)"
                                         : colors.accent,
                                 color:
-                                    currentNotice.buttons && currentNotice.buttons.length > 0
+                                    safeButtons.length > 0
                                         ? "rgba(255, 255, 255, 0.9)"
                                         : "#000",
                                 border:
-                                    currentNotice.buttons && currentNotice.buttons.length > 0
+                                    safeButtons.length > 0
                                         ? "1px solid rgba(255, 255, 255, 0.15)"
                                         : "none",
                                 borderRadius: "10px",
@@ -515,11 +539,8 @@ const showNoticeIfNeeded = async () => {
         const notices = await NoticeSystem.getUnseenNotices();
 
         if (notices.length === 0) {
-            console.log("[NoticeSystem] No new notices to display");
             return;
         }
-
-        console.log(`[NoticeSystem] Found ${notices.length} new notice(s)`);
 
         // 모달 컨테이너 생성
         let container = document.getElementById("ivLyrics-notice-container");
@@ -535,6 +556,8 @@ const showNoticeIfNeeded = async () => {
                 if (dom && dom.unmountComponentAtNode) {
                     dom.unmountComponentAtNode(container);
                 }
+                container.remove();
+                container = null;
             }
         };
 
@@ -587,5 +610,3 @@ if (!document.getElementById("ivLyrics-notice-styles")) {
 // 전역으로 showNoticeIfNeeded 함수 노출
 window.showNoticeIfNeeded = showNoticeIfNeeded;
 window.NoticeSystem = NoticeSystem;
-
-console.log("[NoticeSystem] Module loaded successfully. showNoticeIfNeeded is now available.");

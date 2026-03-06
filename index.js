@@ -14,7 +14,8 @@ const FuriganaConverter = (() => {
   const MAX_CONVERSION_CACHE_SIZE = 1000;
   let hasLoggedKuromojiWarning = false;
 
-  // Patch XMLHttpRequest to fix URL issues
+// Patch XMLHttpRequest once to fix Kuromoji dictionary URLs
+if (!XMLHttpRequest.prototype.__ivLyricsFuriganaPatched) {
   const originalXHROpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function (method, url, ...args) {
     // Fix Kuromoji dictionary URLs
@@ -36,6 +37,8 @@ const FuriganaConverter = (() => {
     }
     return originalXHROpen.call(this, method, url, ...args);
   };
+  XMLHttpRequest.prototype.__ivLyricsFuriganaPatched = true;
+}
 
   const init = async () => {
     if (kuromojiInstance) {
@@ -281,13 +284,22 @@ if (typeof window.kuromoji === "undefined") {
 // OverlaySender는 window.OverlaySender로 전역 접근 가능
 if (!window.OverlaySender) {
   console.warn("[ivLyrics] OverlaySender not found from Extension, waiting...");
-  const checkOverlaySender = setInterval(() => {
-    if (window.OverlaySender) {
-      clearInterval(checkOverlaySender);
-      console.log("[ivLyrics] OverlaySender loaded from Extension");
-    }
-  }, 100);
-  setTimeout(() => clearInterval(checkOverlaySender), 5000);
+  if (!window.__ivLyricsOverlaySenderWaitTimer) {
+    window.__ivLyricsOverlaySenderWaitTimer = setInterval(() => {
+      if (window.OverlaySender) {
+        clearInterval(window.__ivLyricsOverlaySenderWaitTimer);
+        window.__ivLyricsOverlaySenderWaitTimer = null;
+        console.log("[ivLyrics] OverlaySender loaded from Extension");
+      }
+    }, 100);
+
+    setTimeout(() => {
+      if (window.__ivLyricsOverlaySenderWaitTimer) {
+        clearInterval(window.__ivLyricsOverlaySenderWaitTimer);
+        window.__ivLyricsOverlaySenderWaitTimer = null;
+      }
+    }, 5000);
+  }
 }
 
 // 하위 호환성을 위해 OverlaySender 별칭 생성
@@ -5964,12 +5976,8 @@ class LyricsContainer extends react.Component {
 (function initNoticeSystem() {
   // 앱이 완전히 로드된 후 공지사항 확인
   setTimeout(() => {
-    console.log("[ivLyrics] Checking for notice system...");
     if (typeof window.showNoticeIfNeeded === 'function') {
-      console.log("[ivLyrics] Calling showNoticeIfNeeded...");
       window.showNoticeIfNeeded();
-    } else {
-      console.warn("[ivLyrics] showNoticeIfNeeded not found. NoticeSystem may not be loaded.");
     }
   }, 3000); // 3초 후 실행 (앱 로드 완료 대기)
 })();
