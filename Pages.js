@@ -505,7 +505,7 @@ const getSyncedAnimationIndex = ({ compact, isScrolling, activeLineIndex, lineNu
 		return sourceIndex - activeLineIndex;
 	}
 
-	return sourceIndex - CONFIG.visual["lines-before"] - 1;
+	return sourceIndex - CONFIG.visual["lines-before"];
 };
 
 const shouldHideSyncedLine = ({ compact, isScrolling, animationIndex }) => {
@@ -1317,8 +1317,15 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 
 	const prevScrollModeRef = useRef(false);
 	useEffect(() => {
-		if (!isScrolling || prevScrollModeRef.current) {
-			prevScrollModeRef.current = isScrolling;
+		if (!isScrolling) {
+			if (prevScrollModeRef.current && lyricContainerEle.current) {
+				lyricContainerEle.current.scrollTop = 0;
+			}
+			prevScrollModeRef.current = false;
+			return undefined;
+		}
+
+		if (prevScrollModeRef.current) {
 			return undefined;
 		}
 
@@ -1346,12 +1353,6 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 				cancelRaf(nestedFrameId);
 			}
 		};
-	}, [isScrolling, activeLyricIndex, lyricsId]);
-
-	useEffect(() => {
-		if (!isScrolling) {
-			prevScrollModeRef.current = false;
-		}
 	}, [isScrolling, lyricsId]);
 
 	if (!Array.isArray(lyrics) || lyrics.length === 0) {
@@ -1365,6 +1366,7 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 			ref: containerRefCallback,
 			onClick: handleContainerClick,
 		},
+		react.createElement(
 			"div",
 			{
 				className: "lyrics-lyricsContainer-SyncedLyrics",
@@ -1401,6 +1403,7 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 					activeGlobalCharIndex: item.activeGlobalCharIndex,
 				});
 			})
+		)
 	);
 });
 

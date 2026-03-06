@@ -2067,7 +2067,7 @@ ruby rt {
   color: var(--lyrics-color-inactive);
   transform: none !important;
   cursor: pointer;
-  margin: 0 0 var(--scroll-line-gap) 0;
+  margin-bottom: var(--scroll-line-gap);
   padding: 0;
   position: relative;
   filter: none !important;
@@ -2089,7 +2089,6 @@ ruby rt {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
   border-radius: 14px;
   padding-inline: clamp(10px, 1.2vw, 18px);
-  margin-inline: calc(clamp(10px, 1.2vw, 18px) * -1);
 }
 
 .lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollCurrent::before {
