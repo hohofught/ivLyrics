@@ -411,7 +411,11 @@ body.ivlyrics-page-active .main-topBar-container {
   pointer-events: none;
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage:not(.scrolling-active) .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-paddingLine {
+.lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-paddingAfter {
+  visibility: hidden;
+}
+
+.lyrics-lyricsContainer-SyncedLyricsPage:not(.scrolling-active) .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-paddingBefore {
   height: 0 !important;
   min-height: 0 !important;
   margin-top: 0 !important;

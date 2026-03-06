@@ -801,6 +801,9 @@ const useSyncedLyricsEngine = ({
 			}
 			if (shouldHideSyncedLine({ compact, isScrolling, animationIndex })) {
 				className += " lyrics-lyricsContainer-LyricsLine-paddingLine";
+				className += animationIndex < 0
+					? " lyrics-lyricsContainer-LyricsLine-paddingBefore"
+					: " lyrics-lyricsContainer-LyricsLine-paddingAfter";
 			}
 
 			return {
