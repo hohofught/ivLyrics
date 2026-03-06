@@ -755,6 +755,42 @@ const useSyncedLyricsEngine = ({
 	}, [compact, activeLineIndex, isScrolling, containerRef, activeLineRef]);
 
 	const renderItems = useMemo(() => {
+		if (compact && isScrolling) {
+			return lyrics.map((line, index) => {
+				const { text, startTime, originalText, text2 } = line;
+				const { mainText, subText, subText2 } = getLyricsDisplayMode(
+					isKara,
+					line,
+					text,
+					originalText,
+					text2
+				);
+				const isActiveLine = index === Math.max(0, activeLineIndex - leadingEmptyLines);
+				const hasSubLine = !!subText || !!subText2;
+
+				return {
+					type: "line",
+					key: `scroll-inline-${startTime ?? index}-${index}`,
+					className: `lyrics-lyricsContainer-LyricsLine lyrics-lyricsContainer-LyricsLine-scrollView${hasSubLine ? " lyrics-lyricsContainer-LyricsLine-hasSubLine" : ""}${isActiveLine ? " lyrics-lyricsContainer-LyricsLine-active lyrics-lyricsContainer-LyricsLine-scrollCurrent" : ""}`,
+					style: {
+						cursor: Number.isFinite(startTime) ? "pointer" : "default",
+					},
+					line,
+					startTime,
+					originalText,
+					mainText,
+					subText,
+					subText2,
+					isActiveLine,
+					trackLineRef: isActiveLine,
+					canSeek: Number.isFinite(startTime),
+					karaokeActive: isActiveLine,
+					globalCharOffset: globalCharOffsets[index] || 0,
+					activeGlobalCharIndex,
+				};
+			});
+		}
+
 		return linesToRender.map((line, visibleIndex) => {
 			const { lineNumber = visibleIndex, text, startTime, originalText, text2 } = line;
 			const compactVisibleIndex = compact
@@ -1250,9 +1286,7 @@ const KaraokeLine = react.memo(({ line, position, isActive, globalCharOffset = 0
 const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright, isKara }) => {
 	const position = useLyricsPlaybackPosition();
 	const [containerReady, setContainerReady] = useState(false);
-	const [scrollViewVisible, setScrollViewVisible] = useState(false);
 	const compactActiveLineEle = useRef();
-	const scrollActiveLineEle = useRef();
 	const lyricContainerEle = useRef();
 	const lyricsId = useMemo(() => lyrics[0]?.text || "no-lyrics", [lyrics]);
 
@@ -1299,7 +1333,7 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 			nestedFrameId = raf(() => {
 				scrollSyncedContainerToActiveLine(
 					lyricContainerEle.current,
-					scrollActiveLineEle.current,
+					compactActiveLineEle.current,
 					"auto"
 				);
 			});
@@ -1315,19 +1349,6 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 	}, [isScrolling, activeLyricIndex, lyricsId]);
 
 	useEffect(() => {
-		if (isScrolling) {
-			setScrollViewVisible(true);
-			return undefined;
-		}
-
-		const timeoutId = setTimeout(() => {
-			setScrollViewVisible(false);
-		}, 180);
-
-		return () => clearTimeout(timeoutId);
-	}, [isScrolling, lyricsId]);
-
-	useEffect(() => {
 		if (!isScrolling) {
 			prevScrollModeRef.current = false;
 		}
@@ -1340,17 +1361,10 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 	return react.createElement(
 		"div",
 		{
-			className: `lyrics-lyricsContainer-SyncedLyricsPage ${isScrolling ? "scrolling-active" : ""}${scrollViewVisible ? " scroll-view-visible" : ""}`,
+			className: `lyrics-lyricsContainer-SyncedLyricsPage ${isScrolling ? "scrolling-active" : ""}`,
 			ref: containerRefCallback,
 			onClick: handleContainerClick,
 		},
-		react.createElement(
-			"div",
-			{
-				className: "lyrics-lyricsContainer-SyncedLyricsCompactView",
-				"aria-hidden": scrollViewVisible ? "true" : "false",
-			},
-			react.createElement(
 			"div",
 			{
 				className: "lyrics-lyricsContainer-SyncedLyrics",
@@ -1387,19 +1401,6 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 					activeGlobalCharIndex: item.activeGlobalCharIndex,
 				});
 			})
-			)
-		),
-		scrollViewVisible
-			? react.createElement(SyncedLyricsScrollView, {
-				lyrics,
-				position,
-				activeLyricIndex,
-				isKara,
-				activeLineRef: scrollActiveLineEle,
-				globalCharOffsets,
-				activeGlobalCharIndex,
-			})
-			: null
 	);
 });
 

@@ -2049,42 +2049,21 @@ ruby rt {
   background-color: var(--spice-text);
 }
 
-.lyrics-lyricsContainer-SyncedLyricsCompactView {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.lyrics-lyricsContainer-SyncedScrollView {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.lyrics-lyricsContainer-SyncedLyricsPage.scroll-view-visible .lyrics-lyricsContainer-SyncedLyricsCompactView {
-  opacity: 0;
-  transform: translateY(-8px);
-  pointer-events: none;
-}
-
-.lyrics-lyricsContainer-SyncedLyricsPage.scroll-view-visible .lyrics-lyricsContainer-SyncedScrollView {
-  display: block;
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics {
   box-sizing: border-box;
   min-height: 100%;
   width: 100%;
+  height: auto;
   padding: 46vh 0 46vh;
   --scroll-line-gap: clamp(10px, calc(var(--lyrics-font-size, 26px) * 0.26), 22px);
   --scroll-line-gap-karaoke: clamp(16px, calc(var(--lyrics-font-size, 26px) * 0.42), 32px);
-  opacity: 1;
-  transform: translateY(0);
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedScrollView.is-karaoke {
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics:has(.lyrics-karaoke-line) {
   --scroll-line-gap: var(--scroll-line-gap-karaoke);
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-LyricsLine-scrollView {
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollView {
   color: var(--lyrics-color-inactive);
   transform: none !important;
   cursor: pointer;
@@ -2096,15 +2075,15 @@ ruby rt {
   transition: color 0.24s ease, opacity 0.24s ease, text-shadow 0.24s ease, background-color 0.24s ease;
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-LyricsLine-scrollView:last-child {
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollView:last-child {
   margin-bottom: 0;
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-LyricsLine-scrollView.lyrics-lyricsContainer-LyricsLine-hasSubLine {
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollView.lyrics-lyricsContainer-LyricsLine-hasSubLine {
   margin-bottom: calc(var(--scroll-line-gap) + clamp(4px, 0.5vw, 10px));
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-LyricsLine-scrollView.lyrics-lyricsContainer-LyricsLine-active {
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollView.lyrics-lyricsContainer-LyricsLine-active {
   transform: none !important;
   opacity: 1;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
@@ -2113,7 +2092,7 @@ ruby rt {
   margin-inline: calc(clamp(10px, 1.2vw, 18px) * -1);
 }
 
-.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-LyricsLine-scrollCurrent::before {
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollCurrent::before {
   content: "";
   position: absolute;
   top: 0.5em;
