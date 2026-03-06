@@ -4454,10 +4454,10 @@ const ConfigModal = () => {
         const isFromSearch = isNavigatingFromSearchRef.current;
 
         if (scrollToSettingId && isFromSearch) {
-          console.log("[ivLyrics Search] Looking for setting:", scrollToSettingId);
+          window.__ivLyricsDebugLog?.("[ivLyrics Search] Looking for setting:", scrollToSettingId);
           // 특정 설정으로 스크롤
           const targetElement = document.querySelector(`[data-setting-key="${scrollToSettingId}"]`);
-          console.log("[ivLyrics Search] Found element:", targetElement);
+          window.__ivLyricsDebugLog?.("[ivLyrics Search] Found element:", targetElement);
 
           if (targetElement && contentArea) {
             // 컨테이너 내에서의 상대적 위치 계산
@@ -4478,7 +4478,7 @@ const ConfigModal = () => {
               targetElement.classList.remove("setting-highlight-flash");
             }, 2000);
           } else {
-            console.log("[ivLyrics Search] Element not found, scrolling to top");
+            window.__ivLyricsDebugLog?.("[ivLyrics Search] Element not found, scrolling to top");
             if (contentArea) {
               contentArea.scrollTop = 0;
             }
@@ -4505,7 +4505,7 @@ const ConfigModal = () => {
       const fonts = fontFamily.split(",").map((f) => f.trim().replace(/['"]/g, ""));
 
       fonts.forEach((font) => {
-        console.log(
+        window.__ivLyricsDebugLog?.(
           `[ivLyrics] Checking font: ${font} for loading`
         );
 
@@ -4520,7 +4520,7 @@ const ConfigModal = () => {
             link.id = linkId;
             link.rel = "stylesheet";
             document.head.appendChild(link);
-            console.log(
+            window.__ivLyricsDebugLog?.(
               `[ivLyrics] Created new link element for: ${font}`
             );
 
@@ -4533,10 +4533,10 @@ const ConfigModal = () => {
                 "+"
               )}:wght@100;200;300;400;500;600;700;800;900&display=swap`;
             }
-            console.log(`[ivLyrics] Font link href set to: ${link.href}`);
+            window.__ivLyricsDebugLog?.(`[ivLyrics] Font link href set to: ${link.href}`);
           }
         } else {
-          console.log(
+          window.__ivLyricsDebugLog?.(
             `[ivLyrics] Font ${font} not in GOOGLE_FONTS list or invalid`
           );
         }
@@ -4545,22 +4545,22 @@ const ConfigModal = () => {
 
     // 기본 폰트 로드 (separate-fonts가 false일 때 사용)
     const baseFont = CONFIG.visual["font-family"];
-    console.log(`[ivLyrics] Base font from CONFIG: ${baseFont}`);
+    window.__ivLyricsDebugLog?.(`[ivLyrics] Base font from CONFIG: ${baseFont}`);
     loadFont(baseFont, "ivLyrics-google-font-base");
 
     // 원문 폰트 로드
     const originalFont = CONFIG.visual["original-font-family"];
-    console.log(`[ivLyrics] Original font from CONFIG: ${originalFont}`);
+    window.__ivLyricsDebugLog?.(`[ivLyrics] Original font from CONFIG: ${originalFont}`);
     loadFont(originalFont, "ivLyrics-google-font-original");
 
     // 발음 폰트 로드
     const phoneticFont = CONFIG.visual["phonetic-font-family"];
-    console.log(`[ivLyrics] Phonetic font from CONFIG: ${phoneticFont}`);
+    window.__ivLyricsDebugLog?.(`[ivLyrics] Phonetic font from CONFIG: ${phoneticFont}`);
     loadFont(phoneticFont, "ivLyrics-google-font-phonetic");
 
     // 번역 폰트 로드
     const translationFont = CONFIG.visual["translation-font-family"];
-    console.log(
+    window.__ivLyricsDebugLog?.(
       `[ivLyrics] Translation font from CONFIG: ${translationFont}`
     );
     loadFont(translationFont, "ivLyrics-google-font-translation");
@@ -4569,7 +4569,7 @@ const ConfigModal = () => {
   // 외관 탭으로 전환될 때 미리보기 폰트 강제 업데이트
   react.useEffect(() => {
     if (activeTab === "appearance") {
-      console.log(
+      window.__ivLyricsDebugLog?.(
         `[ivLyrics] Appearance tab activated, updating preview fonts`
       );
       // 약간의 지연을 주어 DOM이 렌더링된 후 실행
@@ -4584,7 +4584,7 @@ const ConfigModal = () => {
         const phoneticFont = CONFIG.visual["phonetic-font-family"];
         const translationFont = CONFIG.visual["translation-font-family"];
 
-        console.log(
+        window.__ivLyricsDebugLog?.(
           `[ivLyrics] Fonts - original: ${originalFont}, phonetic: ${phoneticFont}, translation: ${translationFont}`
         );
 
@@ -4593,7 +4593,7 @@ const ConfigModal = () => {
           lyricsPreview.style.fontFamily = "var(--font-family)";
           // 짧은 지연 후 실제 폰트 적용
           setTimeout(() => {
-            console.log(
+            window.__ivLyricsDebugLog?.(
               `[ivLyrics] Setting lyrics preview font to: ${originalFont}`
             );
             lyricsPreview.style.fontFamily =
@@ -4604,7 +4604,7 @@ const ConfigModal = () => {
         if (phoneticPreview) {
           phoneticPreview.style.fontFamily = "var(--font-family)";
           setTimeout(() => {
-            console.log(
+            window.__ivLyricsDebugLog?.(
               `[ivLyrics] Setting phonetic preview font to: ${phoneticFont}`
             );
             phoneticPreview.style.fontFamily =
@@ -4615,7 +4615,7 @@ const ConfigModal = () => {
         if (translationPreview) {
           translationPreview.style.fontFamily = "var(--font-family)";
           setTimeout(() => {
-            console.log(
+            window.__ivLyricsDebugLog?.(
               `[ivLyrics] Setting translation preview font to: ${translationFont}`
             );
             translationPreview.style.fontFamily =
@@ -8477,8 +8477,8 @@ const ConfigModal = () => {
 
                 try {
                   const cfg = await StorageManager.exportConfig();
-                  console.log("[Settings] Config before serialize:", cfg);
-                  console.log("[Settings] Has track-sync-offsets:", "ivLyrics:track-sync-offsets" in cfg);
+                  window.__ivLyricsDebugLog?.("[Settings] Config before serialize:", cfg);
+                  window.__ivLyricsDebugLog?.("[Settings] Has track-sync-offsets:", "ivLyrics:track-sync-offsets" in cfg);
                   const u8 = settingsObject.serialize(cfg);
                   // download as file
                   const blob = new Blob([u8], {
@@ -8626,8 +8626,8 @@ const ConfigModal = () => {
                           !fileType && file.name.includes("lpconfig");
                         const isJson = fileType && fileType.includes("json");
                         if (!isLpconfig && !isJson) {
-                          console.log(fileType);
-                          console.log(file.name);
+                          window.__ivLyricsDebugLog?.(fileType);
+                          window.__ivLyricsDebugLog?.(file.name);
                           throw new Error("Invalid file type " + fileType);
                         }
                         if (isJson) {

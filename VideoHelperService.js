@@ -178,7 +178,7 @@ const VideoHelperService = (() => {
                     const videoUrl = data.url || data.message;
                     // URL 형식인지 확인 (http로 시작하는 경우만)
                     if (videoUrl && typeof videoUrl === 'string' && videoUrl.startsWith('http')) {
-                      console.log("[VideoHelperService] Download complete, URL:", videoUrl);
+                      window.__ivLyricsDebugLog?.("[VideoHelperService] Download complete, URL:", videoUrl);
                       onComplete?.(videoUrl);
                       return;
                     }
@@ -188,7 +188,7 @@ const VideoHelperService = (() => {
                   else if (data.status === "error") {
                     const msg = data.message || "";
                     if (msg.startsWith("WARNING")) {
-                      console.log("[VideoHelperService] Ignoring warning:", msg);
+                      window.__ivLyricsDebugLog?.("[VideoHelperService] Ignoring warning:", msg);
                       // WARNING은 무시하고 계속 진행
                     } else {
                       // 진짜 에러
@@ -216,7 +216,7 @@ const VideoHelperService = (() => {
                 if (data.status === "completed") {
                   const videoUrl = data.url || data.message;
                   if (videoUrl && videoUrl.startsWith('http')) {
-                    console.log("[VideoHelperService] Final buffer complete, URL:", videoUrl);
+                    window.__ivLyricsDebugLog?.("[VideoHelperService] Final buffer complete, URL:", videoUrl);
                     onComplete?.(videoUrl);
                     return;
                   }

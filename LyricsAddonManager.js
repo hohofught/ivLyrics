@@ -116,7 +116,7 @@
             if (this._initPromise) return this._initPromise;
 
             this._initPromise = (async () => {
-                console.log('[LyricsAddonManager] Initializing...');
+                window.__ivLyricsDebugLog?.('[LyricsAddonManager] Initializing...');
 
                 // 등록된 모든 Addon 초기화
                 for (const [id, addon] of this._addons) {
@@ -124,14 +124,14 @@
                         if (typeof addon.init === 'function') {
                             await addon.init();
                         }
-                        console.log(`[LyricsAddonManager] Addon "${id}" initialized`);
+                        window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Addon "${id}" initialized`);
                     } catch (e) {
                         console.error(`[LyricsAddonManager] Failed to initialize addon "${id}":`, e);
                     }
                 }
 
                 this._initialized = true;
-                console.log('[LyricsAddonManager] Initialization complete');
+                window.__ivLyricsDebugLog?.('[LyricsAddonManager] Initialization complete');
             })();
 
             return this._initPromise;
@@ -184,8 +184,8 @@
             }
 
             this._addons.set(addon.id, addon);
-            console.log(`[LyricsAddonManager] Registered addon: ${addon.id} (${addon.name})`);
-            console.log(`[LyricsAddonManager] Supports: karaoke=${addon.supports.karaoke}, synced=${addon.supports.synced}, unsynced=${addon.supports.unsynced}`);
+            window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Registered addon: ${addon.id} (${addon.name})`);
+            window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Supports: karaoke=${addon.supports.karaoke}, synced=${addon.supports.synced}, unsynced=${addon.supports.unsynced}`);
 
             // 이미 초기화 완료된 경우, 새 Addon도 초기화
             if (this._initialized && typeof addon.init === 'function') {
@@ -260,7 +260,7 @@
                 const addon = this._addons.get(addonId);
                 this._addons.delete(addonId);
                 this._marketplaceAddons.delete(addonId);
-                console.log(`[LyricsAddonManager] Unregistered addon: ${addonId}`);
+                window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Unregistered addon: ${addonId}`);
 
                 // 이벤트 발생
                 this.emit('addon:unregistered', { id: addonId, name: addon?.name });
@@ -322,7 +322,7 @@
          */
         setProviderOrder(order) {
             Spicetify.LocalStorage.set(STORAGE_PREFIX + 'provider-order', JSON.stringify(order));
-            console.log('[LyricsAddonManager] Provider order saved:', order);
+            window.__ivLyricsDebugLog?.('[LyricsAddonManager] Provider order saved:', order);
 
             // 이벤트 발생
             this.emit('provider:order:changed', { order });
@@ -456,7 +456,7 @@
          */
         _triggerLyricsRefresh() {
             if (window.lyricContainer && typeof window.lyricContainer.fetchLyrics === 'function') {
-                console.log('[LyricsAddonManager] Triggering lyrics refresh for settings change');
+                window.__ivLyricsDebugLog?.('[LyricsAddonManager] Triggering lyrics refresh for settings change');
                 const currentTrack = Spicetify.Player.data?.item;
                 if (currentTrack) {
                     // refresh=true 파라미터로 캐시 무시하고 새로 불러옴
@@ -510,18 +510,18 @@
 
             for (const provider of enabledProviders) {
                 try {
-                    console.log(`[LyricsAddonManager] Trying provider: ${provider.id}`);
+                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Trying provider: ${provider.id}`);
 
                     // 사용자 설정 확인 (먼저 확인해서 최적화)
                     const allowKaraoke = this.getAddonSetting(provider.id, 'enable_karaoke', true);
                     const allowSynced = this.getAddonSetting(provider.id, 'enable_synced', true);
                     const allowUnsynced = this.getAddonSetting(provider.id, 'enable_unsynced', true);
 
-                    console.log(`[LyricsAddonManager] User settings for ${provider.id}: karaoke=${allowKaraoke}, synced=${allowSynced}, unsynced=${allowUnsynced}`);
+                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] User settings for ${provider.id}: karaoke=${allowKaraoke}, synced=${allowSynced}, unsynced=${allowUnsynced}`);
 
                     // 모든 유형이 비활성화되면 이 provider 건너뜀
                     if (!allowKaraoke && !allowSynced && !allowUnsynced) {
-                        console.log(`[LyricsAddonManager] All lyrics types disabled for ${provider.id}, skipping`);
+                        window.__ivLyricsDebugLog?.(`[LyricsAddonManager] All lyrics types disabled for ${provider.id}, skipping`);
                         continue;
                     }
 
@@ -537,7 +537,7 @@
                             const cached = await window.LyricsService.getCachedLyrics(trackId, provider.id);
                             if (cached) {
                                 result = cached;
-                                console.log(`[LyricsAddonManager] Cache hit for ${provider.id}`);
+                                window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Cache hit for ${provider.id}`);
                             }
                         } catch (e) {
                             console.warn(`[LyricsAddonManager] Cache lookup failed for ${provider.id}:`, e);
@@ -555,11 +555,11 @@
                     }
 
                     if (!result || result.error) {
-                        console.log(`[LyricsAddonManager] Provider ${provider.id} returned error:`, result?.error);
+                        window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Provider ${provider.id} returned error:`, result?.error);
                         continue;
                     }
 
-                    console.log(`[LyricsAddonManager] Got lyrics from: ${provider.id}`, {
+                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Got lyrics from: ${provider.id}`, {
                         hasKaraoke: !!result.karaoke,
                         hasSynced: !!result.synced,
                         hasUnsynced: !!result.unsynced,
@@ -571,18 +571,18 @@
                     const hasBaseLyrics = result.synced || result.unsynced;
 
                     if (needsKaraoke && hasBaseLyrics) {
-                        console.log(`[LyricsAddonManager] Karaoke needed but not available, checking sync-data for ${provider.id}...`);
+                        window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Karaoke needed but not available, checking sync-data for ${provider.id}...`);
 
                         // sync-data 조회 시도
                         if (window.SyncDataService?.getSyncData) {
                             try {
                                 const syncProvider = result.provider || provider.id;
-                                console.log(`[LyricsAddonManager] Fetching sync-data for trackId=${trackId}, provider=${syncProvider}`);
+                                window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Fetching sync-data for trackId=${trackId}, provider=${syncProvider}`);
 
                                 const syncData = await window.SyncDataService.getSyncData(trackId, syncProvider);
 
                                 if (syncData && syncData.syncData) {
-                                    console.log(`[LyricsAddonManager] Found sync-data, applying...`);
+                                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Found sync-data, applying...`);
 
                                     // sync-data를 가사에 적용하여 karaoke 생성
                                     const baseLyrics = result.synced || result.unsynced;
@@ -606,22 +606,22 @@
                                             }
                                         }
 
-                                        console.log(`[LyricsAddonManager] Karaoke created from sync-data (${karaoke.length} lines)`);
+                                        window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Karaoke created from sync-data (${karaoke.length} lines)`);
                                     }
                                 } else {
-                                    console.log(`[LyricsAddonManager] No sync-data found for ${syncProvider}`);
+                                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] No sync-data found for ${syncProvider}`);
                                 }
                             } catch (e) {
                                 console.warn(`[LyricsAddonManager] Failed to get sync-data:`, e);
                             }
                         } else if (provider.useIvLyricsSync && window.LyricsService?.applyIvLyricsSyncData) {
                             // 레거시 방식: LyricsService.applyIvLyricsSyncData 사용
-                            console.log(`[LyricsAddonManager] Using legacy applyIvLyricsSyncData for ${provider.id}...`);
+                            window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Using legacy applyIvLyricsSyncData for ${provider.id}...`);
                             try {
                                 const syncResult = await window.LyricsService.applyIvLyricsSyncData(result);
                                 if (syncResult) {
                                     Object.assign(result, syncResult);
-                                    console.log(`[LyricsAddonManager] Legacy sync-data applied, hasKaraoke: ${!!result.karaoke}`);
+                                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Legacy sync-data applied, hasKaraoke: ${!!result.karaoke}`);
                                 }
                             } catch (e) {
                                 console.warn(`[LyricsAddonManager] Failed to apply legacy sync data:`, e);
@@ -635,7 +635,7 @@
                     if (!allowSynced) finalResult.synced = null;
                     if (!allowUnsynced) finalResult.unsynced = null;
 
-                    console.log(`[LyricsAddonManager] After filtering for ${provider.id}:`, {
+                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] After filtering for ${provider.id}:`, {
                         hasKaraoke: !!finalResult.karaoke,
                         hasSynced: !!finalResult.synced,
                         hasUnsynced: !!finalResult.unsynced
@@ -674,7 +674,7 @@
                     }
 
                     // 5. 필터링 후 가사가 없으면 다음 provider 시도
-                    console.log(`[LyricsAddonManager] Lyrics from ${provider.id} filtered out by user settings or empty`);
+                    window.__ivLyricsDebugLog?.(`[LyricsAddonManager] Lyrics from ${provider.id} filtered out by user settings or empty`);
 
                 } catch (e) {
                     console.warn(`[LyricsAddonManager] Provider ${provider.id} failed:`, e);
@@ -763,5 +763,5 @@
 
     initWhenReady();
 
-    console.log('[LyricsAddonManager] Module loaded');
+    window.__ivLyricsDebugLog?.('[LyricsAddonManager] Module loaded');
 })();

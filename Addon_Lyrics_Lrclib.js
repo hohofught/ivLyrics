@@ -263,14 +263,14 @@
                 if (attempt === 0) {
                     // 첫 번째 시도 실패: 500ms 대기 후 재시도
                     await new Promise(r => setTimeout(r, 500));
-                    console.log(`[LR-DEBUG] 네트워크 오류, 재시도 중...`);
+                    window.__ivLyricsDebugLog?.(`[LR-DEBUG] 네트워크 오류, 재시도 중...`);
                 }
                 // attempt === 1이면 재시도도 실패 → 루프 종료
             }
         }
 
         // 모든 재시도 실패 → null 반환 (에러 메시지 노출 방지)
-        console.log(`[LR-DEBUG] 네트워크 재시도 실패, 스킵`);
+        window.__ivLyricsDebugLog?.(`[LR-DEBUG] 네트워크 재시도 실패, 스킵`);
         return null;
     }
 
@@ -465,19 +465,19 @@
              */
             const logDebug = (msg, error = null) => {
                 const endTotal = performance.now();
-                console.log(`[LR-DEBUG] ========================================`);
-                console.log(`[LR-DEBUG] Track: ${info.title} - ${info.artist}`);
-                if (msg) console.log(`[LR-DEBUG] Status: ${msg}`);
-                if (error) console.log(`[LR-DEBUG] Error: ${error}`);
+                window.__ivLyricsDebugLog?.(`[LR-DEBUG] ========================================`);
+                window.__ivLyricsDebugLog?.(`[LR-DEBUG] Track: ${info.title} - ${info.artist}`);
+                if (msg) window.__ivLyricsDebugLog?.(`[LR-DEBUG] Status: ${msg}`);
+                if (error) window.__ivLyricsDebugLog?.(`[LR-DEBUG] Error: ${error}`);
                 if (bestScore > 0) {
                     // 매칭 점수 상세 출력 (디버깅용)
-                    console.log(`[LR-DEBUG] Match Score: ${bestScore.toFixed(2)} (Sync: ${bestSync.toFixed(2)}, Title: ${bestTitle.toFixed(2)}, Artist: ${bestArtist.toFixed(2)})`);
+                    window.__ivLyricsDebugLog?.(`[LR-DEBUG] Match Score: ${bestScore.toFixed(2)} (Sync: ${bestSync.toFixed(2)}, Title: ${bestTitle.toFixed(2)}, Artist: ${bestArtist.toFixed(2)})`);
                 }
                 // 성능 지표 출력
-                if (startServer > 0 && endServer > 0) console.log(`[LR-DEBUG] Time - Server: ${(endServer - startServer).toFixed(2)}ms`);
-                if (startLogic > 0 && endLogic > 0) console.log(`[LR-DEBUG] Time - Logic: ${(endLogic - startLogic).toFixed(2)}ms`);
-                console.log(`[LR-DEBUG] Time - Total: ${(endTotal - startTotal).toFixed(2)}ms`);
-                console.log(`[LR-DEBUG] ========================================`);
+                if (startServer > 0 && endServer > 0) window.__ivLyricsDebugLog?.(`[LR-DEBUG] Time - Server: ${(endServer - startServer).toFixed(2)}ms`);
+                if (startLogic > 0 && endLogic > 0) window.__ivLyricsDebugLog?.(`[LR-DEBUG] Time - Logic: ${(endLogic - startLogic).toFixed(2)}ms`);
+                window.__ivLyricsDebugLog?.(`[LR-DEBUG] Time - Total: ${(endTotal - startTotal).toFixed(2)}ms`);
+                window.__ivLyricsDebugLog?.(`[LR-DEBUG] ========================================`);
             };
 
             // ════════════════════════════════════════════════════════════════
@@ -558,7 +558,7 @@
                     data = await response.json();
                 }
 
-                console.log(`[LR-DEBUG] T${tier}: 구조화 검색 → ${Array.isArray(data) ? data.length : 0}개 결과`);
+                window.__ivLyricsDebugLog?.(`[LR-DEBUG] T${tier}: 구조화 검색 → ${Array.isArray(data) ? data.length : 0}개 결과`);
 
                 // ─────────────────────────────────────────────────────────────
                 // 【Tier 2】 제목 기반 폴백 (번역 제목, 로마자 표기 대응)
@@ -573,7 +573,7 @@
                     if (response && response.ok) {
                         data = await response.json();
                     }
-                    console.log(`[LR-DEBUG] T${tier}: 제목 검색 → ${Array.isArray(data) ? data.length : 0}개 결과`);
+                    window.__ivLyricsDebugLog?.(`[LR-DEBUG] T${tier}: 제목 검색 → ${Array.isArray(data) ? data.length : 0}개 결과`);
                 }
 
                 // ─────────────────────────────────────────────────────────────
@@ -586,7 +586,7 @@
                     const res = await fetchWithTimeout(url, { headers }, 35000);
                     let results = [];
                     if (res && res.ok) results = await res.json();
-                    console.log(`[LR-DEBUG] ${label}: 아티스트 검색 → ${Array.isArray(results) ? results.length : 0}개 결과`);
+                    window.__ivLyricsDebugLog?.(`[LR-DEBUG] ${label}: 아티스트 검색 → ${Array.isArray(results) ? results.length : 0}개 결과`);
 
                     if (Array.isArray(results) && results.length > 0) {
                         const tokens = info.artist.split(/[,、&·/\s]+/).map(s => s.trim().toLowerCase()).filter(t => t.length >= 2);
@@ -596,7 +596,7 @@
                             return tokens.some(t => ra.includes(t));
                         });
                         if (results.length !== before) {
-                            console.log(`[LR-DEBUG] ${label}: 토큰 필터 → ${before}개 → ${results.length}개 (토큰: ${tokens.join(', ')})`);
+                            window.__ivLyricsDebugLog?.(`[LR-DEBUG] ${label}: 토큰 필터 → ${before}개 → ${results.length}개 (토큰: ${tokens.join(', ')})`);
                         }
                     }
                     return Array.isArray(results) ? results : [];
@@ -651,13 +651,13 @@
                     });
 
                     if (data.length !== beforeCount) {
-                        console.log(`[LR-DEBUG] T2: 아티스트 필터 적용 → ${beforeCount}개 → ${data.length}개`);
+                        window.__ivLyricsDebugLog?.(`[LR-DEBUG] T2: 아티스트 필터 적용 → ${beforeCount}개 → ${data.length}개`);
                     }
 
                     // 【T2 필터 후 T3 폴백】
                     // T2 필터가 모든 결과를 제거한 경우 T3로 재시도
                     if (data.length === 0) {
-                        console.log(`[LR-DEBUG] T2: 필터 후 결과 없음 → T3 폴백 시도`);
+                        window.__ivLyricsDebugLog?.(`[LR-DEBUG] T2: 필터 후 결과 없음 → T3 폴백 시도`);
                         tier = 3;
                         data = await searchT3WithTokenFilter('T3(폴백)');
                     }

@@ -77,7 +77,7 @@
             });
 
             if (!response.ok) {
-                console.warn('[ChatGPT Addon] Failed to fetch models:', response.status);
+                window.__ivLyricsDebugLog?.('[ChatGPT Addon] Failed to fetch models:', response.status);
                 return [];
             }
 
@@ -141,7 +141,7 @@
 
             return models;
         } catch (e) {
-            console.warn('[ChatGPT Addon] Error fetching models:', e.message);
+            window.__ivLyricsDebugLog?.('[ChatGPT Addon] Error fetching models:', e.message);
             return [];
         }
     }
@@ -424,7 +424,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     });
 
                     if (response.status === 429 || response.status === 403) {
-                        console.warn(`[ChatGPT Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        window.__ivLyricsDebugLog?.(`[ChatGPT Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         break; // Try next key
                     }
 
@@ -461,7 +461,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[ChatGPT Addon] Attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[ChatGPT Addon] Attempt ${attempt + 1} failed:`, e.message);
 
                     if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) {
                         throw e;
@@ -514,7 +514,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     });
 
                     if (response.status === 429 || response.status === 403) {
-                        console.warn(`[ChatGPT Addon] Stream: API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        window.__ivLyricsDebugLog?.(`[ChatGPT Addon] Stream: API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         break;
                     }
 
@@ -574,7 +574,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[ChatGPT Addon] Stream attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[ChatGPT Addon] Stream attempt ${attempt + 1} failed:`, e.message);
                     if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) throw e;
                     if (attempt < maxRetries - 1) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
                 }
@@ -609,12 +609,12 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
         // If we have more lines, try to find the correct block
         if (lines.length > expectedLineCount) {
-            console.warn(`[ChatGPT Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Trimming...`);
+            window.__ivLyricsDebugLog?.(`[ChatGPT Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Trimming...`);
             return lines.slice(-expectedLineCount);
         }
 
         // If we have fewer lines, pad with empty strings
-        console.warn(`[ChatGPT Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Padding...`);
+        window.__ivLyricsDebugLog?.(`[ChatGPT Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Padding...`);
         while (lines.length < expectedLineCount) {
             lines.push('');
         }
@@ -651,7 +651,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
         ...ADDON_INFO,
 
         async init() {
-            console.log(`[ChatGPT Addon] Initialized (v${ADDON_INFO.version})`);
+            window.__ivLyricsDebugLog?.(`[ChatGPT Addon] Initialized (v${ADDON_INFO.version})`);
         },
 
         /**
@@ -690,7 +690,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                         setAvailableModels(models);
                         ADDON_INFO.models = models;
                     } catch (e) {
-                        console.warn('[ChatGPT Addon] Failed to load models:', e);
+                        window.__ivLyricsDebugLog?.('[ChatGPT Addon] Failed to load models:', e);
                         setAvailableModels([]);
                     } finally {
                         setModelsLoading(false);
@@ -939,5 +939,5 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
     registerAddon();
 
-    console.log('[ChatGPT Addon] Module loaded');
+    window.__ivLyricsDebugLog?.('[ChatGPT Addon] Module loaded');
 })();

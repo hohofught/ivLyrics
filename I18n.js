@@ -187,7 +187,7 @@
             currentLanguage = DEFAULT_LANGUAGE;
         }
 
-        console.log("[I18n] Initialized: " + currentLanguage);
+        window.__ivLyricsDebugLog?.("[I18n] Initialized: " + currentLanguage);
     }
 
     /**
@@ -243,7 +243,7 @@
             localStorage.setItem(STORAGE_KEY, langCode);
         } catch (e) { }
 
-        console.log("[I18n] Language changed to: " + langCode);
+        window.__ivLyricsDebugLog?.("[I18n] Language changed to: " + langCode);
         return Promise.resolve(true);
     }
 

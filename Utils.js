@@ -863,11 +863,11 @@ const Utils = {
     try {
       const updateInfo = await this.checkForUpdates();
 
-      console.log("[ivLyrics] Update check result:", updateInfo);
+      window.__ivLyricsDebugLog?.("[ivLyrics] Update check result:", updateInfo);
 
       // Don't show notification if there was an error
       if (updateInfo.error) {
-        console.log("[ivLyrics] Update check error:", updateInfo.error);
+        window.__ivLyricsDebugLog?.("[ivLyrics] Update check error:", updateInfo.error);
         return updateInfo;
       }
 
@@ -875,7 +875,7 @@ const Utils = {
         const updateKey = `ivLyrics:update-dismissed:${updateInfo.latestVersion}`;
         const isDismissed = StorageManager.getItem(updateKey);
 
-        console.log(
+        window.__ivLyricsDebugLog?.(
           "[ivLyrics] Update available:",
           updateInfo.latestVersion,
           "Dismissed:",
@@ -891,7 +891,7 @@ const Utils = {
             releaseUrl: `https://github.com/ivLis-Studio/ivLyrics/releases/tag/v${updateInfo.latestVersion}`,
           };
 
-          console.log(
+          window.__ivLyricsDebugLog?.(
             "[ivLyrics] Update banner info stored:",
             window.ivLyrics_updateInfo
           );
@@ -899,7 +899,7 @@ const Utils = {
           // Trigger re-render if lyrics container exists
           if (window.lyricContainer) {
             try {
-              console.log("[ivLyrics] Triggering lyricContainer re-render");
+              window.__ivLyricsDebugLog?.("[ivLyrics] Triggering lyricContainer re-render");
               window.lyricContainer.forceUpdate();
             } catch (e) {
               console.error("[ivLyrics] Failed to trigger re-render:", e);
@@ -909,7 +909,7 @@ const Utils = {
           }
         }
       } else {
-        console.log("[ivLyrics] Already up to date");
+        window.__ivLyricsDebugLog?.("[ivLyrics] Already up to date");
       }
 
       return updateInfo;
@@ -1105,7 +1105,7 @@ const Utils = {
         if (window.ApiTracker && logId) {
           window.ApiTracker.logResponse(logId, { submitted: true }, 'success');
         }
-        console.log(`[ivLyrics] Community offset submitted: ${offsetMs}ms`);
+        window.__ivLyricsDebugLog?.(`[ivLyrics] Community offset submitted: ${offsetMs}ms`);
         return data;
       }
       if (window.ApiTracker && logId) {
@@ -1144,7 +1144,7 @@ const Utils = {
       const data = await response.json();
 
       if (data.success) {
-        console.log(`[ivLyrics] Community feedback submitted: ${isPositive ? '👍' : '👎'}`);
+        window.__ivLyricsDebugLog?.(`[ivLyrics] Community feedback submitted: ${isPositive ? '👍' : '👎'}`);
         return data;
       }
       return null;
@@ -1218,7 +1218,7 @@ const Utils = {
       const data = await response.json();
 
       if (data.success) {
-        console.log(`[ivLyrics] Community video submitted: ${videoId}`);
+        window.__ivLyricsDebugLog?.(`[ivLyrics] Community video submitted: ${videoId}`);
         return data;
       }
       return null;
@@ -1251,7 +1251,7 @@ const Utils = {
       const data = await response.json();
 
       if (data.success) {
-        console.log(`[ivLyrics] Community vote submitted: ${voteType > 0 ? '👍' : voteType < 0 ? '👎' : '취소'}`);
+        window.__ivLyricsDebugLog?.(`[ivLyrics] Community vote submitted: ${voteType > 0 ? '👍' : voteType < 0 ? '👎' : '취소'}`);
         return data;
       }
       return null;
@@ -1287,7 +1287,7 @@ const Utils = {
       const data = await response.json();
 
       if (data.success) {
-        console.log(`[ivLyrics] Community video deleted: ${videoEntryId}`);
+        window.__ivLyricsDebugLog?.(`[ivLyrics] Community video deleted: ${videoEntryId}`);
         return data;
       }
       return null;
@@ -1355,7 +1355,7 @@ const Utils = {
       this._cleanupOldSelectedVideos(db).catch(() => { });
 
       db.close();
-      console.log(`[ivLyrics] Saved selected video for ${trackUri}:`, videoInfo.youtubeVideoId);
+      window.__ivLyricsDebugLog?.(`[ivLyrics] Saved selected video for ${trackUri}:`, videoInfo.youtubeVideoId);
       return true;
     } catch (error) {
       console.error('[ivLyrics] Failed to save selected video:', error);
@@ -1403,7 +1403,7 @@ const Utils = {
       db.close();
 
       if (result) {
-        console.log(`[ivLyrics] Loaded selected video for ${trackUri}:`, result.youtubeVideoId);
+        window.__ivLyricsDebugLog?.(`[ivLyrics] Loaded selected video for ${trackUri}:`, result.youtubeVideoId);
         return result;
       }
       return null;
@@ -1430,7 +1430,7 @@ const Utils = {
       });
 
       db.close();
-      console.log(`[ivLyrics] Removed selected video for ${trackUri}`);
+      window.__ivLyricsDebugLog?.(`[ivLyrics] Removed selected video for ${trackUri}`);
       return true;
     } catch (error) {
       console.error('[ivLyrics] Failed to remove selected video:', error);
@@ -1478,7 +1478,7 @@ const Utils = {
 
       // 404 = 영상이 존재하지 않음, 401 = 비공개 영상
       if (response.status === 404 || response.status === 401) {
-        console.log("[ivLyrics] YouTube video not found or private:", videoId);
+        window.__ivLyricsDebugLog?.("[ivLyrics] YouTube video not found or private:", videoId);
         return null;
       }
 
@@ -1501,7 +1501,7 @@ const Utils = {
           const backupData = await backupResponse.json();
           // noembed은 존재하지 않는 영상에 대해 error 필드를 반환함
           if (backupData.error) {
-            console.log("[ivLyrics] Video not found via noembed:", videoId);
+            window.__ivLyricsDebugLog?.("[ivLyrics] Video not found via noembed:", videoId);
             return null;
           }
           return backupData.title || null;

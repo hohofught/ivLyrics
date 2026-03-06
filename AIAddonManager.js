@@ -132,7 +132,7 @@
             if (this._initPromise) return this._initPromise;
 
             this._initPromise = (async () => {
-                console.log('[AIAddonManager] Initializing...');
+                window.__ivLyricsDebugLog?.('[AIAddonManager] Initializing...');
 
                 // 등록된 모든 Addon 초기화
                 for (const [id, addon] of this._addons) {
@@ -140,14 +140,14 @@
                         if (typeof addon.init === 'function') {
                             await addon.init();
                         }
-                        console.log(`[AIAddonManager] Addon "${id}" initialized`);
+                        window.__ivLyricsDebugLog?.(`[AIAddonManager] Addon "${id}" initialized`);
                     } catch (e) {
                         console.error(`[AIAddonManager] Failed to initialize addon "${id}":`, e);
                     }
                 }
 
                 this._initialized = true;
-                console.log('[AIAddonManager] Initialization complete');
+                window.__ivLyricsDebugLog?.('[AIAddonManager] Initialization complete');
             })();
 
             return this._initPromise;
@@ -207,8 +207,8 @@
             }
 
             this._addons.set(addon.id, addon);
-            console.log(`[AIAddonManager] Registered addon: ${addon.id} (${addon.name})`);
-            console.log(`[AIAddonManager] Supports: translate=${addon.supports.translate}, metadata=${addon.supports.metadata}, tmi=${addon.supports.tmi}`);
+            window.__ivLyricsDebugLog?.(`[AIAddonManager] Registered addon: ${addon.id} (${addon.name})`);
+            window.__ivLyricsDebugLog?.(`[AIAddonManager] Supports: translate=${addon.supports.translate}, metadata=${addon.supports.metadata}, tmi=${addon.supports.tmi}`);
 
             // 이미 초기화 완료된 경우, 새 Addon도 초기화
             if (this._initialized && typeof addon.init === 'function') {
@@ -276,7 +276,7 @@
                 const addon = this._addons.get(addonId);
                 this._addons.delete(addonId);
                 this._marketplaceAddons.delete(addonId);
-                console.log(`[AIAddonManager] Unregistered addon: ${addonId}`);
+                window.__ivLyricsDebugLog?.(`[AIAddonManager] Unregistered addon: ${addonId}`);
 
                 // 이벤트 발생
                 this.emit('addon:unregistered', { id: addonId, name: addon?.name });
@@ -338,7 +338,7 @@
          */
         setProviderOrder(order) {
             Spicetify.LocalStorage.set(STORAGE_PREFIX + 'provider-order', JSON.stringify(order));
-            console.log('[AIAddonManager] Provider order saved:', order);
+            window.__ivLyricsDebugLog?.('[AIAddonManager] Provider order saved:', order);
 
             // 이벤트 발생
             this.emit('provider:order:changed', { order });
@@ -552,7 +552,7 @@
                 if (typeof addon.translateMetadata !== 'function') continue;
 
                 try {
-                    console.log(`[AIAddonManager] Trying metadata provider: ${addon.id}`);
+                    window.__ivLyricsDebugLog?.(`[AIAddonManager] Trying metadata provider: ${addon.id}`);
                     const result = await addon.translateMetadata(params);
 
                     // 디버그 타이머 종료
@@ -619,7 +619,7 @@
                 if (typeof addon.translateLyrics !== 'function') continue;
 
                 try {
-                    console.log(`[AIAddonManager] Trying translate provider: ${addon.id}`);
+                    window.__ivLyricsDebugLog?.(`[AIAddonManager] Trying translate provider: ${addon.id}`);
                     const result = await addon.translateLyrics(params);
 
                     // 디버그 타이머 종료
@@ -684,7 +684,7 @@
                 if (typeof addon.generateTMI !== 'function') continue;
 
                 try {
-                    console.log(`[AIAddonManager] Trying TMI provider: ${addon.id}`);
+                    window.__ivLyricsDebugLog?.(`[AIAddonManager] Trying TMI provider: ${addon.id}`);
                     const result = await addon.generateTMI(params);
 
                     // 디버그 타이머 종료
@@ -772,6 +772,6 @@
 
     initWhenReady();
 
-    console.log('[AIAddonManager] Module loaded');
+    window.__ivLyricsDebugLog?.('[AIAddonManager] Module loaded');
 })();
 

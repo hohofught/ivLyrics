@@ -5,9 +5,9 @@
 	}
 
 	// 디버깅을 위한 Spicetify.Playbar API 확인
-	console.log("[ivLyrics] Spicetify.Playbar available:", !!Spicetify.Playbar);
-	console.log("[ivLyrics] Spicetify.Playbar.Button available:", !!Spicetify.Playbar?.Button);
-	console.log("[ivLyrics] Spicetify.Playbar.Widget available:", !!Spicetify.Playbar?.Widget);
+	window.__ivLyricsDebugLog?.("[ivLyrics] Spicetify.Playbar available:", !!Spicetify.Playbar);
+	window.__ivLyricsDebugLog?.("[ivLyrics] Spicetify.Playbar.Button available:", !!Spicetify.Playbar?.Button);
+	window.__ivLyricsDebugLog?.("[ivLyrics] Spicetify.Playbar.Widget available:", !!Spicetify.Playbar?.Widget);
 
 	// ===== 가사 버튼 교체 (기존 기능) =====
 	let button = null;
@@ -29,7 +29,7 @@
 				Spicetify.Platform.History.location.pathname === "/ivLyrics",
 				false
 			);
-			console.log("[ivLyrics] Playbar.Button created successfully:", button);
+			window.__ivLyricsDebugLog?.("[ivLyrics] Playbar.Button created successfully:", button);
 		} catch (e) {
 			console.warn("[ivLyrics] Failed to create Playbar.Button:", e);
 			buttonRegistrationFailed = true;
@@ -67,7 +67,7 @@
 		setTimeout(() => {
 			const ivLyricsButton = document.querySelector('.main-nowPlayingBar-extraControls button svg path[d*="M13.426 2.574"]');
 			if (ivLyricsButton) {
-				console.log("[ivLyrics] Playbar button successfully registered");
+				window.__ivLyricsDebugLog?.("[ivLyrics] Playbar button successfully registered");
 				callback(true);
 			} else if (retries > 0) {
 				verifyButtonRegistration(callback, retries - 1);
@@ -132,7 +132,7 @@
 				false,
 				true  // right=true: 오른쪽 그룹에 배치
 			);
-			console.log("[ivLyrics] Fullscreen Playbar.Button created successfully:", fullscreenButton);
+			window.__ivLyricsDebugLog?.("[ivLyrics] Fullscreen Playbar.Button created successfully:", fullscreenButton);
 		} catch (e) {
 			console.warn("[ivLyrics] Failed to create fullscreen Playbar.Button:", e);
 			fullscreenButtonRegistrationFailed = true;
@@ -168,7 +168,7 @@
 		setTimeout(() => {
 			const ivLyricsFullscreenButton = document.querySelector('.main-nowPlayingBar-extraControls button svg path[d*="M0.25 3C0.25"]');
 			if (ivLyricsFullscreenButton) {
-				console.log("[ivLyrics] Fullscreen button successfully registered");
+				window.__ivLyricsDebugLog?.("[ivLyrics] Fullscreen button successfully registered");
 				callback(true);
 			} else if (retries > 0) {
 				verifyFullscreenButtonRegistration(callback, retries - 1);

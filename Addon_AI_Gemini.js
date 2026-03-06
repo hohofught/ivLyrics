@@ -53,7 +53,7 @@
             const response = await fetch(endpoint);
 
             if (!response.ok) {
-                console.warn('[Gemini Addon] Failed to fetch models:', response.status);
+                window.__ivLyricsDebugLog?.('[Gemini Addon] Failed to fetch models:', response.status);
                 return [];
             }
 
@@ -112,7 +112,7 @@
 
             return models;
         } catch (e) {
-            console.warn('[Gemini Addon] Error fetching models:', e.message);
+            window.__ivLyricsDebugLog?.('[Gemini Addon] Error fetching models:', e.message);
             return [];
         }
     }
@@ -403,7 +403,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     });
 
                     if (response.status === 429 || response.status === 403) {
-                        console.warn(`[Gemini Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        window.__ivLyricsDebugLog?.(`[Gemini Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         break; // Try next key
                     }
 
@@ -432,7 +432,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[Gemini Addon] Attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[Gemini Addon] Attempt ${attempt + 1} failed:`, e.message);
 
                     if (attempt < maxRetries - 1) {
                         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
@@ -553,7 +553,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
         if (lines.length > expectedLineCount) {
             // Try to find a contiguous block of expectedLineCount lines
             // that looks most like translated content
-            console.warn(`[Gemini Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Trimming...`);
+            window.__ivLyricsDebugLog?.(`[Gemini Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Trimming...`);
 
             // Simple heuristic: take the last expectedLineCount lines
             // (AI often adds explanation at the beginning)
@@ -561,7 +561,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
         }
 
         // If we have fewer lines, pad with empty strings
-        console.warn(`[Gemini Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Padding...`);
+        window.__ivLyricsDebugLog?.(`[Gemini Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Padding...`);
         while (lines.length < expectedLineCount) {
             lines.push('');
         }
@@ -598,7 +598,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
         ...ADDON_INFO,
 
         async init() {
-            console.log(`[Gemini Addon] Initialized (v${ADDON_INFO.version})`);
+            window.__ivLyricsDebugLog?.(`[Gemini Addon] Initialized (v${ADDON_INFO.version})`);
         },
 
         /**
@@ -637,7 +637,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                         // ADDON_INFO.models 업데이트 (다른 곳에서 사용할 수 있도록)
                         ADDON_INFO.models = models;
                     } catch (e) {
-                        console.warn('[Gemini Addon] Failed to load models:', e);
+                        window.__ivLyricsDebugLog?.('[Gemini Addon] Failed to load models:', e);
                         setAvailableModels([]);
                     } finally {
                         setModelsLoading(false);
@@ -883,5 +883,5 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
     registerAddon();
 
-    console.log('[Gemini Addon] Module loaded');
+    window.__ivLyricsDebugLog?.('[Gemini Addon] Module loaded');
 })();

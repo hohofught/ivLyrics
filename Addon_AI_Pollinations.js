@@ -45,7 +45,7 @@
             const response = await fetch(`${BASE_URL}/v1/models`);
 
             if (!response.ok) {
-                console.warn('[Pollinations Addon] Failed to fetch models:', response.status);
+                window.__ivLyricsDebugLog?.('[Pollinations Addon] Failed to fetch models:', response.status);
                 return [];
             }
 
@@ -86,7 +86,7 @@
 
             return models;
         } catch (e) {
-            console.warn('[Pollinations Addon] Error fetching models:', e.message);
+            window.__ivLyricsDebugLog?.('[Pollinations Addon] Error fetching models:', e.message);
             return [];
         }
     }
@@ -355,7 +355,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                     if (response.status === 429 || response.status === 403) {
                         if (apiKey) {
-                            console.warn(`[Pollinations Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                            window.__ivLyricsDebugLog?.(`[Pollinations Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         }
                         break; // Try next key
                     }
@@ -384,7 +384,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[Pollinations Addon] Attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[Pollinations Addon] Attempt ${attempt + 1} failed:`, e.message);
 
                     if (attempt < maxRetries - 1) {
                         await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
@@ -473,12 +473,12 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
         // If we have more lines, try to find the correct block
         if (lines.length > expectedLineCount) {
-            console.warn(`[Pollinations Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Trimming...`);
+            window.__ivLyricsDebugLog?.(`[Pollinations Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Trimming...`);
             return lines.slice(-expectedLineCount);
         }
 
         // If we have fewer lines, pad with empty strings
-        console.warn(`[Pollinations Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Padding...`);
+        window.__ivLyricsDebugLog?.(`[Pollinations Addon] Got ${lines.length} lines, expected ${expectedLineCount}. Padding...`);
         while (lines.length < expectedLineCount) {
             lines.push('');
         }
@@ -515,7 +515,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
         ...ADDON_INFO,
 
         async init() {
-            console.log(`[Pollinations Addon] Initialized (v${ADDON_INFO.version})`);
+            window.__ivLyricsDebugLog?.(`[Pollinations Addon] Initialized (v${ADDON_INFO.version})`);
         },
 
         /**
@@ -547,7 +547,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                         setAvailableModels(models);
                         ADDON_INFO.models = models;
                     } catch (e) {
-                        console.warn('[Pollinations Addon] Failed to load models:', e);
+                        window.__ivLyricsDebugLog?.('[Pollinations Addon] Failed to load models:', e);
                         setAvailableModels([]);
                     } finally {
                         setModelsLoading(false);
@@ -746,5 +746,5 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
     registerAddon();
 
-    console.log('[Pollinations Addon] Module loaded');
+    window.__ivLyricsDebugLog?.('[Pollinations Addon] Module loaded');
 })();

@@ -52,7 +52,7 @@
             });
 
             if (!response.ok) {
-                console.warn('[Claude Addon] Failed to fetch models:', response.status);
+                window.__ivLyricsDebugLog?.('[Claude Addon] Failed to fetch models:', response.status);
                 return [];
             }
 
@@ -84,7 +84,7 @@
 
             return models;
         } catch (e) {
-            console.warn('[Claude Addon] Error fetching models:', e.message);
+            window.__ivLyricsDebugLog?.('[Claude Addon] Error fetching models:', e.message);
             return [];
         }
     }
@@ -338,7 +338,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     });
 
                     if (response.status === 429 || response.status === 403) {
-                        console.warn(`[Claude Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        window.__ivLyricsDebugLog?.(`[Claude Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         break; // Try next key
                     }
 
@@ -375,7 +375,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[Claude Addon] Attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[Claude Addon] Attempt ${attempt + 1} failed:`, e.message);
 
                     if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) {
                         throw e;
@@ -424,7 +424,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     });
 
                     if (response.status === 429 || response.status === 403) {
-                        console.warn(`[Claude Addon] Stream: API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        window.__ivLyricsDebugLog?.(`[Claude Addon] Stream: API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         break;
                     }
 
@@ -503,7 +503,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[Claude Addon] Stream attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[Claude Addon] Stream attempt ${attempt + 1} failed:`, e.message);
 
                     if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) {
                         throw e;
@@ -792,5 +792,5 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
     registerAddon();
 
-    console.log('[Claude Addon] Module loaded');
+    window.__ivLyricsDebugLog?.('[Claude Addon] Module loaded');
 })();

@@ -1002,7 +1002,7 @@
         patchWindowOpen();
         observeIframes();
         patchYouTubePlayer();
-        console.log(`${logPrefix} initialized`);
+        window.__ivLyricsDebugLog?.(`${logPrefix} initialized`);
     };
 
     waitForSpicetify();

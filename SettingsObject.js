@@ -258,7 +258,7 @@ class SettingsObject {
   // - [값 인덱스:1바이트] 또는 [0xff 커스텀 값 표시][커스텀 값 길이:2바이트][커스텀 값 문자들...]
   serialize(config) {
     console.groupCollapsed("Serializing config");
-    console.log("Config:", config);
+    window.__ivLyricsDebugLog?.("Config:", config);
 
     const cbytes = [];
     const CONFIG_KEYS = Object.keys(config).filter((x) => !toIgnore.has(x));
@@ -302,7 +302,7 @@ class SettingsObject {
       throw new Error("Custom key count exceeds 65535");
     }
 
-    console.log("Custom Keys:", customKeys);
+    window.__ivLyricsDebugLog?.("Custom Keys:", customKeys);
     for (let i = 0; i < customKeys.length; i++) {
       const key = customKeys[i];
       appendString(key);
@@ -311,9 +311,9 @@ class SettingsObject {
     append2BNumber(CONFIG_KEYS.length);
     for (let i = 0; i < CONFIG_KEYS.length; i++) {
       const key = CONFIG_KEYS[i];
-      console.log("Key:", key);
+      window.__ivLyricsDebugLog?.("Key:", key);
       if (customKeys.includes(key)) {
-        console.log("CKey:", key);
+        window.__ivLyricsDebugLog?.("CKey:", key);
         // 커스텀 키인 경우
         cbytes.push(...CUSTOM_INDEX_PREFIX);
         const keyIndex = customKeys.indexOf(key);
@@ -342,19 +342,19 @@ class SettingsObject {
       }
     }
 
-    console.log("Serialized bytes:", cbytes);
-    console.log(
+    window.__ivLyricsDebugLog?.("Serialized bytes:", cbytes);
+    window.__ivLyricsDebugLog?.(
       "Serialized string:",
       new TextDecoder().decode(new Uint8Array(cbytes))
     );
-    console.log("Total bytes:", cbytes.length);
+    window.__ivLyricsDebugLog?.("Total bytes:", cbytes.length);
     console.groupEnd();
     return new Uint8Array(cbytes);
   }
 
   deserialize(byteArray) {
     console.groupCollapsed("Deserializing byte array");
-    console.log("Byte array:", byteArray);
+    window.__ivLyricsDebugLog?.("Byte array:", byteArray);
 
     let offset = 0;
 
@@ -386,7 +386,7 @@ class SettingsObject {
       const key = readString();
       customKeys.push(key);
     }
-    console.log("Custom Keys:", customKeys);
+    window.__ivLyricsDebugLog?.("Custom Keys:", customKeys);
 
     const configCount = read2BNumber();
     const config = {};
@@ -427,7 +427,7 @@ class SettingsObject {
       config[key] = value;
     }
 
-    console.log("Deserialized config:", config);
+    window.__ivLyricsDebugLog?.("Deserialized config:", config);
 
     console.groupEnd();
     return config;

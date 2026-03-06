@@ -223,7 +223,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				// However, if the old Providers object is used, we might need adjustment. 
 				// But we prioritize LyricsAddonManager now.
 
-				console.log('[SyncDataCreator] Trying provider:', tryProvider);
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Trying provider:', tryProvider);
 
 				try {
 					if (window.LyricsAddonManager) {
@@ -237,11 +237,11 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 
 					if (result && (result.synced || result.unsynced)) {
 						usedProvider = tryProvider;
-						console.log('[SyncDataCreator] Found lyrics from:', tryProvider);
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] Found lyrics from:', tryProvider);
 						break;
 					}
 				} catch (providerError) {
-					console.log('[SyncDataCreator] Provider', tryProvider, 'failed:', providerError.message);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Provider', tryProvider, 'failed:', providerError.message);
 				}
 			}
 
@@ -265,7 +265,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					try {
 						const existingSyncData = await window.SyncDataService.getSyncData(trackId, finalProvider);
 						if (existingSyncData && existingSyncData.syncData && existingSyncData.syncData.lines) {
-							console.log('[SyncDataCreator] Found matching existing sync data');
+							window.__ivLyricsDebugLog?.('[SyncDataCreator] Found matching existing sync data');
 							setSyncData(existingSyncData.syncData);
 							Toast.success(I18n.t('syncCreator.loadedExistingSyncData') || '기존 싱크 데이터를 불러왔습니다');
 						}
@@ -318,7 +318,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 			// 0. initialData가 있으면 그것을 우선 사용
 			// Auto loading from initialData disabled per user request
 			if (false && initialData && initialData.provider && initialData.lyrics) {
-				console.log('[SyncDataCreator] Using initial data:', initialData.provider);
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Using initial data:', initialData.provider);
 				let finalProvider = initialData.provider;
 				const inputLyrics = initialData.lyrics;
 
@@ -371,7 +371,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					try {
 						const existingSyncData = await window.SyncDataService.getSyncData(trackId, finalProvider);
 						if (existingSyncData && existingSyncData.syncData && existingSyncData.syncData.lines) {
-							console.log('[SyncDataCreator] Found matching existing sync data');
+							window.__ivLyricsDebugLog?.('[SyncDataCreator] Found matching existing sync data');
 							setSyncData(existingSyncData.syncData);
 							Toast.success(I18n.t('syncCreator.loadedExistingSyncData') || '기존 싱크 데이터를 불러왔습니다');
 						}
@@ -649,7 +649,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 		// record 모드가 아니거나 라인이 변경되면 키보드 싱크 상태 초기화
 		const shouldReset = mode !== 'record' || lineChanged;
 		if (shouldReset && (isKeyboardSyncingRef.current || isKeyboardDraggingRef.current)) {
-			console.log('[SyncDataCreator] Resetting keyboard sync state, mode:', mode, 'lineChanged:', lineChanged);
+			window.__ivLyricsDebugLog?.('[SyncDataCreator] Resetting keyboard sync state, mode:', mode, 'lineChanged:', lineChanged);
 			// 진행 중인 키보드 싱크 초기화
 			isKeyboardSyncingRef.current = false;
 			keyboardCharIndexRef.current = -1;
@@ -739,7 +739,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 			// record 모드가 아니면 처리하지 않음
 			if (mode !== 'record') return;
 
-			console.log('[SyncDataCreator] KeyDown:', e.key, 'mode:', mode, 'lineIndex:', currentLineIndex);
+			window.__ivLyricsDebugLog?.('[SyncDataCreator] KeyDown:', e.key, 'mode:', mode, 'lineIndex:', currentLineIndex);
 
 			if (currentLineIndex >= lyricsLines.length) return;
 
@@ -774,7 +774,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					keyboardCharIndexRef.current = startIndex;
 					setDragStartTime(currentTime);
 					setRecordingCharIndex(startIndex);
-					console.log('[SyncDataCreator] Started keyboard sync, chars:', currentLineChars.length, 'startIndex:', startIndex);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Started keyboard sync, chars:', currentLineChars.length, 'startIndex:', startIndex);
 					return startIndex;
 				} else {
 					// 다음 글자로 진행
@@ -797,13 +797,13 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 						keyboardCharIndexRef.current = nextIndex;
 						setRecordingCharIndex(nextIndex);
 						autoScroll(nextIndex);
-						console.log('[SyncDataCreator] Advanced to char:', nextIndex);
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] Advanced to char:', nextIndex);
 					}
 
 					// 마지막 글자면 라인 완료
 					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
 						finishKeyboardSync();
-						console.log('[SyncDataCreator] Line completed');
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed');
 						return -1; // 완료됨
 					}
 					return keyboardCharIndexRef.current;
@@ -834,7 +834,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					charTimesRef.current[i] = Math.round(interpolatedTime * 1000) / 1000;
 				}
 
-				console.log('[SyncDataCreator] Applied interpolation to word:', startIdx, '-', endIdx, 'duration:', duration.toFixed(3));
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to word:', startIdx, '-', endIdx, 'duration:', duration.toFixed(3));
 				pendingWordSyncRef.current = null;
 			};
 
@@ -876,7 +876,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					setRecordingCharIndex(endIdx);
 					autoScroll(endIdx);
 
-					console.log('[SyncDataCreator] Word sync started, first word ends at:', endIdx);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Word sync started, first word ends at:', endIdx);
 
 					// 마지막 글자면 라인 완료 (보간 적용 후)
 					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
@@ -889,10 +889,10 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 								const interpolatedTime = currentTime + (duration * progress);
 								charTimesRef.current[i] = Math.round(interpolatedTime * 1000) / 1000;
 							}
-							console.log('[SyncDataCreator] Applied interpolation to single word line');
+							window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to single word line');
 						}
 						finishKeyboardSync();
-						console.log('[SyncDataCreator] Line completed by word');
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by word');
 					} else {
 						// 보간을 위해 현재 단어 정보 저장 (보간 활성화 시)
 						if (interpolationEnabledRef.current) {
@@ -956,7 +956,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					};
 				}
 
-				console.log('[SyncDataCreator] Word advanced to char:', keyboardCharIndexRef.current);
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Word advanced to char:', keyboardCharIndexRef.current);
 
 				// 마지막 글자면 라인 완료
 				if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
@@ -972,12 +972,12 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 								const interpolatedTime = startTime + (duration * progress);
 								charTimesRef.current[i] = Math.round(interpolatedTime * 1000) / 1000;
 							}
-							console.log('[SyncDataCreator] Applied interpolation to last word:', startIdx, '-', endIdx);
+							window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to last word:', startIdx, '-', endIdx);
 						}
 					}
 					pendingWordSyncRef.current = null;
 					finishKeyboardSync();
-					console.log('[SyncDataCreator] Line completed by word');
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by word');
 				}
 			};
 
@@ -1015,13 +1015,13 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 
 				keyboardCharIndexRef.current = targetIdx;
 				setRecordingCharIndex(keyboardCharIndexRef.current);
-				console.log('[SyncDataCreator] Word reverted to char:', keyboardCharIndexRef.current);
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Word reverted to char:', keyboardCharIndexRef.current);
 
 				// 모든 글자 취소시 싱크 상태 초기화
 				if (keyboardCharIndexRef.current < 0) {
 					isKeyboardSyncingRef.current = false;
 					setDragStartTime(null);
-					console.log('[SyncDataCreator] All chars reverted by word, sync reset');
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] All chars reverted by word, sync reset');
 				}
 			};
 
@@ -1043,12 +1043,12 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					charTimesRef.current[keyboardCharIndexRef.current] = null;
 					keyboardCharIndexRef.current--;
 					setRecordingCharIndex(keyboardCharIndexRef.current);
-					console.log('[SyncDataCreator] Reverted to char:', keyboardCharIndexRef.current);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Reverted to char:', keyboardCharIndexRef.current);
 					// 모든 글자 취소시 싱크 상태 초기화
 					if (keyboardCharIndexRef.current < 0) {
 						isKeyboardSyncingRef.current = false;
 						setDragStartTime(null);
-						console.log('[SyncDataCreator] All chars reverted, sync reset');
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] All chars reverted, sync reset');
 					}
 				}
 			}
@@ -1133,12 +1133,12 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					keyboardCharIndexRef.current = endIdx;
 					setRecordingCharIndex(endIdx);
 					autoScroll(endIdx);
-					console.log('[SyncDataCreator] Syllable sync started, ends at:', endIdx);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Syllable sync started, ends at:', endIdx);
 
 					// 마지막 글자면 라인 완료
 					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
 						finishKeyboardSync();
-						console.log('[SyncDataCreator] Line completed by syllable');
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by syllable');
 					}
 				} else {
 					// 이미 싱크 중인 경우: 다음 음절로 진행
@@ -1202,12 +1202,12 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					keyboardCharIndexRef.current = endIdx;
 					setRecordingCharIndex(endIdx);
 					autoScroll(endIdx);
-					console.log('[SyncDataCreator] Syllable advanced to:', endIdx);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Syllable advanced to:', endIdx);
 
 					// 마지막 글자면 라인 완료
 					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
 						finishKeyboardSync();
-						console.log('[SyncDataCreator] Line completed by syllable');
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by syllable');
 					}
 				}
 			}
@@ -1321,11 +1321,11 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 			}
 		};
 
-		console.log('[SyncDataCreator] Registering keydown/keyup listeners, mode:', mode);
+		window.__ivLyricsDebugLog?.('[SyncDataCreator] Registering keydown/keyup listeners, mode:', mode);
 		document.addEventListener('keydown', handleKeyDown, true); // capture phase
 		document.addEventListener('keyup', handleKeyUp, true); // capture phase
 		return () => {
-			console.log('[SyncDataCreator] Removing keydown/keyup listeners');
+			window.__ivLyricsDebugLog?.('[SyncDataCreator] Removing keydown/keyup listeners');
 			document.removeEventListener('keydown', handleKeyDown, true);
 			document.removeEventListener('keyup', handleKeyUp, true);
 			// 정리시 드래그 인터벌도 정리
@@ -1643,7 +1643,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				worker.onmessage = (e) => {
 					if (e.data.found && !solved) {
 						solved = true;
-						console.log('[SyncDataCreator] PoW solved! nonce:', e.data.nonce);
+						window.__ivLyricsDebugLog?.('[SyncDataCreator] PoW solved! nonce:', e.data.nonce);
 						workers.forEach(w => w.terminate());
 						publishWorkersRef.current = [];
 						URL.revokeObjectURL(workerUrl);
@@ -1686,7 +1686,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				});
 			} catch (corsError) {
 				// CORS 오류 시 프록시 사용
-				console.log('[SyncDataCreator] Direct challenge request failed, trying proxy...');
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Direct challenge request failed, trying proxy...');
 				challengeRes = await fetch('https://corsproxy.io/?url=' + encodeURIComponent(challengeUrl), {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' }

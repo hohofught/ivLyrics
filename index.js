@@ -571,10 +571,18 @@ function render() {
 // Optimized utility functions with better error handling and performance
 const APP_NAME = "ivLyrics";
 const IVLYRICS_DEBUG = false;
+if (typeof window.__IVLYRICS_DEBUG__ !== "boolean") {
+  window.__IVLYRICS_DEBUG__ = IVLYRICS_DEBUG;
+}
+if (!window.__ivLyricsDebugLog) {
+  window.__ivLyricsDebugLog = (...args) => {
+    if (window.__IVLYRICS_DEBUG__) {
+      console.log(...args);
+    }
+  };
+}
 const ivLyricsDebug = (...args) => {
-  if (IVLYRICS_DEBUG) {
-    console.log(...args);
-  }
+  window.__ivLyricsDebugLog?.(...args);
 };
 
 // IndexedDB for track sync offsets

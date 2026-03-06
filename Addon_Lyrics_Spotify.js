@@ -57,7 +57,7 @@
          * 초기화
          */
         async init() {
-            console.log(`[Spotify Lyrics Addon] Initialized (v${ADDON_INFO.version})`);
+            window.__ivLyricsDebugLog?.(`[Spotify Lyrics Addon] Initialized (v${ADDON_INFO.version})`);
         },
 
         /**
@@ -202,5 +202,5 @@
 
     registerAddon();
 
-    console.log('[Spotify Lyrics Addon] Module loaded');
+    window.__ivLyricsDebugLog?.('[Spotify Lyrics Addon] Module loaded');
 })();

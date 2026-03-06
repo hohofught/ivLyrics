@@ -312,7 +312,7 @@ const SyncedVideoPreview = ({ videoId, startTime }) => {
         events: {
           onReady: (event) => {
             if (!isMounted) return;
-            console.log("[SyncedVideoPreview] Player ready");
+            window.__ivLyricsDebugLog?.("[SyncedVideoPreview] Player ready");
             setIsReady(true);
 
             // 초기 동기화

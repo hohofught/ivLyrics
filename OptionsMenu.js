@@ -162,7 +162,7 @@ const OptionsMenu = react.memo(
                 }
 
                 // 외부 콜백 호출
-                console.log('[OptionsMenu] Item clicked:', key, 'onSelect type:', typeof onSelect);
+                window.__ivLyricsDebugLog?.('[OptionsMenu] Item clicked:', key, 'onSelect type:', typeof onSelect);
                 if (typeof onSelect === 'function') {
                   onSelect(key);
                 } else {
@@ -991,18 +991,18 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
         ? "gemini"
         : friendlyLanguage;
 
-    console.log(
+    window.__ivLyricsDebugLog?.(
       "[TranslationMenu] Language:",
       friendlyLanguage,
       "ModeKey:",
       modeKey
     );
-    console.log("[TranslationMenu] Current values:");
-    console.log(
+    window.__ivLyricsDebugLog?.("[TranslationMenu] Current values:");
+    window.__ivLyricsDebugLog?.(
       `translation-mode:${modeKey} =`,
       CONFIG.visual[`translation-mode:${modeKey}`]
     );
-    console.log(
+    window.__ivLyricsDebugLog?.(
       `translation-mode-2:${modeKey} =`,
       CONFIG.visual[`translation-mode-2:${modeKey}`]
     );

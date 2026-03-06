@@ -51,7 +51,7 @@
             });
 
             if (!response.ok) {
-                console.warn('[Perplexity Addon] Failed to fetch models:', response.status);
+                window.__ivLyricsDebugLog?.('[Perplexity Addon] Failed to fetch models:', response.status);
                 return [];
             }
 
@@ -81,7 +81,7 @@
 
             return models;
         } catch (e) {
-            console.warn('[Perplexity Addon] Error fetching models:', e.message);
+            window.__ivLyricsDebugLog?.('[Perplexity Addon] Error fetching models:', e.message);
             return [];
         }
     }
@@ -337,7 +337,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
                     });
 
                     if (response.status === 429 || response.status === 403) {
-                        console.warn(`[Perplexity Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
+                        window.__ivLyricsDebugLog?.(`[Perplexity Addon] API key ${keyIndex + 1} failed (${response.status}), trying next...`);
                         break; // Try next key
                     }
 
@@ -374,7 +374,7 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
                 } catch (e) {
                     lastError = e;
-                    console.warn(`[Perplexity Addon] Attempt ${attempt + 1} failed:`, e.message);
+                    window.__ivLyricsDebugLog?.(`[Perplexity Addon] Attempt ${attempt + 1} failed:`, e.message);
 
                     if (e.message.includes('Invalid API key') || e.message.includes('permission denied')) {
                         throw e;
@@ -710,5 +710,5 @@ Even if the song is English, the description and trivia MUST be written in ${lan
 
     registerAddon();
 
-    console.log('[Perplexity Addon] Module loaded');
+    window.__ivLyricsDebugLog?.('[Perplexity Addon] Module loaded');
 })();
