@@ -580,7 +580,13 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
     // 키보드 단축키 (Shift + S)
     useEffect(() => {
         const handleKeyPress = (e) => {
-            if (e.shiftKey && e.key === 'S') {
+            const activeElement = document.activeElement;
+            const tagName = activeElement?.tagName?.toLowerCase();
+            if (tagName === 'input' || tagName === 'textarea' || activeElement?.isContentEditable) {
+                return;
+            }
+
+            if (e.shiftKey && e.code === 'KeyS') {
                 setShowStats(prev => !prev);
             }
         };

@@ -42,6 +42,16 @@
         }
     };
 
+    const cleanupWorker = (worker) => {
+        if (!worker) return;
+        try {
+            worker.postMessage('stop');
+        } catch (e) { }
+        try {
+            worker.terminate();
+        } catch (e) { }
+    };
+
     serviceDebug("[LyricsService] Initializing LyricsService Extension...");
 
     // ============================================
@@ -3199,24 +3209,21 @@
                 if (this._offsetListenerSetup) return;
                 this._offsetListenerSetup = true;
 
-                // localStorage 변경 감지
-                window.addEventListener('storage', (e) => {
+                this._storageListener = (e) => {
                     if (e.key && e.key.startsWith('lyrics-delay:')) {
                         this.resendWithNewOffset();
                     }
-                });
+                };
 
-                // 커스텀 이벤트 리스너
-                window.addEventListener('ivLyrics:delay-changed', () => {
+                this._delayChangedListener = () => {
                     this.resendWithNewOffset();
-                });
+                };
 
-                window.addEventListener('ivLyrics:offset-changed', () => {
+                this._offsetChangedListener = () => {
                     this.resendWithNewOffset();
-                });
+                };
 
-                // ivLyrics 페이지에서 가사가 준비되면 오버레이로 전송
-                window.addEventListener('ivLyrics:lyrics-ready', (e) => {
+                this._lyricsReadyListener = (e) => {
                     if (!this.enabled) return;
                     const { trackInfo, lyrics } = e.detail || {};
                     if (trackInfo) {
@@ -3227,26 +3234,23 @@
                         });
                         this.sendLyrics(trackInfo, lyrics || []);
                     }
-                });
+                };
 
-                // 페이지 가시성 변경 감지
-                document.addEventListener('visibilitychange', () => {
+                this._visibilityChangeListener = () => {
                     if (document.visibilityState === 'visible' && this.enabled) {
                         helperDebug('[lyricsHelperSender] 페이지 활성화 - 가사 재전송');
                         setTimeout(() => this.resendWithNewOffset(), 200);
                     }
-                });
+                };
 
-                // 창 포커스 시
-                window.addEventListener('focus', () => {
+                this._focusListener = () => {
                     if (this.enabled && this._lastTrackInfo) {
                         helperDebug('[lyricsHelperSender] 창 포커스 - 가사 재전송');
                         setTimeout(() => this.resendWithNewOffset(), 300);
                     }
-                });
+                };
 
-                // 트랙 변경 감지
-                Spicetify.Player.addEventListener('songchange', async () => {
+                this._songChangeListener = async () => {
                     // 캐시 초기화
                     this.lastSentUri = null;
                     this.lastSentLyrics = null;
@@ -3308,7 +3312,52 @@
                     } catch (e) {
                         console.error('[lyricsHelperSender] 가사 가져오기 실패:', e);
                     }
-                });
+                };
+
+                window.addEventListener('storage', this._storageListener);
+                window.addEventListener('ivLyrics:delay-changed', this._delayChangedListener);
+                window.addEventListener('ivLyrics:offset-changed', this._offsetChangedListener);
+                window.addEventListener('ivLyrics:lyrics-ready', this._lyricsReadyListener);
+                document.addEventListener('visibilitychange', this._visibilityChangeListener);
+                window.addEventListener('focus', this._focusListener);
+                Spicetify.Player.addEventListener('songchange', this._songChangeListener);
+            }
+        },
+        teardownOffsetListener: {
+            value: function () {
+                if (!this._offsetListenerSetup) return;
+                this._offsetListenerSetup = false;
+
+                if (this._storageListener) {
+                    window.removeEventListener('storage', this._storageListener);
+                    this._storageListener = null;
+                }
+                if (this._delayChangedListener) {
+                    window.removeEventListener('ivLyrics:delay-changed', this._delayChangedListener);
+                    this._delayChangedListener = null;
+                }
+                if (this._offsetChangedListener) {
+                    window.removeEventListener('ivLyrics:offset-changed', this._offsetChangedListener);
+                    this._offsetChangedListener = null;
+                }
+                if (this._lyricsReadyListener) {
+                    window.removeEventListener('ivLyrics:lyrics-ready', this._lyricsReadyListener);
+                    this._lyricsReadyListener = null;
+                }
+                if (this._visibilityChangeListener) {
+                    document.removeEventListener('visibilitychange', this._visibilityChangeListener);
+                    this._visibilityChangeListener = null;
+                }
+                if (this._focusListener) {
+                    window.removeEventListener('focus', this._focusListener);
+                    this._focusListener = null;
+                }
+                if (this._songChangeListener && typeof Spicetify.Player?.removeEventListener === 'function') {
+                    try {
+                        Spicetify.Player.removeEventListener('songchange', this._songChangeListener);
+                    } catch (e) { }
+                    this._songChangeListener = null;
+                }
             }
         },
         startProgressSync: {
@@ -3423,6 +3472,15 @@
                 this._worker.postMessage('start');
             }
         },
+        stopProgressSync: {
+            value: function () {
+                if (!this._worker) return;
+                cleanupWorker(this._worker);
+                this._worker = null;
+                this._isSendingProgress = false;
+                this._lastProgressUri = null;
+            }
+        },
         checkConnection: {
             value: async function () {
                 if (!this.enabled) return false;
@@ -3452,6 +3510,12 @@
                     setTimeout(() => this.checkConnection(), 1000);
                 }
                 helperDebug('[lyricsHelperSender] Initialized in Extension');
+            }
+        },
+        destroy: {
+            value: function () {
+                this.stopProgressSync();
+                this.teardownOffsetListener();
             }
         }
     });
