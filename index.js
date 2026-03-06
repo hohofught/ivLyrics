@@ -5259,6 +5259,9 @@ class LyricsContainer extends react.Component {
     const textShadow = CONFIG.visual["text-shadow-enabled"]
       ? `0 0 ${CONFIG.visual["text-shadow-blur"]}px ${shadowColor}`
       : "none";
+    const textDropShadow = CONFIG.visual["text-shadow-enabled"]
+      ? `drop-shadow(0 0 ${CONFIG.visual["text-shadow-blur"]}px ${shadowColor})`
+      : "none";
 
     this.styleVariables = {
       ...this.styleVariables,
@@ -5296,6 +5299,7 @@ class LyricsContainer extends react.Component {
       "--lyrics-furigana-spacing": `${CONFIG.visual["furigana-spacing"]}px`,
       "--lyrics-line-spacing": `${CONFIG.visual["line-spacing"] || 8}px`,
       "--lyrics-text-shadow": textShadow,
+      "--lyrics-text-drop-shadow": textDropShadow,
       "--lyrics-original-opacity": CONFIG.visual["original-opacity"] / 100,
       "--lyrics-translation-opacity":
         CONFIG.visual["translation-opacity"] / 100,

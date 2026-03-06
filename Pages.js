@@ -145,6 +145,696 @@ const getLyricsDisplayMode = (isKara, line, text, originalText, text2) => {
 	return { mainText, subText, subText2 };
 };
 
+function renderLyricsUnavailable(message = I18n.t("messages.noLyrics")) {
+	return react.createElement(
+		"div",
+		{ className: "lyrics-lyricsContainer-LyricsUnavailablePage" },
+		react.createElement(
+			"span",
+			{ className: "lyrics-lyricsContainer-LyricsUnavailableMessage" },
+			message
+		)
+	);
+}
+
+const getCurrentTrackUri = () => Spicetify.Player?.data?.item?.uri || "";
+
+const useTrackOffsetState = () => {
+	const [trackOffset, setTrackOffset] = useState(0);
+	const trackUri = getCurrentTrackUri();
+
+	useEffect(() => {
+		let cancelled = false;
+
+		const loadOffset = async () => {
+			const offset = (await Utils.getTrackSyncOffset(trackUri)) || 0;
+			if (!cancelled) {
+				setTrackOffset(offset);
+			}
+		};
+
+		loadOffset();
+
+		const handleOffsetChange = (event) => {
+			if (event.detail.trackUri === trackUri) {
+				setTrackOffset(event.detail.offset);
+			}
+		};
+
+		window.addEventListener('ivLyrics:offset-changed', handleOffsetChange);
+		return () => {
+			cancelled = true;
+			window.removeEventListener('ivLyrics:offset-changed', handleOffsetChange);
+		};
+	}, [trackUri]);
+
+	return trackOffset;
+};
+
+const useLyricsPlaybackPosition = () => {
+	const [position, setPosition] = useState(0);
+	const trackOffset = useTrackOffsetState();
+
+	useTrackPosition(() => {
+		const newPos = Spicetify.Player.getProgress();
+		const delay = CONFIG.visual.delay + trackOffset;
+		setPosition(newPos + delay);
+	});
+
+	return position;
+};
+
+const useScrollActivity = (containerRef, deps = []) => {
+	const [isScrolling, setIsScrolling] = useState(false);
+	const scrollTimeout = useRef(null);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const handleWheel = () => {
+			setIsScrolling(true);
+			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+			scrollTimeout.current = setTimeout(() => {
+				setIsScrolling(false);
+			}, 3000);
+		};
+
+		container.addEventListener("wheel", handleWheel, { passive: true });
+		container.addEventListener("touchmove", handleWheel, { passive: true });
+
+		return () => {
+			container.removeEventListener("wheel", handleWheel);
+			container.removeEventListener("touchmove", handleWheel);
+			if (scrollTimeout.current) {
+				clearTimeout(scrollTimeout.current);
+				scrollTimeout.current = null;
+			}
+		};
+	}, deps);
+
+	const handleContainerClick = useCallback(() => {
+		if (!isScrolling) return;
+		setIsScrolling(false);
+		if (scrollTimeout.current) {
+			clearTimeout(scrollTimeout.current);
+			scrollTimeout.current = null;
+		}
+	}, [isScrolling]);
+
+	return { isScrolling, handleContainerClick };
+};
+
+const renderLyricSubLine = (className, text, onContextMenu = null) => {
+	if (!text) return null;
+	const props = {
+		className,
+		style: { "--sub-lyric-color": CONFIG.visual["inactive-color"] },
+	};
+	if (onContextMenu) {
+		props.onContextMenu = onContextMenu;
+	}
+
+	if (typeof text === "string" && text) {
+		props.dangerouslySetInnerHTML = { __html: Utils.rubyTextToHTML(text) };
+		return react.createElement("p", props);
+	}
+
+	return react.createElement("p", props, safeRenderText(text));
+};
+
+const renderLyricMainContent = ({
+	isKara = false,
+	mainText,
+	line,
+	position,
+	isActive,
+	globalCharOffset = 0,
+	activeGlobalCharIndex = -1,
+}) => {
+	if (isKara) {
+		return react.createElement(KaraokeLine, {
+			line,
+			position,
+			isActive,
+			globalCharOffset,
+			activeGlobalCharIndex,
+		});
+	}
+
+	if (typeof mainText === "string") {
+		return null;
+	}
+
+	return safeRenderText(mainText);
+};
+
+const normalizeUnsyncedLyrics = (lyrics) => {
+	if (!lyrics) {
+		return [];
+	}
+	if (Array.isArray(lyrics)) {
+		return lyrics.filter(item => item !== null && item !== undefined);
+	}
+	if (typeof lyrics === "string") {
+		return lyrics.split("\n").map((text, index) => ({ text, index }));
+	}
+	return [];
+};
+
+const getUnsyncedLineRenderData = (lyrics, text, originalText, text2) => {
+	const { mainText: lineText, subText, subText2: showMode2Translation } =
+		getLyricsDisplayMode(false, null, text, originalText, text2);
+
+	const belowOrigin = (typeof originalText === "object"
+		? originalText?.props?.children?.[0]
+		: originalText)?.replace(/\s+/g, "");
+	const belowTxt = (typeof text === "object"
+		? text?.props?.children?.[0]
+		: text)?.replace(/\s+/g, "");
+
+	const displayMode = CONFIG.visual["translate:display-mode"];
+	const showTranslatedBelow = displayMode === "below";
+	const replaceOriginal = displayMode === "replace";
+	const belowMode = showTranslatedBelow && originalText && belowOrigin !== belowTxt;
+	const showMode2 = !!showMode2Translation && (showTranslatedBelow || replaceOriginal);
+
+	return {
+		lineText,
+		subText,
+		showMode2Translation,
+		belowMode,
+		showMode2,
+	};
+};
+
+const getCopyableText = (value) => {
+	if (value === null || value === undefined) {
+		return "";
+	}
+
+	if (typeof value === "string") {
+		return value;
+	}
+
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value);
+	}
+
+	if (typeof value === "object") {
+		if (Array.isArray(value)) {
+			return value.map(getCopyableText).join("");
+		}
+
+		if (value.props?.children !== undefined) {
+			return getCopyableText(value.props.children);
+		}
+
+		if (typeof value.text === "string") {
+			return value.text;
+		}
+	}
+
+	return safeRenderText(value) || "";
+};
+
+const copyLyricText = (text, successMessageKey, failureMessageKey) => {
+	const copyText = getCopyableText(text);
+	if (!copyText) {
+		Toast.error(I18n.t(failureMessageKey));
+		return;
+	}
+
+	Spicetify.Platform.ClipboardAPI.copy(copyText)
+		.then(() => Toast.success(I18n.t(successMessageKey)))
+		.catch(() => Toast.error(I18n.t(failureMessageKey)));
+};
+
+const createCopyHandler = (text, successMessageKey, failureMessageKey) => (event) => {
+	event.preventDefault();
+	copyLyricText(text, successMessageKey, failureMessageKey);
+};
+
+const getLyricsAnchorRatio = (container) => {
+	if (!container) {
+		return 0.5;
+	}
+
+	const rawAnchorRatio = window.getComputedStyle(container).getPropertyValue("--ivfs-lyrics-anchor-ratio").trim();
+	const parsedAnchorRatio = Number.parseFloat(rawAnchorRatio);
+
+	return Number.isFinite(parsedAnchorRatio)
+		? Math.min(0.95, Math.max(0.05, parsedAnchorRatio))
+		: 0.5;
+};
+
+const scrollSyncedContainerToActiveLine = (container, activeLine, behavior = "smooth") => {
+	if (!container || !activeLine) return;
+
+	const anchorRatio = getLyricsAnchorRatio(container);
+	const containerHeight = container.clientHeight || 0;
+	const lineHeight = activeLine.clientHeight || activeLine.getBoundingClientRect().height || 0;
+	const targetTop = activeLine.offsetTop - (containerHeight * anchorRatio - lineHeight / 2);
+	const maxScrollTop = Math.max(0, container.scrollHeight - containerHeight);
+	const nextTop = Math.max(0, Math.min(targetTop, maxScrollTop));
+
+	if (typeof container.scrollTo === "function") {
+		container.scrollTo({ top: nextTop, behavior });
+		return;
+	}
+
+	container.scrollTop = nextTop;
+};
+
+const getCompactSyncedOffset = (container, activeLine, isScrolling) => {
+	if (!container || !activeLine || isScrolling) {
+		return 0;
+	}
+
+	const anchorRatio = getLyricsAnchorRatio(container);
+	const anchorOffset = container.clientHeight * anchorRatio;
+	return anchorOffset - (activeLine.offsetTop + activeLine.clientHeight / 2);
+};
+
+const buildGlobalCharState = (lyrics, position) => {
+	const offsets = [];
+	let totalChars = 0;
+	let activeCharIndex = -1;
+	let lastPassedCharIndex = -1;
+	let lastPassedCharEndTime = 0;
+	let lastPassedCharDuration = 100;
+
+	for (let i = 0; i < lyrics.length; i++) {
+		const line = lyrics[i];
+		offsets.push(totalChars);
+
+		if (!line?.syllables || !Array.isArray(line.syllables)) {
+			continue;
+		}
+
+		for (const syllable of line.syllables) {
+			if (!syllable || !syllable.text) continue;
+
+			const charArray = Array.from(syllable.text || "");
+			const syllableStart = syllable.startTime || 0;
+			const syllableEnd = syllable.endTime || syllableStart + 500;
+
+			for (let charIdx = 0; charIdx < charArray.length; charIdx++) {
+				const charDuration = (syllableEnd - syllableStart) / charArray.length;
+				const charStart = syllableStart + (charIdx * charDuration);
+				const charEnd = charStart + charDuration;
+
+				if (position >= charStart && position < charEnd) {
+					activeCharIndex = totalChars;
+				}
+
+				if (position >= charEnd && charEnd > lastPassedCharEndTime) {
+					lastPassedCharEndTime = charEnd;
+					lastPassedCharIndex = totalChars;
+					lastPassedCharDuration = charDuration || 100;
+				}
+
+				totalChars++;
+			}
+		}
+	}
+
+	if (activeCharIndex === -1 && lastPassedCharIndex !== -1) {
+		const timeDiff = position - lastPassedCharEndTime;
+		const simulateDuration = Math.max(40, lastPassedCharDuration * 0.01);
+		const virtualProgress = Math.floor(timeDiff / simulateDuration);
+
+		if (timeDiff < 2000) {
+			activeCharIndex = lastPassedCharIndex + 1 + virtualProgress;
+		}
+	}
+
+	return {
+		globalCharOffsets: offsets,
+		activeGlobalCharIndex: activeCharIndex,
+	};
+};
+
+const buildPaddedSyncedLyrics = (lyrics, leadingEmptyLines) =>
+	Array.from({ length: leadingEmptyLines }, () => emptyLine)
+		.concat(lyrics)
+		.map((line, lineNumber) => ({
+			...line,
+			lineNumber,
+		}));
+
+const getActiveTimedLineIndex = (lines, position) => {
+	for (let i = lines.length - 1; i >= 0; i--) {
+		const line = lines[i];
+		if (line && position >= (line.startTime || 0)) {
+			return i;
+		}
+	}
+
+	return 0;
+};
+
+const getSyncedAnimationIndex = ({ compact, isScrolling, activeLineIndex, lineNumber, visibleIndex }) => {
+	if (compact && isScrolling) {
+		return 0;
+	}
+
+	const sourceIndex = compact && !isScrolling ? visibleIndex : lineNumber;
+
+	if (activeLineIndex <= CONFIG.visual["lines-before"]) {
+		return sourceIndex - activeLineIndex;
+	}
+
+	return sourceIndex - CONFIG.visual["lines-before"] - 1;
+};
+
+const shouldHideSyncedLine = ({ compact, isScrolling, animationIndex }) => {
+	if (compact && isScrolling) {
+		return false;
+	}
+
+	return (
+		(animationIndex < 0 && -animationIndex > CONFIG.visual["lines-before"]) ||
+		animationIndex > CONFIG.visual["lines-after"]
+	);
+};
+
+const LyricsLineBlock = react.memo(({
+	className,
+	style,
+	lineRef = null,
+	dir = "auto",
+	onClick = null,
+	mainText,
+	subText = null,
+	subText2 = null,
+	originalText = null,
+	isKara = false,
+	line = null,
+	position = 0,
+	isActive = false,
+	globalCharOffset = 0,
+	activeGlobalCharIndex = -1,
+	mainCopyText = null,
+	mainCopySuccessKey = "notifications.lyricsCopied",
+	mainCopyFailureKey = "notifications.lyricsCopyFailed",
+	subCopyText = null,
+	subCopySuccessKey = "notifications.translationCopied",
+	subCopyFailureKey = "notifications.translationCopyFailed",
+	subText2CopyText = null,
+	subText2CopySuccessKey = "notifications.secondTranslationCopied",
+	subText2CopyFailureKey = "notifications.secondTranslationCopyFailed",
+}) => {
+	const mainLine = line || (typeof mainText === "object" ? mainText : {
+		text: mainText,
+		originalText,
+		text2: subText2,
+	});
+
+	const mainProps = {
+		onContextMenu: createCopyHandler(
+			mainCopyText || Utils.formatLyricLineToCopy(mainText, subText, subText2, originalText),
+			mainCopySuccessKey,
+			mainCopyFailureKey
+		),
+	};
+
+	if (typeof mainText === "string" && !isKara && mainText) {
+		mainProps.dangerouslySetInnerHTML = { __html: Utils.rubyTextToHTML(mainText) };
+	}
+
+	return react.createElement(
+		"div",
+		{
+			className,
+			style,
+			dir,
+			ref: lineRef,
+			onClick,
+		},
+		react.createElement(
+			"p",
+			mainProps,
+			renderLyricMainContent({
+				isKara,
+				mainText,
+				line: mainLine,
+				position,
+				isActive,
+				globalCharOffset,
+				activeGlobalCharIndex,
+			})
+		),
+		renderLyricSubLine(
+			"lyrics-lyricsContainer-LyricsLine-phonetic",
+			subText,
+			subCopyText
+				? createCopyHandler(subCopyText, subCopySuccessKey, subCopyFailureKey)
+				: null
+		),
+		renderLyricSubLine(
+			"lyrics-lyricsContainer-LyricsLine-translation",
+			subText2,
+			subText2CopyText
+				? createCopyHandler(subText2CopyText, subText2CopySuccessKey, subText2CopyFailureKey)
+				: null
+		)
+	);
+});
+
+const useSyncedLyricsEngine = ({
+	lyrics,
+	position,
+	compact = false,
+	isKara = false,
+	containerRef,
+	activeLineRef,
+	lyricsId,
+	containerReady = true,
+}) => {
+	const leadingEmptyLines = compact ? 2 : 1;
+	const { isScrolling, handleContainerClick } = useScrollActivity(
+		containerRef,
+		compact ? [lyricsId, containerReady] : [lyricsId]
+	);
+
+	const paddedLyrics = useMemo(
+		() => buildPaddedSyncedLyrics(lyrics, leadingEmptyLines),
+		[lyrics, leadingEmptyLines]
+	);
+
+	const activeLineIndex = useMemo(
+		() => getActiveTimedLineIndex(paddedLyrics, position),
+		[paddedLyrics, position]
+	);
+
+	const compactVisibleLines = useMemo(() => {
+		if (!compact || isScrolling) {
+			return paddedLyrics;
+		}
+
+		const startIndex = Math.max(activeLineIndex - CONFIG.visual["lines-before"], 0);
+		const visibleCount = CONFIG.visual["lines-before"] + CONFIG.visual["lines-after"] + 1;
+		return paddedLyrics.slice(startIndex, startIndex + visibleCount);
+	}, [compact, isScrolling, paddedLyrics, activeLineIndex]);
+
+	const linesToRender = compact ? compactVisibleLines : paddedLyrics;
+	const compactAnchorIndex = compact
+		? Math.min(CONFIG.visual["lines-before"], leadingEmptyLines)
+		: activeLineIndex;
+	const activeElementIndex = compact
+		? (isScrolling
+			? activeLineIndex
+			: Math.max(Math.min(activeLineIndex, CONFIG.visual["lines-before"]), compactAnchorIndex))
+		: activeLineIndex;
+	const visualAnchorLineNumber = compact && activeLineIndex < leadingEmptyLines
+		? leadingEmptyLines
+		: activeLineIndex;
+
+	const { globalCharOffsets, activeGlobalCharIndex } = useMemo(
+		() => buildGlobalCharState(lyrics, position),
+		[lyrics, position]
+	);
+
+	const compactOffset = compact
+		? getCompactSyncedOffset(containerRef.current, activeLineRef.current, isScrolling)
+		: 0;
+
+	useEffect(() => {
+		const actualIndex = Math.max(0, activeLineIndex - leadingEmptyLines);
+		window.dispatchEvent(new CustomEvent("ivLyrics:lyric-index-changed", {
+			detail: { index: actualIndex, total: lyrics.length }
+		}));
+	}, [activeLineIndex, leadingEmptyLines, lyrics.length]);
+
+	const prevCompactScrollingRef = useRef(false);
+	useEffect(() => {
+		if (!compact) {
+			return undefined;
+		}
+
+		const activeLine = activeLineRef.current;
+		if (!isScrolling || prevCompactScrollingRef.current || !activeLine) {
+			prevCompactScrollingRef.current = isScrolling;
+			return undefined;
+		}
+
+		const raf = typeof requestAnimationFrame === "function"
+			? requestAnimationFrame
+			: (callback) => setTimeout(callback, 0);
+
+		raf(() => {
+			if (activeLineRef.current) {
+				activeLineRef.current.scrollIntoView({
+					block: "center",
+					inline: "nearest",
+				});
+			}
+		});
+
+		prevCompactScrollingRef.current = isScrolling;
+		return undefined;
+	}, [compact, isScrolling, activeLineIndex]);
+
+	const hasAutoScrolledRef = useRef(false);
+	useEffect(() => {
+		hasAutoScrolledRef.current = false;
+		prevCompactScrollingRef.current = false;
+	}, [lyricsId]);
+
+	useEffect(() => {
+		if (compact) {
+			return undefined;
+		}
+
+		const container = containerRef.current;
+		const activeLine = activeLineRef.current;
+		if (!container || !activeLine || isScrolling) {
+			return undefined;
+		}
+
+		if (!hasAutoScrolledRef.current || isInViewport(activeLine)) {
+			scrollSyncedContainerToActiveLine(container, activeLine, hasAutoScrolledRef.current ? "smooth" : "auto");
+			hasAutoScrolledRef.current = true;
+		}
+
+		return undefined;
+	}, [compact, activeLineIndex, isScrolling, containerRef, activeLineRef]);
+
+	useEffect(() => {
+		if (compact || !isScrolling || !activeLineRef.current) {
+			return undefined;
+		}
+
+		const timeoutId = setTimeout(() => {
+			scrollSyncedContainerToActiveLine(containerRef.current, activeLineRef.current, "auto");
+		}, 0);
+
+		return () => clearTimeout(timeoutId);
+	}, [compact, activeLineIndex, isScrolling, containerRef, activeLineRef]);
+
+	const renderItems = useMemo(() => {
+		return linesToRender.map((line, visibleIndex) => {
+			const { lineNumber = visibleIndex, text, startTime, originalText, text2 } = line;
+
+			if (compact && lineNumber === 1 && activeLineIndex <= leadingEmptyLines) {
+				const firstLyricStartTime = lyrics[0]?.startTime || 1;
+				if (position < firstLyricStartTime) {
+					return {
+						type: "indicator",
+						key: `compact-idling-${lineNumber}`,
+						progress: position / firstLyricStartTime,
+						delay: firstLyricStartTime / 3,
+						isActive: true,
+					};
+				}
+			}
+
+			if (!compact && lineNumber === 0) {
+				const nextStartTime = paddedLyrics[1]?.startTime || 1;
+				return {
+					type: "indicator",
+					key: `expanded-idling-${lineNumber}`,
+					progress: position / nextStartTime,
+					delay: nextStartTime / 3,
+					isActive: activeLineIndex === 0,
+				};
+			}
+
+			const isActiveLine = lineNumber === activeLineIndex;
+			const animationIndex = getSyncedAnimationIndex({
+				compact,
+				isScrolling,
+				activeLineIndex,
+				lineNumber,
+				visibleIndex,
+			});
+			const { mainText, subText, subText2 } = getLyricsDisplayMode(isKara, line, text, originalText, text2);
+
+			let className = "lyrics-lyricsContainer-LyricsLine";
+			if (isActiveLine) {
+				className += " lyrics-lyricsContainer-LyricsLine-active";
+			}
+			if (shouldHideSyncedLine({ compact, isScrolling, animationIndex })) {
+				className += " lyrics-lyricsContainer-LyricsLine-paddingLine";
+			}
+
+			return {
+				type: "line",
+				key: lineNumber,
+				className,
+				style: {
+					cursor: "pointer",
+					"--position-index": animationIndex,
+					"--animation-index": Math.abs(animationIndex) + 1,
+					"--line-shift-duration": isScrolling
+						? "0s"
+						: `${Math.max(0.28, 0.46 - Math.min(Math.abs(animationIndex), 4) * 0.04)}s`,
+					"--line-shift-delay": isScrolling
+						? "0s"
+						: `${animationIndex > 0 ? Math.min(animationIndex, 3) * 0.02 : 0}s`,
+					"--blur-index": Math.abs(animationIndex),
+				},
+				line,
+				startTime,
+				originalText,
+				mainText,
+				subText,
+				subText2,
+				isActiveLine,
+				trackLineRef: lineNumber === visualAnchorLineNumber,
+				canSeek: lineNumber >= leadingEmptyLines && Number.isFinite(startTime),
+				karaokeActive: compact ? visibleIndex === activeElementIndex : isActiveLine,
+				globalCharOffset: lineNumber >= leadingEmptyLines && lineNumber - leadingEmptyLines < globalCharOffsets.length
+					? globalCharOffsets[lineNumber - leadingEmptyLines]
+					: 0,
+				activeGlobalCharIndex,
+			};
+		});
+	}, [
+		linesToRender,
+		compact,
+		activeLineIndex,
+		leadingEmptyLines,
+		lyrics,
+		position,
+		paddedLyrics,
+		isScrolling,
+		isKara,
+		activeElementIndex,
+		visualAnchorLineNumber,
+		globalCharOffsets,
+		activeGlobalCharIndex,
+	]);
+
+	return {
+		isScrolling,
+		handleContainerClick,
+		renderItems,
+		compactOffset,
+	};
+};
+
 // Global animation manager to prevent multiple instances
 const AnimationManager = {
 	active: false,
@@ -288,610 +978,275 @@ const useTrackPosition = (callback) => {
 	}, []);
 };
 
-// 새로운 노래방 컴포넌트 - synced 모드 기반의 간단한 구조
-const KaraokeLine = react.memo(({ line, position, isActive, globalCharOffset = 0, activeGlobalCharIndex = -1 }) => {
-	if (!line || !line.syllables || !Array.isArray(line.syllables)) {
-		return line?.text || "";
+const getKaraokeLineBounds = (line) => {
+	if (!line?.syllables || !Array.isArray(line.syllables) || line.syllables.length === 0) {
+		const startTime = Number.isFinite(line?.startTime) ? line.startTime : 0;
+		const endTime = Number.isFinite(line?.endTime) ? line.endTime : startTime;
+		return { startTime, endTime };
 	}
 
-	const elements = [];
-	let localCharIndex = 0;
+	let startTime = Infinity;
+	let endTime = -Infinity;
 
-	// Build raw text and apply furigana if enabled
-	const rawLineText = line.syllables.map(syllable => syllable?.text || "").join("");
-	const processedText = Utils.applyFuriganaIfEnabled(rawLineText);
-	const hasFurigana = processedText !== rawLineText && processedText.includes('<ruby>');
+	for (const syllable of line.syllables) {
+		if (!syllable) continue;
+		const syllableStart = Number.isFinite(syllable.startTime) ? syllable.startTime : null;
+		const syllableEnd = Number.isFinite(syllable.endTime) ? syllable.endTime : syllableStart;
 
-	// 전체 글자 정보를 먼저 수집
-	const allChars = [];
-	line.syllables.forEach((syllable, syllableIndex) => {
-		if (!syllable || !syllable.text) return;
-
-		const syllableStart = syllable.startTime || 0;
-		const syllableEnd = syllable.endTime || syllableStart + 500;
-		const syllableText = syllable.text || "";
-		const charArray = Array.from(syllableText);
-
-		charArray.forEach((char, charIndex) => {
-			const charDuration = (syllableEnd - syllableStart) / charArray.length;
-			const charStart = syllableStart + (charIndex * charDuration);
-			const charEnd = charStart + charDuration;
-
-			allChars.push({
-				char,
-				charStart,
-				charEnd,
-				syllableIndex,
-				charIndex,
-				localIndex: localCharIndex,
-				globalIndex: globalCharOffset + localCharIndex
-			});
-			localCharIndex++;
-		});
-	});
-
-	// 라인의 마지막 글자 종료 시간
-	const lastCharEndTime = allChars.length > 0 ? allChars[allChars.length - 1].charEnd : 0;
-	// 라인이 완료되었는지 (마지막 글자의 endTime이 지났는지)
-	const isLineComplete = isActive && position > lastCharEndTime;
-
-	// 현재 활성 글자 찾기 (이 줄에서만)
-	let activeLocalIndex = -1;
-	if (isActive && !isLineComplete) {
-		for (let i = 0; i < allChars.length; i++) {
-			if (position >= allChars[i].charStart && position < allChars[i].charEnd) {
-				activeLocalIndex = i;
-				break;
-			}
+		if (syllableStart !== null) {
+			startTime = Math.min(startTime, syllableStart);
+			endTime = Math.max(endTime, syllableEnd ?? syllableStart);
 		}
 	}
 
-	const karaokeBounceEnabled = CONFIG.visual["karaoke-bounce"];
+	if (!Number.isFinite(startTime)) {
+		startTime = Number.isFinite(line?.startTime) ? line.startTime : 0;
+	}
+	if (!Number.isFinite(endTime)) {
+		endTime = Number.isFinite(line?.endTime) ? line.endTime : startTime;
+	}
 
-	const charRenderData = allChars.map((charInfo, index) => {
-		const isCharActive = activeLocalIndex === index;
-		// 라인이 완료되면 모든 글자가 sung 상태
-		const isCharSung = isLineComplete || (isActive && position > charInfo.charEnd);
+	return { startTime, endTime };
+};
 
-		const currentGlobalIndex = charInfo.globalIndex;
-		let waveOffset = 0;
-		let waveScale = 1;
-		let transitionDelay = 0;
-		let shouldAnimate = false;
+const buildKaraokeFuriganaMap = (processedText) => {
+	const furiganaMap = new Map();
+	if (typeof processedText !== "string" || !processedText.includes("<ruby>")) {
+		return furiganaMap;
+	}
 
-		if (karaokeBounceEnabled && activeGlobalCharIndex >= 0) {
-			const distance = Math.abs(currentGlobalIndex - activeGlobalCharIndex);
-			// Allow animation for chars within range OR recently passed chars (for smooth finish)
-			if (distance <= 2 || (currentGlobalIndex < activeGlobalCharIndex && distance <= 5)) {
-				shouldAnimate = true;
-				if (distance <= 2) {
-					transitionDelay = distance * 0.05;
-					const normalizedDistance = distance / 2;
-					const waveStrength = Math.max(0, 1 - normalizedDistance * normalizedDistance);
-					waveOffset = -10 * waveStrength;
-					waveScale = 1 + 0.12 * waveStrength;
-				}
-			}
-		}
-
-		let className = "lyrics-karaoke-char";
-		if (isCharActive) {
-			className += " active";
-		} else if (isCharSung) {
-			className += " sung";
-			// 라인이 완료되면 fade 효과를 위한 클래스 추가
-			if (isLineComplete) {
-				className += " line-complete";
-			}
-		}
-
-		const style = shouldAnimate ? {
-			transform: `translateY(${waveOffset}px) scale(${waveScale})`,
-			transition: `transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${transitionDelay}s, color 0.2s ease-out`,
-			transitionDelay: `${transitionDelay}s`
-		} : {
-			transition: "transform 0.1s ease-out, color 0.2s ease-out"
-		};
-
-		return {
-			char: charInfo.char,
-			className,
-			style,
-			key: `char-${charInfo.globalIndex}`,
-			syllableIndex: charInfo.syllableIndex
-		};
-	});
-
-	// Use the already built rawLineText from above
-	const tokens = [];
-	const whitespacePattern = /([\s\u00a0\u1680\u2000-\u200b\u202f\u205f\u3000]+)/gu;
-	let lastIndex = 0;
+	const rubyRegex = /<ruby>([^<]+)<rt>([^<]+)<\/rt><\/ruby>/g;
+	let currentPos = 0;
+	let lastMatchEnd = 0;
 	let match;
 
-	// Build text from charRenderData to ensure exact matching
-	const actualText = charRenderData.map(c => c.char).join('');
+	rubyRegex.lastIndex = 0;
 
-	// Reset regex state
-	whitespacePattern.lastIndex = 0;
-	while ((match = whitespacePattern.exec(actualText)) !== null) {
-		if (match.index > lastIndex) {
-			tokens.push({ type: "word", value: actualText.slice(lastIndex, match.index) });
+	while ((match = rubyRegex.exec(processedText)) !== null) {
+		const kanjiSequence = match[1];
+		const reading = match[2];
+		const beforeMatch = processedText.substring(lastMatchEnd, match.index);
+		const plainTextBefore = beforeMatch.replace(/<[^>]+>/g, "");
+		currentPos += Array.from(plainTextBefore).length;
+
+		const kanjiChars = Array.from(kanjiSequence);
+		if (kanjiChars.length === 1) {
+			furiganaMap.set(currentPos, reading);
+		} else {
+			const readingChars = Array.from(reading);
+			const charsPerKanji = Math.max(1, Math.floor(readingChars.length / kanjiChars.length));
+			kanjiChars.forEach((_, idx) => {
+				const nextReading = idx === kanjiChars.length - 1
+					? readingChars.slice(idx * charsPerKanji).join("")
+					: readingChars.slice(idx * charsPerKanji, (idx + 1) * charsPerKanji).join("");
+				furiganaMap.set(currentPos + idx, nextReading);
+			});
 		}
-		tokens.push({ type: "space", value: match[0] });
-		lastIndex = match.index + match[0].length;
+
+		currentPos += kanjiChars.length;
+		lastMatchEnd = match.index + match[0].length;
 	}
 
-	if (lastIndex < actualText.length) {
-		tokens.push({ type: "word", value: actualText.slice(lastIndex) });
-	}
+	return furiganaMap;
+};
 
-	const hasWhitespaceToken = tokens.some(token => token.type === "space");
-	// Total character count including spaces
-	const totalTokenChars = tokens.reduce((sum, token) => sum + Array.from(token.value).length, 0);
-	const actualCharCount = charRenderData.length;
+const buildKaraokeTimedChars = (line) => {
+	const timedChars = [];
 
-	// Parse furigana HTML to extract readings for each kanji with position tracking
-	// Do this BEFORE word grouping so it's available for both paths
-	const furiganaMap = new Map(); // position -> reading
-	if (hasFurigana) {
-		const rubyRegex = /<ruby>([^<]+)<rt>([^<]+)<\/rt><\/ruby>/g;
+	if (line?.syllables && Array.isArray(line.syllables) && line.syllables.length > 0) {
+		line.syllables.forEach((syllable) => {
+			if (!syllable || !syllable.text) return;
 
-		// Build clean text from processedText (removing all HTML tags)
-		const cleanText = processedText.replace(/<ruby>([^<]+)<rt>[^<]+<\/rt><\/ruby>/g, '$1');
+			const charArray = Array.from(syllable.text || "");
+			const syllableStart = Number.isFinite(syllable.startTime) ? syllable.startTime : (line.startTime || 0);
+			const syllableEnd = Number.isFinite(syllable.endTime) ? syllable.endTime : syllableStart + 500;
+			const charDuration = Math.max(1, (syllableEnd - syllableStart) / Math.max(1, charArray.length));
 
-		// Now parse the HTML and map positions
-		let currentPos = 0;
-		let lastMatchEnd = 0;
-		let match;
-
-		rubyRegex.lastIndex = 0;
-
-		while ((match = rubyRegex.exec(processedText)) !== null) {
-			const kanjiSequence = match[1];
-			const reading = match[2];
-
-			// Calculate position by counting plain text before this match
-			const beforeMatch = processedText.substring(lastMatchEnd, match.index);
-			const plainTextBefore = beforeMatch.replace(/<[^>]+>/g, '');
-			currentPos += plainTextBefore.length;
-
-			// Map each kanji to its reading
-			if (kanjiSequence.length === 1) {
-				furiganaMap.set(currentPos, reading);
-			} else {
-				// Multiple kanji - split the reading
-				const kanjiChars = Array.from(kanjiSequence);
-				const readingChars = Array.from(reading);
-				const charsPerKanji = Math.floor(readingChars.length / kanjiChars.length);
-
-				kanjiChars.forEach((kanji, idx) => {
-					let kanjiReading;
-					if (idx === kanjiChars.length - 1) {
-						// Last kanji gets all remaining reading
-						kanjiReading = readingChars.slice(idx * charsPerKanji).join('');
-					} else {
-						kanjiReading = readingChars.slice(idx * charsPerKanji, (idx + 1) * charsPerKanji).join('');
-					}
-					furiganaMap.set(currentPos + idx, kanjiReading);
+			charArray.forEach((char, charIndex) => {
+				const charStart = syllableStart + (charIndex * charDuration);
+				timedChars.push({
+					char,
+					startTime: charStart,
+					endTime: charStart + charDuration,
 				});
-			}
-
-			// Move position forward by the number of kanji
-			currentPos += kanjiSequence.length;
-			lastMatchEnd = match.index + match[0].length;
-		}
-	}
-
-	// Word grouping works if we have spaces and total chars match
-	let useWordGrouping = hasWhitespaceToken && totalTokenChars === actualCharCount;
-
-	if (useWordGrouping) {
-		let charCursor = 0;
-		let mappingFailed = false;
-
-		tokens.forEach((token, tokenIndex) => {
-			if (mappingFailed) {
-				return;
-			}
-
-			if (token.type === "word") {
-				const wordChars = Array.from(token.value);
-				const wordCharData = charRenderData.slice(charCursor, charCursor + wordChars.length);
-
-				if (wordCharData.length !== wordChars.length) {
-					mappingFailed = true;
-					return;
-				}
-
-				// Apply furigana to each character in the word
-				const wordChildren = wordCharData.map((charData, localIdx) => {
-					const globalIdx = charCursor + localIdx;
-					const char = charData.char;
-					const reading = furiganaMap.get(globalIdx);
-
-					if (reading) {
-						// Has furigana
-						return react.createElement(
-							"span",
-							{
-								key: charData.key,
-								className: charData.className,
-								style: charData.style
-							},
-							react.createElement(
-								"ruby",
-								null,
-								char,
-								react.createElement("rt", null, reading)
-							)
-						);
-					} else {
-						// No furigana
-						return react.createElement(
-							"span",
-							{
-								key: charData.key,
-								className: charData.className,
-								style: charData.style
-							},
-							char
-						);
-					}
-				});
-
-				elements.push(
-					react.createElement(
-						"span",
-						{
-							key: `word-${tokenIndex}`,
-							className: "lyrics-karaoke-word"
-						},
-						wordChildren
-					)
-				);
-
-				charCursor += wordChars.length;
-			} else {
-				// Space token - render the space characters from charRenderData
-				const spaceChars = Array.from(token.value);
-				const spaceCharData = charRenderData.slice(charCursor, charCursor + spaceChars.length);
-
-				if (spaceCharData.length !== spaceChars.length) {
-					mappingFailed = true;
-					return;
-				}
-
-				const spaceChildren = spaceCharData.map(charData =>
-					react.createElement(
-						"span",
-						{
-							key: charData.key,
-							className: charData.className,
-							style: charData.style
-						},
-						charData.char
-					)
-				);
-
-				elements.push(
-					react.createElement(
-						"span",
-						{
-							key: `space-${tokenIndex}`,
-							className: "lyrics-karaoke-word-space"
-						},
-						spaceChildren
-					)
-				);
-
-				charCursor += spaceChars.length;
-			}
-		});
-
-		if (mappingFailed || charCursor !== charRenderData.length) {
-			useWordGrouping = false;
-			elements.length = 0;
-		}
-	}
-
-	if (!useWordGrouping) {
-		// Furigana map is already built above, just use it
-		charRenderData.forEach((charData, index) => {
-			const char = charData.char;
-			const reading = furiganaMap.get(index); // Use position index instead of character
-
-			// If this character has a furigana reading, wrap in ruby tag
-			if (reading) {
-				// Wrap ruby in a span that handles the karaoke animation
-				elements.push(
-					react.createElement(
-						"span",
-						{
-							key: charData.key,
-							className: charData.className,
-							style: charData.style
-						},
-						react.createElement(
-							"ruby",
-							null,
-							char,
-							react.createElement("rt", null, reading)
-						)
-					)
-				);
-			} else {
-				elements.push(
-					react.createElement(
-						"span",
-						{
-							key: charData.key,
-							className: charData.className,
-							style: charData.style
-						},
-						char
-					)
-				);
-			}
-
-			// Only add syllable boundary space if the next character is actually a space
-			const nextCharData = charRenderData[index + 1];
-			if (nextCharData && nextCharData.syllableIndex !== charData.syllableIndex) {
-				// Check if the next character is a whitespace character
-				if (nextCharData.char && /\s/.test(nextCharData.char)) {
-					// Skip - the space will be rendered as part of charRenderData
-				} else {
-					// No space in the actual text, don't add artificial space
-					// This prevents "woul d" style splitting
-				}
-			}
+			});
 		});
 	}
 
-	return react.createElement("span", { className: "lyrics-karaoke-line" }, elements);
+	if (timedChars.length > 0) {
+		return timedChars;
+	}
+
+	const fallbackChars = Array.from(getCopyableText(line?.text) || "");
+	const { startTime, endTime } = getKaraokeLineBounds(line);
+	const totalDuration = Math.max(1, endTime - startTime || 500);
+	const charDuration = Math.max(1, totalDuration / Math.max(1, fallbackChars.length || 1));
+
+	return fallbackChars.map((char, index) => ({
+		char,
+		startTime: startTime + (index * charDuration),
+		endTime: startTime + ((index + 1) * charDuration),
+	}));
+};
+
+const getKaraokeCharFill = (position, isActive, startTime, endTime) => {
+	if (!isActive) {
+		return 0;
+	}
+	if (position <= startTime) {
+		return 0;
+	}
+	if (position >= endTime) {
+		return 1;
+	}
+	return Math.max(0, Math.min(1, (position - startTime) / Math.max(1, endTime - startTime)));
+};
+
+const getKaraokeBounceValues = (position, isActive, startTime, endTime) => {
+	if (!CONFIG.visual["karaoke-bounce"] || !isActive) {
+		return {
+			offsetY: 0,
+			scale: 1,
+		};
+	}
+
+	const duration = Math.max(1, endTime - startTime);
+	const releaseDuration = Math.max(240, Math.min(560, duration * 1.6));
+	const totalWindow = duration + releaseDuration;
+	const elapsed = position - startTime;
+
+	if (elapsed < 0 || elapsed > totalWindow) {
+		return {
+			offsetY: 0,
+			scale: 1,
+		};
+	}
+
+	const riseDuration = Math.max(52, Math.min(120, duration * 0.42));
+	let waveStrength;
+
+	if (elapsed <= riseDuration) {
+		const riseProgress = elapsed / riseDuration;
+		waveStrength = 1 - Math.pow(1 - riseProgress, 3);
+	} else {
+		const fallProgress = Math.min(1, (elapsed - riseDuration) / Math.max(1, totalWindow - riseDuration));
+		waveStrength = Math.pow(1 - fallProgress, 1.75);
+	}
+
+	return {
+		offsetY: -6 * waveStrength,
+		scale: 1 + 0.06 * waveStrength,
+	};
+};
+
+const KaraokeLine = react.memo(({ line, position, isActive, globalCharOffset = 0, activeGlobalCharIndex = -1 }) => {
+	if (!line) {
+		return "";
+	}
+
+	const rawLineText = line.syllables?.map((syllable) => syllable?.text || "").join("")
+		|| getCopyableText(line.text)
+		|| "";
+	const processedText = Utils.applyFuriganaIfEnabled(rawLineText);
+	const furiganaMap = buildKaraokeFuriganaMap(processedText);
+	const timedChars = buildKaraokeTimedChars(line);
+	const { endTime } = getKaraokeLineBounds(line);
+	const isComplete = isActive && position >= endTime;
+
+	const charElements = timedChars.map((charInfo, index) => {
+		const fillValue = Math.max(0, Math.min(100, getKaraokeCharFill(
+			position,
+			isActive,
+			charInfo.startTime,
+			charInfo.endTime
+		) * 100));
+		const softEdge = 16;
+		const fillPercent = `${fillValue}%`;
+		const shouldFeather = fillValue > 0 && fillValue < 100;
+		const fillSoftStart = `${shouldFeather ? Math.max(0, fillValue - softEdge) : fillValue}%`;
+		const fillSoftEnd = `${shouldFeather ? Math.min(100, fillValue + softEdge) : fillValue}%`;
+		const bounce = getKaraokeBounceValues(
+			position,
+			isActive,
+			charInfo.startTime,
+			charInfo.endTime
+		);
+		const karaokeStyle = {
+			"--karaoke-char-fill": fillPercent,
+			"--karaoke-char-fill-soft-start": fillSoftStart,
+			"--karaoke-char-fill-soft-end": fillSoftEnd,
+			"--karaoke-bounce-y": `${bounce.offsetY}px`,
+			"--karaoke-bounce-scale": bounce.scale,
+		};
+		const className = `lyrics-karaoke-char${isComplete ? " is-complete" : ""}`;
+		const charNode = react.createElement(
+			"span",
+			{
+				className,
+				style: karaokeStyle,
+				key: `karaoke-char-${index}`,
+			},
+			charInfo.char
+		);
+		const reading = furiganaMap.get(index);
+
+		if (!reading) {
+			return charNode;
+		}
+
+		return react.createElement(
+			"ruby",
+			{
+				className: "lyrics-karaoke-ruby",
+				style: karaokeStyle,
+				key: `karaoke-ruby-${index}`,
+			},
+			charNode,
+			react.createElement("rt", null, reading)
+		);
+	});
+
+	return react.createElement(
+		"span",
+		{
+			className: `lyrics-karaoke-line${isActive ? " is-active" : ""}${isComplete ? " is-complete" : ""}`,
+		},
+		charElements
+	);
 });
 
 const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright, isKara }) => {
-	// 유효성 검사를 Hook 호출 전에 수행하지 않음 - Hook은 항상 같은 순서로 호출되어야 함
-	const [position, setPosition] = useState(0);
-	const [trackOffset, setTrackOffset] = useState(0);
-	const [isScrolling, setIsScrolling] = useState(false);
+	const position = useLyricsPlaybackPosition();
 	const [containerReady, setContainerReady] = useState(false);
 	const activeLineEle = useRef();
 	const lyricContainerEle = useRef();
-	const scrollTimeout = useRef(null);
 	const lyricsId = useMemo(() => lyrics[0]?.text || "no-lyrics", [lyrics]);
 
-	// ref callback to detect when container is mounted
 	const containerRefCallback = useCallback((node) => {
 		lyricContainerEle.current = node;
 		if (node) {
 			setContainerReady(true);
 		}
 	}, []);
-
-	useEffect(() => {
-		const container = lyricContainerEle.current;
-		if (!container) return;
-
-		const handleWheel = () => {
-			setIsScrolling(true);
-			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-			scrollTimeout.current = setTimeout(() => {
-				setIsScrolling(false);
-			}, 3000);
-		};
-
-		container.addEventListener("wheel", handleWheel, { passive: true });
-		container.addEventListener("touchmove", handleWheel, { passive: true });
-
-		return () => {
-			container.removeEventListener("wheel", handleWheel);
-			container.removeEventListener("touchmove", handleWheel);
-			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-		};
-	}, [lyricsId, containerReady]);
-
-	const handleContainerClick = () => {
-		if (isScrolling) {
-			setIsScrolling(false);
-			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-		}
-	};
-
-	// Load track offset asynchronously
-	useEffect(() => {
-		const loadOffset = async () => {
-			const trackUri = Spicetify.Player?.data?.item?.uri || "";
-			if (trackUri) {
-				const offset = (await Utils.getTrackSyncOffset(trackUri)) || 0;
-				setTrackOffset(offset);
-			}
-		};
-
-		loadOffset();
-
-		// Listen for offset changes
-		const handleOffsetChange = (event) => {
-			const trackUri = Spicetify.Player?.data?.item?.uri || "";
-			if (event.detail.trackUri === trackUri) {
-				setTrackOffset(event.detail.offset);
-			}
-		};
-
-		window.addEventListener('ivLyrics:offset-changed', handleOffsetChange);
-		return () => {
-			window.removeEventListener('ivLyrics:offset-changed', handleOffsetChange);
-		};
-	}, [Spicetify.Player?.data?.item?.uri]);
-
-	useTrackPosition(() => {
-		const newPos = Spicetify.Player.getProgress();
-		const delay = CONFIG.visual.delay + trackOffset;
-		// Always update position for smoother karaoke animation
-		setPosition(newPos + delay);
+	const {
+		isScrolling,
+		handleContainerClick,
+		renderItems,
+		compactOffset,
+	} = useSyncedLyricsEngine({
+		lyrics,
+		position,
+		compact: true,
+		isKara,
+		containerRef: lyricContainerEle,
+		activeLineRef: activeLineEle,
+		lyricsId,
+		containerReady,
 	});
 
-	// 전체 가사의 글로벌 캐릭터 인덱스와 현재 활성 글자 계산
-	const { globalCharOffsets, activeGlobalCharIndex } = useMemo(() => {
-		const offsets = [];
-		let totalChars = 0;
-		let activeCharIndex = -1;
-
-		// 가상 인덱스 계산을 위한 변수
-		let lastPassedCharIndex = -1;
-		let lastPassedCharEndTime = 0;
-		let lastPassedCharDuration = 100; // ms
-
-		for (let i = 0; i < lyrics.length; i++) {
-			const line = lyrics[i];
-			offsets.push(totalChars);
-
-			// 라인의 활성 여부와 상관없이 모든 글자를 순회하며 인덱스 계산
-			if (line?.syllables && Array.isArray(line.syllables)) {
-				// 이 줄이 활성 상태인지 확인 (시간 범위 체크)
-				const isLineActive = position >= (line.startTime || 0) &&
-					(i === lyrics.length - 1 || position < (lyrics[i + 1]?.startTime || Infinity));
-
-				for (const syllable of line.syllables) {
-					if (!syllable || !syllable.text) continue;
-
-					const syllableText = syllable.text || "";
-					const charArray = Array.from(syllableText);
-					const syllableStart = syllable.startTime || 0;
-					const syllableEnd = syllable.endTime || syllableStart + 500;
-
-					for (let charIdx = 0; charIdx < charArray.length; charIdx++) {
-						const charDuration = (syllableEnd - syllableStart) / charArray.length;
-						const charStart = syllableStart + (charIdx * charDuration);
-						const charEnd = charStart + charDuration;
-
-						// 현재 활성 글자 찾기
-						if (position >= charStart && position < charEnd) {
-							activeCharIndex = totalChars;
-						}
-
-						// 지나간 글자 중 가장 최근 것 추적
-						if (position >= charEnd) {
-							if (charEnd > lastPassedCharEndTime) {
-								lastPassedCharEndTime = charEnd;
-								lastPassedCharIndex = totalChars;
-								lastPassedCharDuration = charDuration || 100;
-							}
-						}
-
-						totalChars++;
-					}
-				}
-			}
-		}
-
-		// 활성 글자가 없으면(간주/공백) 가상의 인덱스 계산
-		if (activeCharIndex === -1 && lastPassedCharIndex !== -1) {
-			// 마지막 글자 이후 흐른 시간
-			const timeDiff = position - lastPassedCharEndTime;
-			// 시간이 흐름에 따라 인덱스가 증가하는 것으로 시뮬레이션
-			const simulateDuration = Math.max(40, lastPassedCharDuration * 0.01);
-			const virtualProgress = Math.floor(timeDiff / simulateDuration);
-
-			// 너무 오래된 과거는 무시 (예: 2초 이상 지남)
-			if (timeDiff < 2000) {
-				// 마지막 인덱스 다음부터 가상의 글자가 있다고 가정
-				activeCharIndex = lastPassedCharIndex + 1 + virtualProgress;
-			}
-		}
-
-		return { globalCharOffsets: offsets, activeGlobalCharIndex: activeCharIndex };
-	}, [lyrics, position]);
-
-	const lyricWithEmptyLines = useMemo(
-		() =>
-			[emptyLine, emptyLine, ...lyrics].map((line, i) => ({
-				...line,
-				lineNumber: i,
-			})),
-		[lyrics]
-	);
-
-	// Optimize active line calculation with memoization
-	const activeLineIndex = useMemo(() => {
-		for (let i = lyricWithEmptyLines.length - 1; i > 0; i--) {
-			const line = lyricWithEmptyLines[i];
-			if (line && position >= (line.startTime || 0)) {
-				return i;
-			}
-		}
-		return 0;
-	}, [lyricWithEmptyLines, position]);
-
-	const activeLines = useMemo(() => {
-		if (isScrolling) return lyricWithEmptyLines;
-		const startIndex = Math.max(activeLineIndex - CONFIG.visual["lines-before"], 0);
-		const linesCount = CONFIG.visual["lines-before"] + CONFIG.visual["lines-after"] + 1;
-		return lyricWithEmptyLines.slice(startIndex, startIndex + linesCount);
-	}, [activeLineIndex, lyricWithEmptyLines, isScrolling]);
-
-	// Emit current lyric index for fullscreen overlay
-	useEffect(() => {
-		// Subtract 2 for the empty lines at the beginning
-		const actualIndex = Math.max(0, activeLineIndex - 2);
-		window.dispatchEvent(new CustomEvent('ivLyrics:lyric-index-changed', {
-			detail: { index: actualIndex, total: lyrics.length }
-		}));
-	}, [activeLineIndex, lyrics.length]);
-
-	// 스크롤 모드 진입 시 한 번만 현재 줄로 이동
-	const prevIsScrolling = useRef(false);
-	useEffect(() => {
-		// 스크롤 모드가 false -> true로 변경될 때만 scrollIntoView 호출
-		if (isScrolling && !prevIsScrolling.current) {
-			const node = activeLineEle.current;
-			if (node) {
-				const raf = typeof requestAnimationFrame === "function"
-					? requestAnimationFrame
-					: (cb) => setTimeout(cb, 0);
-				raf(() => {
-					node.scrollIntoView({
-						block: "center",
-						inline: "nearest",
-					});
-				});
-			}
-		}
-		prevIsScrolling.current = isScrolling;
-	}, [isScrolling]);
-
-	// 유효성 검사는 Hook 호출 후에 수행
 	if (!Array.isArray(lyrics) || lyrics.length === 0) {
-		return react.createElement(
-			"div",
-			{ className: "lyrics-lyricsContainer-SyncedLyricsPage" },
-			react.createElement(
-				"div",
-				{ className: "lyrics-lyricsContainer-LyricsUnavailablePage" },
-				react.createElement(
-					"span",
-					{ className: "lyrics-lyricsContainer-LyricsUnavailableMessage" },
-					"No lyrics available"
-				)
-			)
-		);
+		return react.createElement("div", { className: "lyrics-lyricsContainer-SyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
 	}
-
-	let offset = 0;
-	if (lyricContainerEle.current) {
-		const container = lyricContainerEle.current;
-		const rawAnchorRatio = window.getComputedStyle(container).getPropertyValue("--ivfs-lyrics-anchor-ratio").trim();
-		const parsedAnchorRatio = Number.parseFloat(rawAnchorRatio);
-		const anchorRatio = Number.isFinite(parsedAnchorRatio)
-			? Math.min(0.95, Math.max(0.05, parsedAnchorRatio))
-			: 0.5;
-		offset = container.clientHeight * anchorRatio;
-	}
-	if (activeLineEle.current) {
-		offset += -(activeLineEle.current.offsetTop + activeLineEle.current.clientHeight / 2);
-	}
-
-	if (isScrolling) offset = 0;
 
 	return react.createElement(
 		"div",
@@ -905,151 +1260,37 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copy
 			{
 				className: "lyrics-lyricsContainer-SyncedLyrics",
 				style: {
-					"--offset": `${offset}px`,
+					"--offset": `${compactOffset}px`,
 				},
 				key: lyricsId,
 			},
-			...activeLines.map((line, i) => {
-				const { text, lineNumber, startTime, originalText, text2 } = line;
-				// Show IdlingIndicator on the second empty line (lineNumber === 1) when before first lyric starts
-				// Check lineNumber instead of i to handle different lines-before configurations
-				// lineNumber 0 = first emptyLine, lineNumber 1 = second emptyLine, lineNumber 2+ = actual lyrics
-				if (lineNumber === 1 && activeLineIndex <= 2) {
-					// Find first actual lyric line from lyrics array (not from activeLines which may be sliced)
-					const firstLyricLine = lyrics[0];
-					const firstLyricStartTime = firstLyricLine?.startTime || 1;
-					// Only show indicator if we're before the first lyric
-					if (position < firstLyricStartTime) {
-						return react.createElement(IdlingIndicator, {
-							key: `idling-indicator-${lineNumber}`,
-							progress: position / firstLyricStartTime,
-							delay: firstLyricStartTime / 3,
-							isActive: true,
-						});
-					}
+			...renderItems.map((item) => {
+				if (item.type === "indicator") {
+					return react.createElement(IdlingIndicator, {
+						key: item.key,
+						progress: item.progress,
+						delay: item.delay,
+						isActive: item.isActive,
+					});
 				}
 
-				let className = "lyrics-lyricsContainer-LyricsLine";
-				// 스크롤 모드일 때는 i가 곧 인덱스, 아닐 때는 상대적 인덱스 계산
-				const activeElementIndex = isScrolling ? activeLineIndex : Math.min(activeLineIndex, CONFIG.visual["lines-before"]);
-				let ref;
-
-				if (lineNumber === activeLineIndex) {
-					className += " lyrics-lyricsContainer-LyricsLine-active";
-					ref = activeLineEle;
-				}
-
-				let animationIndex;
-				if (isScrolling) {
-					animationIndex = 0; // 스크롤 모드에서는 애니메이션 인덱스 무시
-				} else if (activeLineIndex <= CONFIG.visual["lines-before"]) {
-					animationIndex = i - activeLineIndex;
-				} else {
-					animationIndex = i - CONFIG.visual["lines-before"] - 1;
-				}
-
-				const paddingLine = !isScrolling && ((animationIndex < 0 && -animationIndex > CONFIG.visual["lines-before"]) || animationIndex > CONFIG.visual["lines-after"]);
-				if (paddingLine) {
-					className += " lyrics-lyricsContainer-LyricsLine-paddingLine";
-				}
-				const isActive = lineNumber === activeLineIndex;
-				const { mainText, subText, subText2 } = getLyricsDisplayMode(isKara, line, text, originalText, text2);
-
-				if (isActive) {
-					ref = activeLineEle;
-				}
-
-				return react.createElement(
-					"div",
-					{
-						className,
-						style: {
-							cursor: "pointer",
-							"--position-index": animationIndex,
-							// Lines moving down (animationIndex > 0) should not animate transform
-							"--animation-index": animationIndex > 0 ? 0 : (animationIndex < 0 ? 0 : animationIndex) + 1,
-							"--blur-index": Math.abs(animationIndex),
-						},
-						dir: "auto",
-						ref,
-						key: lineNumber,
-						onClick: (event) => {
-							if (startTime) {
-								Spicetify.Player.seek(startTime);
-							}
-						},
-					},
-					react.createElement(
-						"p",
-						{
-							onContextMenu: (event) => {
-								event.preventDefault();
-								const copyText = Utils.formatLyricLineToCopy(mainText, subText, subText2, originalText);
-								if (copyText) {
-									Spicetify.Platform.ClipboardAPI.copy(copyText)
-										.then(() => Toast.success(I18n.t("notifications.lyricsCopied")))
-										.catch(() => Toast.error(I18n.t("notifications.lyricsCopyFailed")));
-								} else {
-									Toast.error(I18n.t("notifications.lyricsCopyFailed"));
-								}
-							},
-							// For Furigana/Hiragana HTML strings - React 310 방지를 위한 안전한 검증
-							...(typeof mainText === "string" && !isKara && mainText ? { dangerouslySetInnerHTML: { __html: Utils.rubyTextToHTML(mainText) } } : {}),
-						},
-						// Safe rendering for main text
-						(() => {
-							if (isKara) {
-								// 새로운 노래방 모드 - 전역 글자 인덱스 전달
-								const currentLineIndex = lineNumber - 2; // emptyLine 2개 제외
-								const globalOffset = currentLineIndex >= 0 && currentLineIndex < globalCharOffsets.length
-									? globalCharOffsets[currentLineIndex]
-									: 0;
-
-								return react.createElement(KaraokeLine, {
-									line,
-									position,
-									isActive: i === activeElementIndex,
-									globalCharOffset: globalOffset,
-									activeGlobalCharIndex: activeGlobalCharIndex
-								});
-							} else {
-								// 비카라오케 모드에서는 문자열이면 dangerouslySetInnerHTML 사용
-								if (typeof mainText === "string") {
-									return null; // Content will be set via dangerouslySetInnerHTML
-								} else {
-									// 객체인 경우 안전한 렌더링
-									return safeRenderText(mainText);
-								}
-							}
-						})()
-					),
-					(() => {
-						if (!subText) return null;
-						const props = {
-							className: "lyrics-lyricsContainer-LyricsLine-phonetic",
-							style: { "--sub-lyric-color": CONFIG.visual["inactive-color"] },
-						};
-						// React 310 방지: 문자열이고 빈 문자열이 아닐 때만 dangerouslySetInnerHTML 사용
-						if (typeof subText === "string" && subText) {
-							props.dangerouslySetInnerHTML = { __html: Utils.rubyTextToHTML(subText) };
-							return react.createElement("p", props);
-						}
-						return react.createElement("p", props, safeRenderText(subText));
-					})(),
-					(() => {
-						if (!subText2) return null;
-						const props2 = {
-							className: "lyrics-lyricsContainer-LyricsLine-translation",
-							style: { "--sub-lyric-color": CONFIG.visual["inactive-color"] },
-						};
-						// React 310 방지: 문자열이고 빈 문자열이 아닐 때만 dangerouslySetInnerHTML 사용
-						if (typeof subText2 === "string" && subText2) {
-							props2.dangerouslySetInnerHTML = { __html: Utils.rubyTextToHTML(subText2) };
-							return react.createElement("p", props2);
-						}
-						return react.createElement("p", props2, safeRenderText(subText2));
-					})()
-				);
+				return react.createElement(LyricsLineBlock, {
+					key: item.key,
+					className: item.className,
+					style: item.style,
+					lineRef: item.trackLineRef ? activeLineEle : null,
+					onClick: item.canSeek ? () => Spicetify.Player.seek(item.startTime) : null,
+					mainText: item.mainText,
+					subText: item.subText,
+					subText2: item.subText2,
+					originalText: item.originalText,
+					isKara,
+					line: item.line,
+					position,
+					isActive: item.karaokeActive,
+					globalCharOffset: item.globalCharOffset,
+					activeGlobalCharIndex: item.activeGlobalCharIndex,
+				});
 			})
 		)
 	);
@@ -1281,150 +1522,25 @@ function isInViewport(element) {
 }
 
 const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright, isKara }) => {
-	// Hook은 항상 먼저 호출되어야 함 - React 130 방지
-	const [position, setPosition] = useState(0);
-	const [trackOffset, setTrackOffset] = useState(0);
-	const [isScrolling, setIsScrolling] = useState(false);
+	const position = useLyricsPlaybackPosition();
 	const activeLineRef = useRef(null);
 	const pageRef = useRef(null);
-	const scrollTimeout = useRef(null);
 	const lyricsId = useMemo(() => lyrics[0]?.text || "no-lyrics", [lyrics]);
-
-	const scrollToActiveLineAnchor = useCallback((behavior = "smooth") => {
-		const container = pageRef.current;
-		const activeLine = activeLineRef.current;
-		if (!container || !activeLine) return;
-
-		const rawAnchorRatio = window.getComputedStyle(container).getPropertyValue("--ivfs-lyrics-anchor-ratio").trim();
-		const parsedAnchorRatio = Number.parseFloat(rawAnchorRatio);
-		const anchorRatio = Number.isFinite(parsedAnchorRatio)
-			? Math.min(0.95, Math.max(0.05, parsedAnchorRatio))
-			: 0.5;
-
-		const containerHeight = container.clientHeight || 0;
-		const lineHeight = activeLine.clientHeight || activeLine.getBoundingClientRect().height || 0;
-		const targetTop = activeLine.offsetTop - (containerHeight * anchorRatio - lineHeight / 2);
-		const maxScrollTop = Math.max(0, container.scrollHeight - containerHeight);
-		const nextTop = Math.max(0, Math.min(targetTop, maxScrollTop));
-
-		if (typeof container.scrollTo === "function") {
-			container.scrollTo({ top: nextTop, behavior });
-			return;
-		}
-		container.scrollTop = nextTop;
-	}, []);
-
-	useEffect(() => {
-		const container = pageRef.current;
-		if (!container) return;
-
-		const handleWheel = () => {
-			setIsScrolling(true);
-			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-			scrollTimeout.current = setTimeout(() => {
-				setIsScrolling(false);
-			}, 3000);
-		};
-
-		container.addEventListener("wheel", handleWheel, { passive: true });
-		container.addEventListener("touchmove", handleWheel, { passive: true });
-
-		return () => {
-			container.removeEventListener("wheel", handleWheel);
-			container.removeEventListener("touchmove", handleWheel);
-			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-		};
-	}, [lyricsId]);
-
-	const handleContainerClick = () => {
-		if (isScrolling) {
-			setIsScrolling(false);
-			if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-		}
-	};
-
-	// Load track offset asynchronously
-	useEffect(() => {
-		const loadOffset = async () => {
-			const trackUri = Spicetify.Player?.data?.item?.uri || "";
-			if (trackUri) {
-				const offset = (await Utils.getTrackSyncOffset(trackUri)) || 0;
-				setTrackOffset(offset);
-			}
-		};
-
-		loadOffset();
-
-		// Listen for offset changes
-		const handleOffsetChange = (event) => {
-			const trackUri = Spicetify.Player?.data?.item?.uri || "";
-			if (event.detail.trackUri === trackUri) {
-				setTrackOffset(event.detail.offset);
-			}
-		};
-
-		window.addEventListener('ivLyrics:offset-changed', handleOffsetChange);
-		return () => {
-			window.removeEventListener('ivLyrics:offset-changed', handleOffsetChange);
-		};
-	}, [Spicetify.Player?.data?.item?.uri]);
-
-	useTrackPosition(() => {
-		const newPos = Spicetify.Player.getProgress();
-		const delay = CONFIG.visual.delay + trackOffset;
-		// Always update position for smoother karaoke animation
-		setPosition(newPos + delay);
+	const {
+		handleContainerClick,
+		renderItems,
+	} = useSyncedLyricsEngine({
+		lyrics,
+		position,
+		compact: false,
+		isKara,
+		containerRef: pageRef,
+		activeLineRef,
+		lyricsId,
 	});
 
-	const padded = useMemo(() => [emptyLine, ...lyrics], [lyrics]);
-
-	const intialScroll = useMemo(() => [false], [lyrics]);
-
-	// Optimize active line calculation with memoization
-	const activeLineIndex = useMemo(() => {
-		for (let i = padded.length - 1; i >= 0; i--) {
-			const line = padded[i];
-			if (line && position >= (line.startTime || 0)) {
-				return i;
-			}
-		}
-		return 0;
-	}, [padded, position]);
-
-	useEffect(() => {
-		if (!isScrolling && activeLineRef.current && (!intialScroll[0] || isInViewport(activeLineRef.current))) {
-			scrollToActiveLineAnchor(intialScroll[0] ? "smooth" : "auto");
-			intialScroll[0] = true;
-		}
-	}, [activeLineIndex, isScrolling, scrollToActiveLineAnchor]);
-
-	// 스크롤 모드 진입 시 현재 가사 위치로 이동
-	useEffect(() => {
-		if (isScrolling && activeLineRef.current) {
-			// 렌더링 후 위치를 잡기 위해 약간의 지연
-			setTimeout(() => {
-				if (activeLineRef.current) {
-					scrollToActiveLineAnchor("auto");
-				}
-			}, 0);
-		}
-	}, [activeLineIndex, isScrolling, scrollToActiveLineAnchor]);
-
-	// 유효성 검사는 Hook 호출 후에 수행
 	if (!Array.isArray(lyrics) || lyrics.length === 0) {
-		return react.createElement(
-			"div",
-			{ className: "lyrics-lyricsContainer-UnsyncedLyricsPage" },
-			react.createElement(
-				"div",
-				{ className: "lyrics-lyricsContainer-LyricsUnavailablePage" },
-				react.createElement(
-					"span",
-					{ className: "lyrics-lyricsContainer-LyricsUnavailableMessage" },
-					"No lyrics available"
-				)
-			)
-		);
+		return react.createElement("div", { className: "lyrics-lyricsContainer-UnsyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
 	}
 
 	return react.createElement(
@@ -1438,122 +1554,31 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 		react.createElement("p", {
 			className: "lyrics-lyricsContainer-LyricsUnsyncedPadding",
 		}),
-		padded.map(({ text, startTime, originalText, text2 }, i) => {
-			if (i === 0) {
-				const nextLine = padded[1];
-				const nextStartTime = nextLine?.startTime || 1;
+		...renderItems.map((item) => {
+			if (item.type === "indicator") {
 				return react.createElement(IdlingIndicator, {
-					key: `expanded-idling-${i}`,
-					isActive: activeLineIndex === 0,
-					progress: position / nextStartTime,
-					delay: nextStartTime / 3,
+					key: item.key,
+					isActive: item.isActive,
+					progress: item.progress,
+					delay: item.delay,
 				});
 			}
 
-			const isActive = i === activeLineIndex;
-			const { mainText, subText, subText2 } = getLyricsDisplayMode(false, null, text, originalText, text2);
-
-			let ref;
-			if (isActive) {
-				ref = activeLineRef;
-			}
-
-			let animationIndex;
-			if (activeLineIndex <= CONFIG.visual["lines-before"]) {
-				animationIndex = i - activeLineIndex;
-			} else {
-				animationIndex = i - CONFIG.visual["lines-before"] - 1;
-			}
-
-			let className = "lyrics-lyricsContainer-LyricsLine";
-			if (isActive) {
-				className += " lyrics-lyricsContainer-LyricsLine-active";
-			}
-
-			const paddingLine = (animationIndex < 0 && -animationIndex > CONFIG.visual["lines-before"]) || animationIndex > CONFIG.visual["lines-after"];
-			if (paddingLine) {
-				className += " lyrics-lyricsContainer-LyricsLine-paddingLine";
-			}
-
-			return react.createElement(
-				"div",
-				{
-					className,
-					style: {
-						cursor: "pointer",
-						"--position-index": animationIndex,
-						// Lines moving down (animationIndex > 0) should not animate transform
-						"--animation-index": animationIndex > 0 ? 0 : (animationIndex < 0 ? 0 : animationIndex) + 1,
-						"--blur-index": Math.abs(animationIndex),
-					},
-					dir: "auto",
-					ref,
-					key: i,
-					onClick: (event) => {
-						if (startTime) {
-							Spicetify.Player.seek(startTime);
-						}
-					},
-				},
-				react.createElement(
-					"p",
-					{
-						onContextMenu: (event) => {
-							event.preventDefault();
-							const copyText = Utils.formatLyricLineToCopy(mainText, subText, subText2, originalText);
-							if (copyText) {
-								Spicetify.Platform.ClipboardAPI.copy(copyText)
-									.then(() => Toast.success(I18n.t("notifications.lyricsCopied")))
-									.catch(() => Toast.error(I18n.t("notifications.lyricsCopyFailed")));
-							} else {
-								Toast.error(I18n.t("notifications.lyricsCopyFailed"));
-							}
-						},
-						// For Furigana/Hiragana HTML strings - React 310 방지를 위한 안전한 검증
-						...(typeof mainText === "string" && !isKara && mainText ? { dangerouslySetInnerHTML: { __html: Utils.rubyTextToHTML(mainText) } } : {}),
-					},
-					// Safe rendering for main text
-					(() => {
-						if (isKara) {
-							// 카라오케 모드에서는 KaraokeLine 컴포넌트 사용
-							return react.createElement(KaraokeLine, {
-								text: mainText,
-								startTime,
-								position,
-								isActive
-							});
-						} else {
-							// 비카라오케 모드에서는 문자열이면 dangerouslySetInnerHTML 사용
-							if (typeof mainText === "string") {
-								return null; // Content will be set via dangerouslySetInnerHTML
-							} else {
-								// 객체인 경우 안전한 렌더링
-								return safeRenderText(mainText);
-							}
-						}
-					})()
-				),
-				// React 310 방지: subText가 문자열이고 비어있지 않을 때만 렌더링
-				subText && typeof subText === "string" && subText && react.createElement("p", {
-					className: "lyrics-lyricsContainer-LyricsLine-phonetic",
-					style: {
-						"--sub-lyric-color": CONFIG.visual["inactive-color"],
-					},
-					dangerouslySetInnerHTML: {
-						__html: Utils.rubyTextToHTML(subText),
-					},
-				}),
-				// React 310 방지: subText2가 문자열이고 비어있지 않을 때만 렌더링
-				subText2 && typeof subText2 === "string" && subText2 && react.createElement("p", {
-					className: "lyrics-lyricsContainer-LyricsLine-translation",
-					style: {
-						"--sub-lyric-color": CONFIG.visual["inactive-color"],
-					},
-					dangerouslySetInnerHTML: {
-						__html: Utils.rubyTextToHTML(subText2),
-					},
-				})
-			);
+			return react.createElement(LyricsLineBlock, {
+				key: item.key,
+				className: item.className,
+				style: item.style,
+				lineRef: item.trackLineRef ? activeLineRef : null,
+				onClick: item.canSeek ? () => Spicetify.Player.seek(item.startTime) : null,
+				mainText: item.mainText,
+				subText: item.subText,
+				subText2: item.subText2,
+				originalText: item.originalText,
+				isKara,
+				line: item.line,
+				position,
+				isActive: item.karaokeActive,
+			});
 		}),
 		react.createElement("p", {
 			className: "lyrics-lyricsContainer-LyricsUnsyncedPadding",
@@ -1563,39 +1588,37 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 });
 
 const UnsyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright }) => {
-	// Hook은 항상 같은 순서로 호출되어야 함 - React 130 방지
-	const lyricsArray = useMemo(() => {
-		// React 31 방지: 안전한 배열 변환 및 유효성 검사
-		if (!lyrics) {
-			return [];
-		}
-		if (Array.isArray(lyrics)) {
-			// 배열의 각 요소가 유효한지 확인
-			return lyrics.filter(item => item !== null && item !== undefined);
-		}
-		if (typeof lyrics === "string") {
-			return lyrics.split("\n").map((text, index) => ({ text, index }));
-		}
-		// 비어있거나 잘못된 데이터인 경우 빈 배열 반환
-		return [];
-	}, [lyrics]);
+	const lyricsArray = useMemo(() => normalizeUnsyncedLyrics(lyrics), [lyrics]);
 
-	// 유효성 검사는 Hook 호출 후에 수행
 	if (lyricsArray.length === 0) {
-		return react.createElement(
-			"div",
-			{ className: "lyrics-lyricsContainer-UnsyncedLyricsPage" },
-			react.createElement(
-				"div",
-				{ className: "lyrics-lyricsContainer-LyricsUnavailablePage" },
-				react.createElement(
-					"span",
-					{ className: "lyrics-lyricsContainer-LyricsUnavailableMessage" },
-					I18n.t("messages.noLyrics")
-				)
-			)
-		);
+		return react.createElement("div", { className: "lyrics-lyricsContainer-UnsyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
 	}
+
+	const renderItems = useMemo(() => lyricsArray.map(({ text, originalText, text2 }, index) => {
+		const {
+			lineText,
+			subText,
+			showMode2Translation,
+			belowMode,
+			showMode2,
+		} = getUnsyncedLineRenderData(lyrics, text, originalText, text2);
+
+		return {
+			key: index,
+			mainText: lineText,
+			subText: belowMode ? subText : null,
+			subText2: showMode2 ? showMode2Translation : null,
+			mainCopyText: Utils.formatLyricLineToCopy(
+				lineText,
+				belowMode ? subText : null,
+				showMode2 ? showMode2Translation : null,
+				originalText
+			),
+			subCopyText: belowMode ? subText : null,
+			subText2CopyText: showMode2 ? showMode2Translation : null,
+			originalText,
+		};
+	}), [lyricsArray, lyrics]);
 
 	return react.createElement(
 		"div",
@@ -1605,87 +1628,19 @@ const UnsyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, co
 		react.createElement("p", {
 			className: "lyrics-lyricsContainer-LyricsUnsyncedPadding",
 		}),
-		...lyricsArray.map(({ text, originalText, text2 }, index) => {
-			const { mainText: lineText, subText, subText2: showMode2Translation } = getLyricsDisplayMode(false, null, text, originalText, text2);
-
-			// Convert lyrics to text for comparison
-			const belowOrigin = (typeof originalText === "object" ? originalText?.props?.children?.[0] : originalText)?.replace(/\s+/g, "");
-			const belowTxt = (typeof text === "object" ? text?.props?.children?.[0] : text)?.replace(/\s+/g, "");
-
-			// Show sub-lines in "below" mode or when we have Mode 2 translation in either mode
-			const displayMode = CONFIG.visual["translate:display-mode"];
-			const showTranslatedBelow = displayMode === "below";
-			const replaceOriginal = displayMode === "replace";
-			const belowMode = showTranslatedBelow && originalText && belowOrigin !== belowTxt;
-			const showMode2 = !!showMode2Translation && (showTranslatedBelow || replaceOriginal);
-
-			return react.createElement(
-				"div",
-				{
-					className: "lyrics-lyricsContainer-LyricsLine lyrics-lyricsContainer-LyricsLine-active",
-					key: index,
-					dir: "auto",
-				},
-				react.createElement(
-					"p",
-					{
-						onContextMenu: (event) => {
-							event.preventDefault();
-							Spicetify.Platform.ClipboardAPI.copy(Utils.convertParsedToUnsynced(lyrics, belowMode).original)
-								.then(() => Toast.success(I18n.t("notifications.lyricsCopied")))
-								.catch(() => Toast.error(I18n.t("notifications.lyricsCopyFailed")));
-						},
-						// React 310 방지: 문자열이고 비어있지 않을 때만 dangerouslySetInnerHTML 사용
-						...(typeof lineText === "string" && lineText
-							? { dangerouslySetInnerHTML: { __html: Utils.rubyTextToHTML(lineText) } }
-							: {}),
-					},
-					typeof lineText === "string" ? null : lineText
-				),
-				belowMode &&
-				react.createElement(
-					"p",
-					{
-						className: "lyrics-lyricsContainer-LyricsLine-phonetic",
-						style: {
-							"--sub-lyric-color": CONFIG.visual["inactive-color"]
-						},
-						onContextMenu: (event) => {
-							event.preventDefault();
-							Spicetify.Platform.ClipboardAPI.copy(Utils.convertParsedToUnsynced(lyrics, belowMode).conver)
-								.then(() => Toast.success(I18n.t("notifications.translationCopied")))
-								.catch(() => Toast.error(I18n.t("notifications.translationCopyFailed")));
-						},
-						// React 310 방지: 문자열이고 비어있지 않을 때만 dangerouslySetInnerHTML 사용
-						...(typeof subText === "string" && subText
-							? { dangerouslySetInnerHTML: { __html: Utils.rubyTextToHTML(subText) } }
-							: {}),
-					},
-					typeof subText === "string" ? null : subText
-				),
-				showMode2 &&
-				react.createElement(
-					"p",
-					{
-						className: "lyrics-lyricsContainer-LyricsLine-translation",
-						style: {
-							"--sub-lyric-color": CONFIG.visual["inactive-color"]
-						},
-						onContextMenu: (event) => {
-							event.preventDefault();
-							Spicetify.Platform.ClipboardAPI.copy(showMode2Translation)
-								.then(() => Toast.success(I18n.t("notifications.secondTranslationCopied")))
-								.catch(() => Toast.error(I18n.t("notifications.secondTranslationCopyFailed")));
-						},
-						// React 310 방지: 문자열이고 비어있지 않을 때만 dangerouslySetInnerHTML 사용
-						...(typeof showMode2Translation === "string" && showMode2Translation
-							? { dangerouslySetInnerHTML: { __html: Utils.rubyTextToHTML(showMode2Translation) } }
-							: {}),
-					},
-					typeof showMode2Translation === "string" ? null : showMode2Translation
-				)
-			);
-		}),
+		...renderItems.map((item) =>
+			react.createElement(LyricsLineBlock, {
+				key: item.key,
+				className: "lyrics-lyricsContainer-LyricsLine lyrics-lyricsContainer-LyricsLine-active",
+				mainText: item.mainText,
+				subText: item.subText,
+				subText2: item.subText2,
+				originalText: item.originalText,
+				mainCopyText: item.mainCopyText,
+				subCopyText: item.subCopyText,
+				subText2CopyText: item.subText2CopyText,
+			})
+		),
 		react.createElement("p", {
 			className: "lyrics-lyricsContainer-LyricsUnsyncedPadding",
 		}),
@@ -1805,19 +1760,9 @@ const LyricsPage = ({ lyricsContainer }) => {
 };
 
 const LyricsUnavailableView = react.memo(({ isLoading }) =>
-	react.createElement(
-		"div",
-		{
-			className: "lyrics-lyricsContainer-LyricsUnavailablePage",
-		},
-		react.createElement(
-			"span",
-			{
-				className: "lyrics-lyricsContainer-LyricsUnavailableMessage",
-			},
-			isLoading ? LoadingIcon : "(• _ • )"
-		)
-	)
+	isLoading
+		? renderLyricsUnavailable(LoadingIcon)
+		: renderLyricsUnavailable("(• _ • )")
 );
 
 const LyricsPageRenderer = react.memo(({
