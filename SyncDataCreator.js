@@ -5,6 +5,204 @@
 const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 	const { useState, useEffect, useRef, useCallback, useMemo } = react;
 
+	const roundSyncTime = (time) => Math.round(time * 1000) / 1000;
+	const EDGE_INTERPOLATION_GAP_SEC = 0.045;
+
+	const isWordChar = (ch) => !!ch && /[\p{L}\p{N}]/u.test(ch);
+	const isLatinChar = (ch) => !!ch && /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(ch);
+	const isLatinVowel = (ch) => !!ch && /[AEIOUYaeiouyÀ-ÖØ-öø-ÿ]/.test(ch);
+	const isInternalJoiner = (chars, index) => {
+		const ch = chars[index];
+		if (!ch || !/['’"]/u.test(ch)) return false;
+		return isWordChar(chars[index - 1]) && isWordChar(chars[index + 1]);
+	};
+	const isWordBoundary = (chars, index) => {
+		const ch = chars[index];
+		if (!ch) return false;
+		if (isInternalJoiner(chars, index)) return false;
+		return /[\s\-–—]/u.test(ch);
+	};
+	const isLeadingChar = (chars, index) => {
+		const ch = chars[index];
+		if (!ch) return false;
+		if (isInternalJoiner(chars, index)) return false;
+		return /[\(\[\{「『【〈《¿¡'"“”‘’]/u.test(ch);
+	};
+	const isTrailingChar = (chars, index) => {
+		const ch = chars[index];
+		if (!ch) return false;
+		if (isInternalJoiner(chars, index)) return false;
+		return /[\s!?\.,;:\)\]\}」』】〉》'"“”‘’]/u.test(ch);
+	};
+	const isValidOnsetCluster = (cluster) => /^(bl|br|ch|chr|cl|cr|dr|fl|fr|gl|gr|ph|pl|pr|qu|sc|sch|scr|sh|sk|sl|sm|sn|sp|spl|spr|st|str|sw|th|thr|tr|tw|wh|wr)$/i.test(cluster);
+	const edgeInterpolation = (progress) => {
+		if (progress <= 0) return 0;
+		if (progress >= 1) return 1;
+		if (progress < 0.5) {
+			const scaled = progress * 2;
+			return 0.5 * (1 - Math.pow(1 - scaled, 3));
+		}
+		const scaled = (progress - 0.5) * 2;
+		return 0.5 + (0.5 * Math.pow(scaled, 3));
+	};
+	const applyInterpolatedRangeToCharTimes = (target, startIdx, endIdx, startTime, endTime) => {
+		if (!target || startIdx > endIdx || startIdx < 0) return;
+		const count = endIdx - startIdx + 1;
+		const safeEndTime = Math.max(startTime, endTime);
+		if (count <= 1) {
+			target[startIdx] = roundSyncTime(startTime);
+			return;
+		}
+		for (let i = 0; i < count; i++) {
+			const progress = count === 1 ? 1 : i / (count - 1);
+			target[startIdx + i] = roundSyncTime(startTime + ((safeEndTime - startTime) * edgeInterpolation(progress)));
+		}
+	};
+	const estimateSegmentDuration = (startIdx, endIdx, scale = 0.055, maxDuration = 0.26) =>
+		Math.min(maxDuration, Math.max(0.07, (endIdx - startIdx + 1) * scale));
+	const buildLatinWordSyllables = (chars, wordStart, wordEnd) => {
+		const nuclei = [];
+		let index = wordStart;
+
+		while (index <= wordEnd) {
+			if (!isLatinVowel(chars[index])) {
+				index++;
+				continue;
+			}
+
+			const nucleusStart = index;
+			index++;
+			while (index <= wordEnd && isLatinVowel(chars[index])) {
+				index++;
+			}
+			nuclei.push({ start: nucleusStart, end: index - 1 });
+		}
+
+		if (nuclei.length > 1) {
+			const lastNucleus = nuclei[nuclei.length - 1];
+			if (lastNucleus.start === lastNucleus.end &&
+				lastNucleus.end === wordEnd &&
+				/[eE]/.test(chars[lastNucleus.start]) &&
+				isWordChar(chars[lastNucleus.start - 1])) {
+				nuclei.pop();
+			}
+		}
+
+		if (!nuclei.length) {
+			return [{ start: wordStart, end: wordEnd }];
+		}
+
+		const syllables = [];
+		let currentStart = wordStart;
+
+		for (let i = 0; i < nuclei.length; i++) {
+			const nucleus = nuclei[i];
+			const nextNucleus = nuclei[i + 1];
+
+			if (!nextNucleus) {
+				syllables.push({ start: currentStart, end: wordEnd });
+				break;
+			}
+
+			const consonantRunStart = nucleus.end + 1;
+			const consonantRunEnd = nextNucleus.start - 1;
+			let splitAfter = nucleus.end;
+
+			if (consonantRunEnd >= consonantRunStart) {
+				const runLength = consonantRunEnd - consonantRunStart + 1;
+				if (runLength === 1) {
+					splitAfter = nucleus.end;
+				} else {
+					splitAfter = consonantRunEnd - 1;
+					const onsetCluster = chars.slice(splitAfter + 1, consonantRunEnd + 1).join('').toLowerCase();
+					if (runLength > 2 && isValidOnsetCluster(onsetCluster)) {
+						splitAfter = consonantRunStart - 1;
+					}
+				}
+			}
+
+			syllables.push({ start: currentStart, end: splitAfter });
+			currentStart = splitAfter + 1;
+		}
+
+		return syllables.filter(segment => segment.start <= segment.end);
+	};
+	const buildLineSyllableSegments = (chars) => {
+		if (!Array.isArray(chars) || !chars.length) return [];
+		const segments = [];
+		let index = 0;
+		let pendingPrefixStart = 0;
+
+		while (index < chars.length) {
+			while (index < chars.length && isWordBoundary(chars, index)) {
+				index++;
+			}
+
+			if (index >= chars.length) {
+				break;
+			}
+
+			const prefixStart = pendingPrefixStart;
+			let wordStart = index;
+			while (wordStart < chars.length && isLeadingChar(chars, wordStart) && !isWordBoundary(chars, wordStart)) {
+				wordStart++;
+			}
+
+			let wordEnd = wordStart;
+			while (wordEnd < chars.length && !isWordBoundary(chars, wordEnd)) {
+				wordEnd++;
+			}
+			wordEnd--;
+
+			if (wordEnd < wordStart) {
+				index++;
+				pendingPrefixStart = index;
+				continue;
+			}
+
+			let trailingEnd = wordEnd;
+			while (trailingEnd >= wordStart && isTrailingChar(chars, trailingEnd) && !isInternalJoiner(chars, trailingEnd)) {
+				trailingEnd--;
+			}
+
+			const coreEnd = Math.max(wordStart, trailingEnd);
+			let wordSegments;
+
+			if (!isLatinChar(chars[wordStart])) {
+				wordSegments = [];
+				for (let i = wordStart; i <= coreEnd; i++) {
+					wordSegments.push({ start: i, end: i });
+				}
+			} else if (chars.slice(wordStart, coreEnd + 1).every(ch => isLatinChar(ch) || /['’]/u.test(ch))) {
+				wordSegments = buildLatinWordSyllables(chars, wordStart, coreEnd);
+			} else {
+				wordSegments = [];
+				for (let i = wordStart; i <= coreEnd; i++) {
+					wordSegments.push({ start: i, end: i });
+				}
+			}
+
+			if (!wordSegments.length) {
+				wordSegments = [{ start: wordStart, end: coreEnd }];
+			}
+
+			wordSegments = wordSegments.map((segment, segmentIndex) => ({
+				start: segmentIndex === 0 ? prefixStart : segment.start,
+				end: segmentIndex === wordSegments.length - 1 ? wordEnd : segment.end,
+			}));
+
+			segments.push(...wordSegments.filter(segment => segment.start <= segment.end));
+			index = wordEnd + 1;
+			pendingPrefixStart = index;
+		}
+
+		if (!segments.length && chars.length) {
+			segments.push({ start: 0, end: chars.length - 1 });
+		}
+
+		return segments;
+	};
+
 	// 상태 관리
 	const [provider, setProvider] = useState('');   // 상세 provider (sync-data 매칭용, 예: spotify-MusixMatch)
 	const [addonId, setAddonId] = useState('');     // 실제 addon ID (가사 로드용, 예: spotify)
@@ -81,6 +279,11 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 		if (currentLineIndex < 0 || currentLineIndex >= lyricsLines.length) return [];
 		return Array.from(lyricsLines[currentLineIndex]);
 	}, [lyricsLines, currentLineIndex]);
+
+	const currentLineSyllableSegments = useMemo(
+		() => buildLineSyllableSegments(currentLineChars),
+		[currentLineChars]
+	);
 
 	const completedLines = useMemo(() => {
 		if (!syncData || !syncData.lines) return 0;
@@ -633,6 +836,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 	// pendingWordSync: 이전 단어의 시작 시간과 인덱스 범위를 저장
 	// 다음 단어가 탭되면 이전 단어의 글자들에 보간된 시간 적용
 	const pendingWordSyncRef = useRef(null);
+	const pendingSyllableSyncRef = useRef(null);
 	// 단어 간 최소 간격 (ms) - 단어가 즉시 전환되지 않도록
 	const WORD_GAP_MS = 80;
 	// 단어 내 보간 활성화 여부
@@ -655,6 +859,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 			keyboardCharIndexRef.current = -1;
 			charTimesRef.current = [];
 			pendingWordSyncRef.current = null; // 보간 대기 상태도 초기화
+			pendingSyllableSyncRef.current = null;
 			setDragStartTime(null);
 			setRecordingCharIndex(-1);
 			// 드래그 모드도 초기화
@@ -727,6 +932,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 			isKeyboardSyncingRef.current = false;
 			keyboardCharIndexRef.current = -1;
 			charTimesRef.current = [];
+			pendingWordSyncRef.current = null;
+			pendingSyllableSyncRef.current = null;
 			setDragStartTime(null);
 			setRecordingCharIndex(-1);
 		};
@@ -743,11 +950,6 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 
 			if (currentLineIndex >= lyricsLines.length) return;
 
-			// 특수문자 패턴 헬퍼 함수들
-			const isTrailingChar = (ch) => /[\s!?\.,;:\)\]\}」』】〉》"''""]/i.test(ch);
-			const isLeadingChar = (ch) => /[\(\[\{「『【〈《"''""¿¡]/i.test(ch);
-			const isWordBoundary = (ch) => /[\s\-–—]/i.test(ch);
-
 			// 한 글자 앞으로 진행하는 헬퍼 함수
 			const advanceOneChar = (currentTime) => {
 				if (!isKeyboardSyncingRef.current) {
@@ -755,18 +957,20 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					isKeyboardSyncingRef.current = true;
 					let startIndex = 0;
 					charTimesRef.current = new Array(currentLineChars.length).fill(null);
+					pendingWordSyncRef.current = null;
+					pendingSyllableSyncRef.current = null;
 					charTimesRef.current[0] = currentTime;
 
 					// 첫 글자가 여는 괄호면 다음 글자까지 포함
-					if (isLeadingChar(currentLineChars[0])) {
-						while (startIndex + 1 < currentLineChars.length && isLeadingChar(currentLineChars[startIndex])) {
+					if (isLeadingChar(currentLineChars, 0)) {
+						while (startIndex + 1 < currentLineChars.length && isLeadingChar(currentLineChars, startIndex)) {
 							startIndex++;
 							charTimesRef.current[startIndex] = currentTime;
 						}
 					}
 
 					// 다음 글자가 구두점/닫는괄호/공백이면 함께 처리
-					while (startIndex + 1 < currentLineChars.length && isTrailingChar(currentLineChars[startIndex + 1])) {
+					while (startIndex + 1 < currentLineChars.length && isTrailingChar(currentLineChars, startIndex + 1)) {
 						startIndex++;
 						charTimesRef.current[startIndex] = currentTime;
 					}
@@ -783,13 +987,13 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 						charTimesRef.current[nextIndex] = currentTime;
 
 						// 현재 글자가 여는 괄호면 다음 글자까지 포함
-						while (nextIndex + 1 < currentLineChars.length && isLeadingChar(currentLineChars[nextIndex])) {
+						while (nextIndex + 1 < currentLineChars.length && isLeadingChar(currentLineChars, nextIndex)) {
 							nextIndex++;
 							charTimesRef.current[nextIndex] = currentTime;
 						}
 
 						// 다음 글자가 구두점/닫는괄호/공백이면 함께 처리
-						while (nextIndex + 1 < currentLineChars.length && isTrailingChar(currentLineChars[nextIndex + 1])) {
+						while (nextIndex + 1 < currentLineChars.length && isTrailingChar(currentLineChars, nextIndex + 1)) {
 							nextIndex++;
 							charTimesRef.current[nextIndex] = currentTime;
 						}
@@ -827,15 +1031,33 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				const wordEndTime = nextWordStartTime - (WORD_GAP_MS / 1000);
 				const duration = Math.max(0, wordEndTime - startTime);
 
-				// 각 글자에 균등하게 시간 분배
-				for (let i = startIdx; i <= endIdx; i++) {
-					const progress = (i - startIdx) / charCount;
-					const interpolatedTime = startTime + (duration * progress);
-					charTimesRef.current[i] = Math.round(interpolatedTime * 1000) / 1000;
-				}
+				applyInterpolatedRangeToCharTimes(
+					charTimesRef.current,
+					startIdx,
+					endIdx,
+					startTime,
+					startTime + duration
+				);
 
 				window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to word:', startIdx, '-', endIdx, 'duration:', duration.toFixed(3));
 				pendingWordSyncRef.current = null;
+			};
+
+			const applyInterpolationToPendingSyllable = (nextSyllableStartTime) => {
+				if (!pendingSyllableSyncRef.current || !interpolationEnabledRef.current) return;
+
+				const { startIdx, endIdx, startTime } = pendingSyllableSyncRef.current;
+				const endTime = Math.max(startTime, nextSyllableStartTime - EDGE_INTERPOLATION_GAP_SEC);
+				applyInterpolatedRangeToCharTimes(
+					charTimesRef.current,
+					startIdx,
+					endIdx,
+					startTime,
+					endTime
+				);
+
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to syllable:', startIdx, '-', endIdx, 'duration:', (endTime - startTime).toFixed(3));
+				pendingSyllableSyncRef.current = null;
 			};
 
 			// 한 단어 앞으로 진행하는 헬퍼 함수
@@ -850,7 +1072,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					charTimesRef.current[0] = currentTime;
 
 					// 첫 글자가 여는 괄호면 다음 글자까지 포함
-					while (startIdx + 1 < currentLineChars.length && isLeadingChar(currentLineChars[startIdx])) {
+					while (startIdx + 1 < currentLineChars.length && isLeadingChar(currentLineChars, startIdx)) {
 						startIdx++;
 						charTimesRef.current[startIdx] = currentTime;
 					}
@@ -858,16 +1080,16 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					// 첫 단어의 끝까지 진행 (단어 경계 만나면 멈춤)
 					let endIdx = startIdx;
 					while (endIdx + 1 < currentLineChars.length &&
-						!isWordBoundary(currentLineChars[endIdx + 1]) &&
-						!isTrailingChar(currentLineChars[endIdx + 1])) {
+						!isWordBoundary(currentLineChars, endIdx + 1) &&
+						!isTrailingChar(currentLineChars, endIdx + 1)) {
 						endIdx++;
 						charTimesRef.current[endIdx] = currentTime;
 					}
 
 					// trailing 문자들(구두점 등) 포함
 					while (endIdx + 1 < currentLineChars.length &&
-						isTrailingChar(currentLineChars[endIdx + 1]) &&
-						!isWordBoundary(currentLineChars[endIdx + 1])) {
+						isTrailingChar(currentLineChars, endIdx + 1) &&
+						!isWordBoundary(currentLineChars, endIdx + 1)) {
 						endIdx++;
 						charTimesRef.current[endIdx] = currentTime;
 					}
@@ -882,13 +1104,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
 						// 첫 단어이자 마지막 단어인 경우에도 보간 적용
 						if (interpolationEnabledRef.current && endIdx > 0) {
-							const charCount = endIdx + 1;
-							const duration = Math.min(0.3, charCount * 0.05);
-							for (let i = 0; i <= endIdx; i++) {
-								const progress = i / charCount;
-								const interpolatedTime = currentTime + (duration * progress);
-								charTimesRef.current[i] = Math.round(interpolatedTime * 1000) / 1000;
-							}
+							const duration = estimateSegmentDuration(0, endIdx);
+							applyInterpolatedRangeToCharTimes(charTimesRef.current, 0, endIdx, currentTime, currentTime + duration);
 							window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to single word line');
 						}
 						finishKeyboardSync();
@@ -913,7 +1130,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				let endIdx = startIdx + 1;
 
 				// 먼저 현재 공백들 건너뛰기
-				while (endIdx < currentLineChars.length && isWordBoundary(currentLineChars[endIdx])) {
+				while (endIdx < currentLineChars.length && isWordBoundary(currentLineChars, endIdx)) {
 					// 공백에는 이전 단어 끝 시간 + 갭 적용
 					charTimesRef.current[endIdx] = currentTime - (WORD_GAP_MS / 2000);
 					endIdx++;
@@ -923,13 +1140,13 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				const nextWordStartIdx = endIdx;
 
 				// 다음 단어 경계까지 진행
-				while (endIdx < currentLineChars.length && !isWordBoundary(currentLineChars[endIdx]) && !isTrailingChar(currentLineChars[endIdx])) {
+				while (endIdx < currentLineChars.length && !isWordBoundary(currentLineChars, endIdx) && !isTrailingChar(currentLineChars, endIdx)) {
 					charTimesRef.current[endIdx] = currentTime;
 					endIdx++;
 				}
 
 				// trailing 문자들도 함께 처리
-				while (endIdx < currentLineChars.length && isTrailingChar(currentLineChars[endIdx]) && !isWordBoundary(currentLineChars[endIdx])) {
+				while (endIdx < currentLineChars.length && isTrailingChar(currentLineChars, endIdx) && !isWordBoundary(currentLineChars, endIdx)) {
 					charTimesRef.current[endIdx] = currentTime;
 					endIdx++;
 				}
@@ -966,12 +1183,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 						const charCount = endIdx - startIdx + 1;
 						if (charCount > 1) {
 							// 마지막 단어는 시작 시간으로부터 글자 수에 비례한 짧은 지속시간 부여
-							const duration = Math.min(0.3, charCount * 0.05); // 최대 300ms
-							for (let i = startIdx; i <= endIdx; i++) {
-								const progress = (i - startIdx) / charCount;
-								const interpolatedTime = startTime + (duration * progress);
-								charTimesRef.current[i] = Math.round(interpolatedTime * 1000) / 1000;
-							}
+							const duration = estimateSegmentDuration(startIdx, endIdx); // 최대 260ms
+							applyInterpolatedRangeToCharTimes(charTimesRef.current, startIdx, endIdx, startTime, startTime + duration);
 							window.__ivLyricsDebugLog?.('[SyncDataCreator] Applied interpolation to last word:', startIdx, '-', endIdx);
 						}
 					}
@@ -991,19 +1204,19 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				let targetIdx = keyboardCharIndexRef.current - 1;
 
 				// trailing 문자들 건너뛰기
-				while (targetIdx >= 0 && isTrailingChar(currentLineChars[targetIdx])) {
+				while (targetIdx >= 0 && isTrailingChar(currentLineChars, targetIdx)) {
 					charTimesRef.current[targetIdx + 1] = null;
 					targetIdx--;
 				}
 
 				// 단어 경계까지 뒤로 가기
-				while (targetIdx >= 0 && !isWordBoundary(currentLineChars[targetIdx])) {
+				while (targetIdx >= 0 && !isWordBoundary(currentLineChars, targetIdx)) {
 					charTimesRef.current[targetIdx + 1] = null;
 					targetIdx--;
 				}
 
 				// 공백들 건너뛰기
-				while (targetIdx >= 0 && isWordBoundary(currentLineChars[targetIdx])) {
+				while (targetIdx >= 0 && isWordBoundary(currentLineChars, targetIdx)) {
 					charTimesRef.current[targetIdx + 1] = null;
 					targetIdx--;
 				}
@@ -1040,6 +1253,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				e.stopPropagation();
 				e.stopImmediatePropagation();
 				if (isKeyboardSyncingRef.current && keyboardCharIndexRef.current >= 0) {
+					pendingWordSyncRef.current = null;
+					pendingSyllableSyncRef.current = null;
 					charTimesRef.current[keyboardCharIndexRef.current] = null;
 					keyboardCharIndexRef.current--;
 					setRecordingCharIndex(keyboardCharIndexRef.current);
@@ -1067,6 +1282,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				e.preventDefault();
 				e.stopPropagation();
 				e.stopImmediatePropagation();
+				pendingSyllableSyncRef.current = null;
 				revertOneWord();
 			}
 
@@ -1077,139 +1293,78 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				e.stopImmediatePropagation();
 				const currentTime = Spicetify.Player.getProgress() / 1000;
 
-				// 모음 판별 함수 (영어 + 일부 다국어 지원)
-				const isVowel = (ch) => /[aeiouAEIOUàáâãäåæèéêëìíîïòóôõöùúûüýÿøœ]/i.test(ch);
+				if (!currentLineSyllableSegments.length) {
+					return;
+				}
 
 				if (!isKeyboardSyncingRef.current) {
-					// 싱크 시작
 					isKeyboardSyncingRef.current = true;
 					charTimesRef.current = new Array(currentLineChars.length).fill(null);
+					pendingSyllableSyncRef.current = null;
 					setDragStartTime(currentTime);
+					pendingWordSyncRef.current = null;
 
-					let startIdx = 0;
-					charTimesRef.current[0] = currentTime;
-
-					// 첫 글자가 여는 괄호면 다음 글자까지 포함
-					while (startIdx + 1 < currentLineChars.length && isLeadingChar(currentLineChars[startIdx])) {
-						startIdx++;
-						charTimesRef.current[startIdx] = currentTime;
+					const firstSegment = currentLineSyllableSegments[0];
+					for (let i = firstSegment.start; i <= firstSegment.end; i++) {
+						charTimesRef.current[i] = currentTime;
 					}
 
-					// 첫 음절 끝까지 진행: 모음을 만나면 그 모음까지 포함하고 멈춤
-					let endIdx = startIdx;
-					let foundVowel = isVowel(currentLineChars[endIdx]);
+					keyboardCharIndexRef.current = firstSegment.end;
+					setRecordingCharIndex(firstSegment.end);
+					autoScroll(firstSegment.end);
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Syllable sync started, segment:', firstSegment.start, '-', firstSegment.end);
 
-					// 모음을 찾을 때까지 진행
-					while (!foundVowel && endIdx + 1 < currentLineChars.length &&
-						!isWordBoundary(currentLineChars[endIdx + 1])) {
-						endIdx++;
-						charTimesRef.current[endIdx] = currentTime;
-						if (isVowel(currentLineChars[endIdx])) {
-							foundVowel = true;
-						}
-					}
-
-					// 모음 뒤의 자음들도 포함 (다음 모음 전까지)
-					if (foundVowel) {
-						while (endIdx + 1 < currentLineChars.length &&
-							!isWordBoundary(currentLineChars[endIdx + 1]) &&
-							!isVowel(currentLineChars[endIdx + 1]) &&
-							!isTrailingChar(currentLineChars[endIdx + 1])) {
-							endIdx++;
-							charTimesRef.current[endIdx] = currentTime;
-						}
-					}
-
-					// trailing 문자들(구두점 등) 포함 - 단어 끝인 경우만
-					if (endIdx + 1 >= currentLineChars.length || isWordBoundary(currentLineChars[endIdx + 1])) {
-						while (endIdx + 1 < currentLineChars.length &&
-							isTrailingChar(currentLineChars[endIdx + 1]) &&
-							!isWordBoundary(currentLineChars[endIdx + 1])) {
-							endIdx++;
-							charTimesRef.current[endIdx] = currentTime;
-						}
-					}
-
-					keyboardCharIndexRef.current = endIdx;
-					setRecordingCharIndex(endIdx);
-					autoScroll(endIdx);
-					window.__ivLyricsDebugLog?.('[SyncDataCreator] Syllable sync started, ends at:', endIdx);
-
-					// 마지막 글자면 라인 완료
-					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
+					if (firstSegment.end >= currentLineChars.length - 1) {
+						const duration = estimateSegmentDuration(firstSegment.start, firstSegment.end, 0.05, 0.22);
+						applyInterpolatedRangeToCharTimes(charTimesRef.current, firstSegment.start, firstSegment.end, currentTime, currentTime + duration);
 						finishKeyboardSync();
 						window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by syllable');
-					}
-				} else {
-					// 이미 싱크 중인 경우: 다음 음절로 진행
-					const startIdx = keyboardCharIndexRef.current;
-					let endIdx = startIdx + 1;
-
-					if (endIdx >= currentLineChars.length) {
-						// 이미 끝에 도달
-						finishKeyboardSync();
 						return;
 					}
 
-					// 공백이면 건너뛰기
-					while (endIdx < currentLineChars.length && isWordBoundary(currentLineChars[endIdx])) {
-						charTimesRef.current[endIdx] = currentTime;
-						endIdx++;
-					}
-
-					if (endIdx >= currentLineChars.length) {
-						keyboardCharIndexRef.current = currentLineChars.length - 1;
-						setRecordingCharIndex(keyboardCharIndexRef.current);
-						finishKeyboardSync();
-						return;
-					}
-
-					// 첫 글자 처리
-					charTimesRef.current[endIdx] = currentTime;
-					let foundVowel = isVowel(currentLineChars[endIdx]);
-
-					// 모음을 찾을 때까지 진행
-					while (!foundVowel && endIdx + 1 < currentLineChars.length &&
-						!isWordBoundary(currentLineChars[endIdx + 1])) {
-						endIdx++;
-						charTimesRef.current[endIdx] = currentTime;
-						if (isVowel(currentLineChars[endIdx])) {
-							foundVowel = true;
-						}
-					}
-
-					// 모음 뒤의 자음들도 포함 (다음 모음 전까지)
-					if (foundVowel) {
-						while (endIdx + 1 < currentLineChars.length &&
-							!isWordBoundary(currentLineChars[endIdx + 1]) &&
-							!isVowel(currentLineChars[endIdx + 1]) &&
-							!isTrailingChar(currentLineChars[endIdx + 1])) {
-							endIdx++;
-							charTimesRef.current[endIdx] = currentTime;
-						}
-					}
-
-					// trailing 문자들(구두점 등) 포함 - 단어 끝인 경우만
-					if (endIdx + 1 >= currentLineChars.length || isWordBoundary(currentLineChars[endIdx + 1])) {
-						while (endIdx + 1 < currentLineChars.length &&
-							isTrailingChar(currentLineChars[endIdx + 1]) &&
-							!isWordBoundary(currentLineChars[endIdx + 1])) {
-							endIdx++;
-							charTimesRef.current[endIdx] = currentTime;
-						}
-					}
-
-					keyboardCharIndexRef.current = endIdx;
-					setRecordingCharIndex(endIdx);
-					autoScroll(endIdx);
-					window.__ivLyricsDebugLog?.('[SyncDataCreator] Syllable advanced to:', endIdx);
-
-					// 마지막 글자면 라인 완료
-					if (keyboardCharIndexRef.current >= currentLineChars.length - 1) {
-						finishKeyboardSync();
-						window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by syllable');
-					}
+					pendingSyllableSyncRef.current = {
+						startIdx: firstSegment.start,
+						endIdx: firstSegment.end,
+						startTime: currentTime
+					};
+					return;
 				}
+
+				const currentSegmentIndex = currentLineSyllableSegments.findIndex(
+					(segment) => keyboardCharIndexRef.current >= segment.start && keyboardCharIndexRef.current <= segment.end
+				);
+				const nextSegment = currentLineSyllableSegments[(currentSegmentIndex >= 0 ? currentSegmentIndex : -1) + 1];
+
+				if (!nextSegment) {
+					applyInterpolationToPendingSyllable(currentTime);
+					finishKeyboardSync();
+					return;
+				}
+
+				applyInterpolationToPendingSyllable(currentTime);
+				for (let i = nextSegment.start; i <= nextSegment.end; i++) {
+					charTimesRef.current[i] = currentTime;
+				}
+
+				keyboardCharIndexRef.current = nextSegment.end;
+				setRecordingCharIndex(nextSegment.end);
+				autoScroll(nextSegment.end);
+				window.__ivLyricsDebugLog?.('[SyncDataCreator] Syllable advanced to segment:', nextSegment.start, '-', nextSegment.end);
+
+				if (nextSegment.end >= currentLineChars.length - 1) {
+					const duration = estimateSegmentDuration(nextSegment.start, nextSegment.end, 0.05, 0.22);
+					applyInterpolatedRangeToCharTimes(charTimesRef.current, nextSegment.start, nextSegment.end, currentTime, currentTime + duration);
+					pendingSyllableSyncRef.current = null;
+					finishKeyboardSync();
+					window.__ivLyricsDebugLog?.('[SyncDataCreator] Line completed by syllable');
+					return;
+				}
+
+				pendingSyllableSyncRef.current = {
+					startIdx: nextSegment.start,
+					endIdx: nextSegment.end,
+					startTime: currentTime
+				};
 			}
 
 			// / 키: 드래그 모드 시작 (누르고 있으면 연속으로 빠르게 진행)
@@ -1273,6 +1428,8 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 				isKeyboardSyncingRef.current = false;
 				keyboardCharIndexRef.current = -1;
 				charTimesRef.current = [];
+				pendingWordSyncRef.current = null;
+				pendingSyllableSyncRef.current = null;
 				setDragStartTime(null);
 				setRecordingCharIndex(-1);
 
@@ -1335,7 +1492,7 @@ const SyncDataCreator = ({ trackInfo, initialData, onClose }) => {
 			}
 			isKeyboardDraggingRef.current = false;
 		};
-	}, [mode, currentLineIndex, lyricsLines.length, currentLineChars, lineCharOffsets, autoScroll]);
+	}, [mode, currentLineIndex, lyricsLines.length, currentLineChars, currentLineSyllableSegments, lineCharOffsets, autoScroll]);
 
 	const handleContainerMouseDown = useCallback((e) => {
 		if (mode !== 'record' || currentLineIndex >= lyricsLines.length) return;
