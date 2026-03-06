@@ -2,6 +2,23 @@
 // subfiles_extension으로 로드되어 페이지에 구애받지 않고 작동
 
 (function GlobalShortcuts() {
+    const MODULE_KEY = "__ivLyricsGlobalShortcuts";
+    const moduleState = window[MODULE_KEY] || (window[MODULE_KEY] = {
+        initialized: false,
+        waitTimer: null,
+        waitTimeout: null,
+        historyUnlisten: null,
+        fullscreenClosedHandler: null,
+        ivLyricsHandler: null,
+        storageHandler: null,
+        focusHandler: null,
+        visibilityHandler: null
+    });
+
+    if (moduleState.initialized) {
+        return;
+    }
+
     // 설정 키 (개별 설정은 직접 키 이름으로 저장됨)
     const FULLSCREEN_KEY_SETTING = "ivLyrics:visual:fullscreen-key";
     const DEFAULT_KEY = "f12";
@@ -164,11 +181,6 @@
         }
     };
 
-    // 전체화면 종료 이벤트 리스너 (index.js에서 발생시킴)
-    window.addEventListener("ivLyrics:fullscreen-closed", () => {
-        goBackToPreviousPage();
-    });
-
     // 입력 필드 체크
     const isInputFocused = () => {
         const activeElement = document.activeElement;
@@ -183,9 +195,10 @@
 
         const newKey = getFullscreenKey();
 
-        // 기존 바인딩이 있고 키가 변경되었으면 해제
-        if (currentBoundKey && currentBoundKey !== newKey) {
+        // 기존 바인딩이 있으면 먼저 해제
+        if (currentBoundKey) {
             globalMousetrap.unbind(currentBoundKey);
+            currentBoundKey = null;
         }
 
         // 새 키 바인딩
@@ -206,8 +219,9 @@
         const newToggleTvKey = getToggleTvKey();
 
         // 기존 바인딩 해제
-        if (currentToggleTvKey && currentToggleTvKey !== newToggleTvKey) {
+        if (currentToggleTvKey) {
             globalMousetrap.unbind(currentToggleTvKey);
+            currentToggleTvKey = null;
         }
 
         // TV 모드 전환 키 (전체화면 모드에서만 작동)
@@ -221,6 +235,12 @@
             });
             currentToggleTvKey = newToggleTvKey;
         }
+    };
+
+    const syncBindingsAndState = () => {
+        updateKeyBinding();
+        updateTvModeKey();
+        cleanupOrphanedFullscreenContainer();
     };
 
     // fullscreen container 정리 함수 (ivLyrics 페이지 아닐 때 container가 남아있으면 삭제)
@@ -259,6 +279,16 @@
             return;
         }
 
+        moduleState.initialized = true;
+        if (moduleState.waitTimer) {
+            clearInterval(moduleState.waitTimer);
+            moduleState.waitTimer = null;
+        }
+        if (moduleState.waitTimeout) {
+            clearTimeout(moduleState.waitTimeout);
+            moduleState.waitTimeout = null;
+        }
+
         // 전역 Mousetrap 인스턴스 생성
         globalMousetrap = new Spicetify.Mousetrap(document);
 
@@ -269,12 +299,13 @@
         // 페이지 이동 감지하여 orphaned fullscreen container 정리
         // Spicetify History 이벤트 리스너 등록
         if (Spicetify.Platform?.History) {
-            Spicetify.Platform.History.listen((location) => {
+            const unlisten = Spicetify.Platform.History.listen(() => {
                 // 페이지 이동 시 약간의 딜레이 후 체크 (DOM 업데이트 대기)
                 setTimeout(() => {
                     cleanupOrphanedFullscreenContainer();
                 }, 100);
             });
+            moduleState.historyUnlisten = typeof unlisten === "function" ? unlisten : null;
         }
 
         // 초기 로드 시에도 체크 (이전에 fullscreen이 남아있는 경우를 위해)
@@ -282,8 +313,13 @@
             cleanupOrphanedFullscreenContainer();
         }, 500);
 
+        moduleState.fullscreenClosedHandler = () => {
+            goBackToPreviousPage();
+        };
+        window.addEventListener("ivLyrics:fullscreen-closed", moduleState.fullscreenClosedHandler);
+
         // 설정 변경 감지
-        window.addEventListener("ivLyrics", (event) => {
+        moduleState.ivLyricsHandler = (event) => {
             if (event.detail?.name === "fullscreen-key") {
                 updateKeyBinding();
             }
@@ -294,44 +330,54 @@
             if (event.detail?.type === "fullscreen-toggle") {
                 toggleFullscreen();
             }
-        });
+        };
+        window.addEventListener("ivLyrics", moduleState.ivLyricsHandler);
 
-        // 설정 저장 시 바인딩 업데이트를 위한 Storage 이벤트 리스너
-        // (다른 탭에서 변경된 경우를 위해)
-        const checkKeyChange = () => {
-            const newKey = getFullscreenKey();
-            const newToggleTvKey = getToggleTvKey();
-
-            if (newKey !== currentBoundKey) {
-                updateKeyBinding();
-            }
-            if (newToggleTvKey !== currentToggleTvKey) {
-                updateTvModeKey();
+        moduleState.storageHandler = (event) => {
+            if (event.key === FULLSCREEN_KEY_SETTING || event.key === TOGGLE_TV_MODE_KEY || event.key === null) {
+                syncBindingsAndState();
             }
         };
+        window.addEventListener("storage", moduleState.storageHandler);
 
-        // 주기적 체크: 설정 변경 확인 + orphaned container 정리
-        setInterval(() => {
-            checkKeyChange();
-            cleanupOrphanedFullscreenContainer(); // 추가: orphaned container 정기적 정리
-        }, 2000); // 2초마다 체크 (더 빠른 반응을 위해 5초에서 2초로 변경)
+        moduleState.focusHandler = () => {
+            syncBindingsAndState();
+        };
+        window.addEventListener("focus", moduleState.focusHandler);
+
+        moduleState.visibilityHandler = () => {
+            if (document.visibilityState === "visible") {
+                syncBindingsAndState();
+            }
+        };
+        document.addEventListener("visibilitychange", moduleState.visibilityHandler);
 
         console.debug("[ivLyrics] Global shortcuts initialized");
     };
 
     // Spicetify가 준비되면 초기화
-    if (Spicetify.Platform && Spicetify.LocalStorage) {
+    if (Spicetify.Platform && Spicetify.LocalStorage && Spicetify.Mousetrap) {
         init();
     } else {
         // Spicetify가 준비될 때까지 대기
-        const waitForSpicetify = setInterval(() => {
-            if (Spicetify.Platform && Spicetify.LocalStorage) {
-                clearInterval(waitForSpicetify);
-                init();
-            }
-        }, 100);
+        if (!moduleState.waitTimer) {
+            moduleState.waitTimer = setInterval(() => {
+                if (Spicetify.Platform && Spicetify.LocalStorage && Spicetify.Mousetrap) {
+                    clearInterval(moduleState.waitTimer);
+                    moduleState.waitTimer = null;
+                    init();
+                }
+            }, 100);
+        }
 
         // 10초 이내에 준비되지 않으면 포기
-        setTimeout(() => clearInterval(waitForSpicetify), 10000);
+        if (!moduleState.waitTimeout) {
+            moduleState.waitTimeout = setTimeout(() => {
+                if (moduleState.waitTimer) {
+                    clearInterval(moduleState.waitTimer);
+                    moduleState.waitTimer = null;
+                }
+            }, 10000);
+        }
     }
 })();

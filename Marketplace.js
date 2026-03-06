@@ -25,6 +25,51 @@ const MarketplacePage = (() => {
 
     const _mdCache = new Map();
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function escapeAttribute(value) {
+        return escapeHtml(value)
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function sanitizeCodeLanguage(lang) {
+        return String(lang || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    }
+
+    function sanitizeUrl(url) {
+        if (typeof url !== 'string') return null;
+
+        const trimmed = url.trim();
+        if (!trimmed) return null;
+
+        try {
+            const parsed = new URL(trimmed, window.location.origin);
+            if (!['http:', 'https:'].includes(parsed.protocol)) {
+                return null;
+            }
+            return parsed.toString();
+        } catch {
+            return null;
+        }
+    }
+
+    function buildSafeLinkHtml(url, label) {
+        const safeUrl = sanitizeUrl(url);
+        const safeLabel = escapeHtml(label ?? url ?? '');
+
+        if (!safeUrl) {
+            return safeLabel;
+        }
+
+        return `<a href="${escapeAttribute(safeUrl)}" target="_blank" rel="noopener noreferrer">${safeLabel}</a>`;
+    }
+
     function renderMarkdownToHTML(md) {
         if (_mdCache.has(md)) return _mdCache.get(md);
 
@@ -34,11 +79,13 @@ const MarketplacePage = (() => {
         html = html.replace(/\r\n/g, '\n');
 
         // Escape HTML entities (but preserve existing tags we'll generate)
-        html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        html = escapeHtml(html);
 
         // Code blocks (fenced) - must be before other inline rules
         html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-            return `<pre><code class="language-${lang}">${code.trim()}</code></pre>`;
+            const safeLang = sanitizeCodeLanguage(lang);
+            const className = safeLang ? ` class="language-${safeLang}"` : '';
+            return `<pre><code${className}>${code.trim()}</code></pre>`;
         });
 
         // Inline code
@@ -46,11 +93,18 @@ const MarketplacePage = (() => {
 
         // Images: ![alt](url)
         html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
-            return `<img src="${src}" alt="${alt}" style="max-width:100%;border-radius:8px;margin:8px 0;" loading="lazy" />`;
+            const safeSrc = sanitizeUrl(src);
+            const safeAlt = escapeAttribute(alt);
+
+            if (!safeSrc) {
+                return alt ? `<span>${escapeHtml(alt)}</span>` : '';
+            }
+
+            return `<img src="${escapeAttribute(safeSrc)}" alt="${safeAlt}" style="max-width:100%;border-radius:8px;margin:8px 0;" loading="lazy" />`;
         });
 
         // Links: [text](url)
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => buildSafeLinkHtml(url, text));
 
         // Headings
         html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
@@ -103,7 +157,11 @@ const MarketplacePage = (() => {
         // YouTube embeds (raw URLs on their own line)
         html = html.replace(
             /(?:^|\n)(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)(?:[^\s]*)?(?:\n|$)/gm,
-            '\n<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;margin:8px 0;"><iframe src="https://www.youtube.com/embed/$1" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>\n'
+            (_, videoId) => {
+                const safeVideoId = String(videoId || '').replace(/[^\w-]/g, '');
+                if (!safeVideoId) return '\n';
+                return `\n<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;margin:8px 0;"><iframe src="https://www.youtube.com/embed/${safeVideoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe></div>\n`;
+            }
         );
 
         // Paragraphs: wrap remaining standalone lines
@@ -161,7 +219,7 @@ const MarketplacePage = (() => {
                 .catch(() => {
                     if (!cancelled) {
                         // URL 로드 실패 시 URL 자체를 링크로 표시
-                        setContent(`<a href="${description}" target="_blank" rel="noopener noreferrer">${description}</a>`);
+                        setContent(buildSafeLinkHtml(description, description));
                     }
                 })
                 .finally(() => {

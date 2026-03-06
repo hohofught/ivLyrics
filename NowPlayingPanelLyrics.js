@@ -6,11 +6,36 @@
 (function NowPlayingPanelLyricsModule() {
     "use strict";
 
+    const MODULE_KEY = "__ivLyricsNowPlayingPanelModule";
+    const moduleState = window[MODULE_KEY] || (window[MODULE_KEY] = {
+        initialized: false,
+        runtimeStarted: false,
+        waitTimer: null,
+        panelObserver: null,
+        pageObserver: null,
+        pageObserverTimeout: null,
+        historyUnlisten: null,
+        lyricsListener: null,
+        settingsListener: null,
+        insertTimer: null
+    });
+
     // Spicetify가 준비될 때까지 대기
     if (!window.Spicetify || !Spicetify.React || !Spicetify.ReactDOM) {
-        setTimeout(NowPlayingPanelLyricsModule, 300);
+        if (!moduleState.waitTimer) {
+            moduleState.waitTimer = setTimeout(() => {
+                moduleState.waitTimer = null;
+                NowPlayingPanelLyricsModule();
+            }, 300);
+        }
         return;
     }
+
+    moduleState.waitTimer = null;
+    if (moduleState.initialized) {
+        return;
+    }
+    moduleState.initialized = true;
 
     const react = Spicetify.React;
     const { useState, useEffect, useRef, useCallback, useMemo, memo } = react;
@@ -66,10 +91,16 @@
     const NOWPLAYING_BAR_CONTAINER_CLASS = "ivlyrics-nowplaying-bar-lyrics";
 
     // Observer 참조
-    let panelObserver = null;
+    let panelObserver = moduleState.panelObserver;
     let lyricsRoot = null;
     let starryNightBarRoot = null; // Starry Night 테마용 렌더링 루트
     let stylesInjected = false;
+    let pageObserver = moduleState.pageObserver;
+    let pageObserverTimeout = moduleState.pageObserverTimeout;
+    let historyUnlisten = moduleState.historyUnlisten;
+    let lyricsListener = moduleState.lyricsListener;
+    let settingsListener = moduleState.settingsListener;
+    let insertTimer = moduleState.insertTimer;
 
     // ============================================
     // CSS 스타일 
@@ -523,6 +554,14 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         currentIndex: 0,
         isPlaying: false,
         trackUri: null
+    };
+
+    const clearInsertTimer = () => {
+        if (insertTimer) {
+            clearTimeout(insertTimer);
+            insertTimer = null;
+            moduleState.insertTimer = null;
+        }
     };
 
     // ============================================
@@ -1693,18 +1732,47 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
             childList: true,
             subtree: true
         });
+        moduleState.panelObserver = panelObserver;
+    };
+
+    const teardownObserver = () => {
+        if (panelObserver) {
+            panelObserver.disconnect();
+            panelObserver = null;
+            moduleState.panelObserver = null;
+        }
     };
 
     // ============================================
     // 가사 데이터 수신 및 전달
     // ============================================
     const setupLyricsListener = () => {
+        if (lyricsListener) {
+            return;
+        }
+
         // 트랙 변경 감지
-        Spicetify.Player.addEventListener('songchange', () => {
+        lyricsListener = () => {
             currentLyricsState.lyrics = [];
             currentLyricsState.currentIndex = 0;
             currentLyricsState.trackUri = Spicetify.Player.data?.item?.uri;
-        });
+        };
+
+        Spicetify.Player.addEventListener('songchange', lyricsListener);
+        moduleState.lyricsListener = lyricsListener;
+    };
+
+    const teardownLyricsListener = () => {
+        if (lyricsListener && typeof Spicetify.Player?.removeEventListener === 'function') {
+            try {
+                Spicetify.Player.removeEventListener('songchange', lyricsListener);
+            } catch (e) {
+                // Ignore remove errors
+            }
+        }
+
+        lyricsListener = null;
+        moduleState.lyricsListener = null;
     };
 
     // ============================================
@@ -1731,20 +1799,25 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
     };
 
     const setupPageDetection = () => {
+        if (pageObserver || historyUnlisten) {
+            return;
+        }
+
         // 초기 상태 확인
         updateIvLyricsPageState();
 
         // Spicetify History 변경 감지 (URL 변경)
         if (Spicetify.Platform?.History) {
-            Spicetify.Platform.History.listen(() => {
+            const unlisten = Spicetify.Platform.History.listen(() => {
                 // 약간의 지연 후 확인 (DOM이 업데이트될 시간 확보)
                 setTimeout(updateIvLyricsPageState, 100);
             });
+            historyUnlisten = typeof unlisten === 'function' ? unlisten : null;
+            moduleState.historyUnlisten = historyUnlisten;
         }
 
         // MutationObserver로 DOM 변경 감지 (lyrics-lyricsContainer-LyricsContainer 클래스 포함)
-        let pageObserverTimeout = null;
-        const pageObserver = new MutationObserver((mutations) => {
+        pageObserver = new MutationObserver((mutations) => {
             // 클래스 변경이나 새 요소 추가 시 상태 업데이트
             let shouldUpdate = false;
             for (const mutation of mutations) {
@@ -1782,6 +1855,7 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
             if (shouldUpdate) {
                 if (pageObserverTimeout) clearTimeout(pageObserverTimeout);
                 pageObserverTimeout = setTimeout(updateIvLyricsPageState, 50);
+                moduleState.pageObserverTimeout = pageObserverTimeout;
             }
         });
 
@@ -1793,6 +1867,83 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
             attributes: true,
             attributeFilter: ['data-testid', 'class']
         });
+        moduleState.pageObserver = pageObserver;
+    };
+
+    const teardownPageDetection = () => {
+        if (pageObserverTimeout) {
+            clearTimeout(pageObserverTimeout);
+            pageObserverTimeout = null;
+            moduleState.pageObserverTimeout = null;
+        }
+
+        if (pageObserver) {
+            pageObserver.disconnect();
+            pageObserver = null;
+            moduleState.pageObserver = null;
+        }
+
+        if (typeof historyUnlisten === 'function') {
+            try {
+                historyUnlisten();
+            } catch (e) {
+                // Ignore unlisten errors
+            }
+        }
+
+        historyUnlisten = null;
+        moduleState.historyUnlisten = null;
+    };
+
+    const startRuntime = () => {
+        if (moduleState.runtimeStarted) {
+            return;
+        }
+
+        moduleState.runtimeStarted = true;
+
+        setupPageDetection();
+        setupObserver();
+        setupLyricsListener();
+        updateCSSVariables();
+        insertPanelLyrics();
+
+        clearInsertTimer();
+        insertTimer = setTimeout(() => {
+            insertTimer = null;
+            moduleState.insertTimer = null;
+            insertPanelLyrics();
+        }, 1000);
+        moduleState.insertTimer = insertTimer;
+    };
+
+    const stopRuntime = () => {
+        moduleState.runtimeStarted = false;
+        clearInsertTimer();
+        teardownObserver();
+        teardownLyricsListener();
+        teardownPageDetection();
+        removePanelLyrics();
+        document.body.classList.remove('ivlyrics-page-active');
+        document.body.classList.remove('ivlyrics-starrynight-theme');
+    };
+
+    const handleSettingsEvent = (event) => {
+        if (event.detail?.name === 'panel-lyrics-enabled') {
+            if (event.detail.value) {
+                startRuntime();
+            } else {
+                stopRuntime();
+            }
+        }
+
+        if (event.detail?.name === 'panel-lyrics-width' ||
+            event.detail?.name === 'panel-lyrics-font-family' ||
+            event.detail?.name === 'panel-lyrics-original-size' ||
+            event.detail?.name === 'panel-lyrics-phonetic-size' ||
+            event.detail?.name === 'panel-lyrics-translation-size') {
+            updateCSSVariables();
+        }
     };
 
     // ============================================
@@ -1801,48 +1952,18 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
     const init = () => {
         console.log("[NowPlayingPanelLyrics] Initializing...");
 
-        // 설정 체크
-        const isEnabled = getStorageValue(STORAGE_KEY, DEFAULT_ENABLED);
-        if (!isEnabled) {
-            console.log("[NowPlayingPanelLyrics] Disabled by settings");
-            return;
+        if (!settingsListener) {
+            settingsListener = handleSettingsEvent;
+            moduleState.settingsListener = settingsListener;
+            window.addEventListener('ivLyrics', settingsListener);
         }
 
-        // 페이지 감지 설정 (ivLyrics 페이지인지 확인)
-        setupPageDetection();
-
-        // Observer 설정
-        setupObserver();
-
-        // 가사 리스너 설정
-        setupLyricsListener();
-
-        // CSS 변수 초기화
-        updateCSSVariables();
-
-        // 초기 삽입 시도
-        setTimeout(insertPanelLyrics, 1000);
-
-        // 설정 변경 리스너
-        window.addEventListener('ivLyrics', (event) => {
-            if (event.detail?.name === 'panel-lyrics-enabled') {
-                if (event.detail.value) {
-                    setupObserver();
-                    insertPanelLyrics();
-                } else {
-                    if (panelObserver) panelObserver.disconnect();
-                    removePanelLyrics();
-                }
-            }
-            // 새로운 패널 설정 변경 시 CSS 변수 업데이트
-            if (event.detail?.name === 'panel-lyrics-width' ||
-                event.detail?.name === 'panel-lyrics-font-family' ||
-                event.detail?.name === 'panel-lyrics-original-size' ||
-                event.detail?.name === 'panel-lyrics-phonetic-size' ||
-                event.detail?.name === 'panel-lyrics-translation-size') {
-                updateCSSVariables();
-            }
-        });
+        if (getStorageValue(STORAGE_KEY, DEFAULT_ENABLED)) {
+            startRuntime();
+        } else {
+            updateIvLyricsPageState();
+            console.log("[NowPlayingPanelLyrics] Disabled by settings");
+        }
 
         console.log("[NowPlayingPanelLyrics] Initialized successfully");
     };
@@ -1858,9 +1979,9 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         setEnabled: (enabled) => {
             setStorageValue(STORAGE_KEY, enabled);
             if (enabled) {
-                insertPanelLyrics();
+                startRuntime();
             } else {
-                removePanelLyrics();
+                stopRuntime();
             }
         },
         updateLyrics: (lyrics, index) => {
@@ -1874,7 +1995,18 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
             }));
         },
         updateStyles: updateStyles,
-        updateCSSVariables: updateCSSVariables
+        updateCSSVariables: updateCSSVariables,
+        destroy: () => {
+            if (settingsListener) {
+                window.removeEventListener('ivLyrics', settingsListener);
+                settingsListener = null;
+                moduleState.settingsListener = null;
+            }
+
+            stopRuntime();
+            moduleState.initialized = false;
+            delete window[MODULE_KEY];
+        }
     };
 
 })();

@@ -1,10 +1,66 @@
 (function youtubeAdBlockerEntry() {
+    const MODULE_KEY = "__ivLyricsVideoBackgroundDepend";
+    const moduleState = window[MODULE_KEY] || (window[MODULE_KEY] = {
+        initialized: false,
+        waitTimer: null,
+        playerPatchTimer: null,
+        iframeObserver: null,
+        restoreCallbacks: new Map()
+    });
+
+    if (moduleState.initialized) {
+        return;
+    }
+
+    const registerRestore = (key, restore) => {
+        if (!moduleState.restoreCallbacks.has(key)) {
+            moduleState.restoreCallbacks.set(key, restore);
+        }
+    };
+
+    const restoreAll = () => {
+        if (moduleState.waitTimer) {
+            clearTimeout(moduleState.waitTimer);
+            moduleState.waitTimer = null;
+        }
+        if (moduleState.playerPatchTimer) {
+            clearTimeout(moduleState.playerPatchTimer);
+            moduleState.playerPatchTimer = null;
+        }
+        if (moduleState.iframeObserver) {
+            moduleState.iframeObserver.disconnect();
+            moduleState.iframeObserver = null;
+        }
+
+        [...moduleState.restoreCallbacks.values()].reverse().forEach((restore) => {
+            try {
+                restore();
+            } catch (err) {
+                // Ignore restore failures
+            }
+        });
+
+        moduleState.restoreCallbacks.clear();
+        moduleState.initialized = false;
+        delete window[MODULE_KEY];
+    };
+
+    window.VideoBackgroundDepend = {
+        restore: restoreAll
+    };
+
     // Blocks YouTube iframe ads loaded inside Spicetify by sanitizing requests and patching the player API.
     const waitForSpicetify = () => {
         if (!window.Spicetify || !Spicetify.Player || !document.body) {
-            setTimeout(waitForSpicetify, 250);
+            if (!moduleState.waitTimer) {
+                moduleState.waitTimer = setTimeout(() => {
+                    moduleState.waitTimer = null;
+                    waitForSpicetify();
+                }, 250);
+            }
             return;
         }
+        moduleState.waitTimer = null;
         initialize();
     };
 
@@ -86,6 +142,11 @@
         };
         wrappedFetch.__ytAdBlockWrapped = true;
         window.fetch = wrappedFetch;
+        registerRestore("fetch", () => {
+            if (window.fetch === wrappedFetch) {
+                window.fetch = originalFetch;
+            }
+        });
     };
 
     const patchXHR = () => {
@@ -114,6 +175,11 @@
         };
 
         XMLHttpRequest.prototype.__ytAdBlockWrapped = true;
+        registerRestore("xhr", () => {
+            XMLHttpRequest.prototype.open = originalOpen;
+            XMLHttpRequest.prototype.send = originalSend;
+            delete XMLHttpRequest.prototype.__ytAdBlockWrapped;
+        });
     };
 
     const patchSendBeacon = () => {
@@ -128,11 +194,17 @@
         };
         wrappedBeacon.__ytAdBlockWrapped = true;
         navigator.sendBeacon = wrappedBeacon;
+        registerRestore("sendBeacon", () => {
+            if (navigator.sendBeacon === wrappedBeacon) {
+                navigator.sendBeacon = originalSendBeacon;
+            }
+        });
     };
 
     const patchScriptElements = () => {
         if (!window.HTMLScriptElement || HTMLScriptElement.prototype.__ytAdBlockWrapped) return;
         const descriptor = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src");
+        const originalSetAttribute = HTMLScriptElement.prototype.setAttribute;
         if (descriptor?.set) {
             Object.defineProperty(HTMLScriptElement.prototype, "src", {
                 configurable: true,
@@ -148,7 +220,6 @@
                 }
             });
         }
-        const originalSetAttribute = HTMLScriptElement.prototype.setAttribute;
         HTMLScriptElement.prototype.setAttribute = function patchedSetAttribute(name, value) {
             if (typeof name === "string" && name.toLowerCase() === "src" && matchesAdUrl(value)) {
                 blockRequest("script", value);
@@ -157,11 +228,19 @@
             return originalSetAttribute.apply(this, arguments);
         };
         HTMLScriptElement.prototype.__ytAdBlockWrapped = true;
+        registerRestore("script-elements", () => {
+            if (descriptor) {
+                Object.defineProperty(HTMLScriptElement.prototype, "src", descriptor);
+            }
+            HTMLScriptElement.prototype.setAttribute = originalSetAttribute;
+            delete HTMLScriptElement.prototype.__ytAdBlockWrapped;
+        });
     };
 
     const patchLinkElements = () => {
         if (!window.HTMLLinkElement || HTMLLinkElement.prototype.__ytAdBlockWrapped) return;
         const descriptor = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, "href");
+        const originalSetAttribute = HTMLLinkElement.prototype.setAttribute;
         if (descriptor?.set) {
             Object.defineProperty(HTMLLinkElement.prototype, "href", {
                 configurable: true,
@@ -177,7 +256,6 @@
                 }
             });
         }
-        const originalSetAttribute = HTMLLinkElement.prototype.setAttribute;
         HTMLLinkElement.prototype.setAttribute = function patchedSetAttribute(name, value) {
             if (typeof name === "string" && ["href", "data-href"].includes(name.toLowerCase()) && matchesAdUrl(value)) {
                 blockRequest("link", value);
@@ -186,6 +264,13 @@
             return originalSetAttribute.apply(this, arguments);
         };
         HTMLLinkElement.prototype.__ytAdBlockWrapped = true;
+        registerRestore("link-elements", () => {
+            if (descriptor) {
+                Object.defineProperty(HTMLLinkElement.prototype, "href", descriptor);
+            }
+            HTMLLinkElement.prototype.setAttribute = originalSetAttribute;
+            delete HTMLLinkElement.prototype.__ytAdBlockWrapped;
+        });
     };
 
     const patchDocumentCreateElement = () => {
@@ -200,6 +285,10 @@
             return element;
         };
         Document.prototype.__ytAdBlockWrappedCreateElement = true;
+        registerRestore("document-create-element", () => {
+            Document.prototype.createElement = originalCreateElement;
+            delete Document.prototype.__ytAdBlockWrappedCreateElement;
+        });
     };
 
     const patchServiceWorkers = () => {
@@ -214,6 +303,10 @@
             return originalRegister(url, options);
         };
         scope.__ytAdBlockWrapped = true;
+        registerRestore("service-workers", () => {
+            scope.register = originalRegister;
+            delete scope.__ytAdBlockWrapped;
+        });
     };
 
     const patchWindowOpen = () => {
@@ -228,11 +321,17 @@
         };
         wrappedOpen.__ytAdBlockWrapped = true;
         window.open = wrappedOpen;
+        registerRestore("window-open", () => {
+            if (window.open === wrappedOpen) {
+                window.open = originalOpen;
+            }
+        });
     };
 
     const patchImageElements = () => {
         if (!window.HTMLImageElement || HTMLImageElement.prototype.__ytAdBlockWrapped) return;
         const descriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+        const originalSetAttribute = HTMLImageElement.prototype.setAttribute;
         if (descriptor && descriptor.set) {
             Object.defineProperty(HTMLImageElement.prototype, "src", {
                 configurable: true,
@@ -248,7 +347,6 @@
                 }
             });
         }
-        const originalSetAttribute = HTMLImageElement.prototype.setAttribute;
         HTMLImageElement.prototype.setAttribute = function patchedSetAttribute(name, value) {
             if (typeof name === "string" && name.toLowerCase() === "src" && matchesAdUrl(value)) {
                 blockRequest("image", value);
@@ -257,6 +355,13 @@
             return originalSetAttribute.apply(this, arguments);
         };
         HTMLImageElement.prototype.__ytAdBlockWrapped = true;
+        registerRestore("image-elements", () => {
+            if (descriptor) {
+                Object.defineProperty(HTMLImageElement.prototype, "src", descriptor);
+            }
+            HTMLImageElement.prototype.setAttribute = originalSetAttribute;
+            delete HTMLImageElement.prototype.__ytAdBlockWrapped;
+        });
     };
 
     const patchIframeSetter = () => {
@@ -283,6 +388,12 @@
             });
         }
         HTMLIFrameElement.prototype.__ytAdBlockWrapped = true;
+        registerRestore("iframe-setter", () => {
+            if (descriptor) {
+                Object.defineProperty(HTMLIFrameElement.prototype, "src", descriptor);
+            }
+            delete HTMLIFrameElement.prototype.__ytAdBlockWrapped;
+        });
     };
 
     const patchWebSocket = () => {
@@ -338,6 +449,11 @@
         Object.setPrototypeOf(PatchedWebSocket, OriginalWebSocket);
         PatchedWebSocket.__ytAdBlockWrapped = true;
         window.WebSocket = PatchedWebSocket;
+        registerRestore("websocket", () => {
+            if (window.WebSocket === PatchedWebSocket) {
+                window.WebSocket = OriginalWebSocket;
+            }
+        });
     };
 
     const patchEventSource = () => {
@@ -366,6 +482,11 @@
         Object.setPrototypeOf(PatchedEventSource, OriginalEventSource);
         PatchedEventSource.__ytAdBlockWrapped = true;
         window.EventSource = PatchedEventSource;
+        registerRestore("eventsource", () => {
+            if (window.EventSource === PatchedEventSource) {
+                window.EventSource = OriginalEventSource;
+            }
+        });
     };
 
     const patchWorkers = () => {
@@ -385,12 +506,28 @@
         };
 
         if (window.Worker) {
+            const OriginalWorker = window.Worker;
             const patchedWorker = wrapConstructor(window.Worker, "worker");
-            if (patchedWorker) window.Worker = patchedWorker;
+            if (patchedWorker) {
+                window.Worker = patchedWorker;
+                registerRestore("worker", () => {
+                    if (window.Worker === patchedWorker) {
+                        window.Worker = OriginalWorker;
+                    }
+                });
+            }
         }
         if (window.SharedWorker) {
+            const OriginalSharedWorker = window.SharedWorker;
             const patchedSharedWorker = wrapConstructor(window.SharedWorker, "sharedworker");
-            if (patchedSharedWorker) window.SharedWorker = patchedSharedWorker;
+            if (patchedSharedWorker) {
+                window.SharedWorker = patchedSharedWorker;
+                registerRestore("shared-worker", () => {
+                    if (window.SharedWorker === patchedSharedWorker) {
+                        window.SharedWorker = OriginalSharedWorker;
+                    }
+                });
+            }
         }
     };
 
@@ -439,6 +576,10 @@
     };
 
     const observeIframes = () => {
+        if (moduleState.iframeObserver) {
+            return;
+        }
+
         const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 mutation.addedNodes?.forEach((node) => {
@@ -460,6 +601,13 @@
             attributeFilter: ["src"]
         });
         document.querySelectorAll("iframe").forEach(sanitizeIframe);
+        moduleState.iframeObserver = observer;
+        registerRestore("iframe-observer", () => {
+            if (moduleState.iframeObserver === observer) {
+                observer.disconnect();
+                moduleState.iframeObserver = null;
+            }
+        });
     };
 
     const AD_STATE_CODES = new Set([105, 106, 107, 108, 109, 110, 111]);
@@ -751,10 +899,16 @@
 
     const patchYouTubePlayer = () => {
         if (!window.YT || !window.YT.Player || window.YT.Player.__ytAdBlockWrapped) {
-            setTimeout(patchYouTubePlayer, 500);
+            if (!moduleState.playerPatchTimer) {
+                moduleState.playerPatchTimer = setTimeout(() => {
+                    moduleState.playerPatchTimer = null;
+                    patchYouTubePlayer();
+                }, 500);
+            }
             return;
         }
 
+        moduleState.playerPatchTimer = null;
         const OriginalPlayer = window.YT.Player;
         const PatchedPlayer = function patchedPlayer(element, config = {}) {
             const mergedConfig = { ...config };
@@ -820,9 +974,19 @@
         Object.setPrototypeOf(PatchedPlayer, OriginalPlayer);
         PatchedPlayer.__ytAdBlockWrapped = true;
         window.YT.Player = PatchedPlayer;
+        registerRestore("youtube-player", () => {
+            if (window.YT?.Player === PatchedPlayer) {
+                window.YT.Player = OriginalPlayer;
+            }
+        });
     };
 
     const initialize = () => {
+        if (moduleState.initialized) {
+            return;
+        }
+
+        moduleState.initialized = true;
         patchFetch();
         patchXHR();
         patchSendBeacon();

@@ -2461,9 +2461,11 @@ const Prefetcher = {
 };
 
 // 주기적으로 오래된 프리페치 캐시 정리 (10분마다)
-setInterval(() => {
-  Prefetcher.cleanupOldEntries();
-}, 10 * 60 * 1000);
+if (!window.__ivLyricsPrefetchCleanupTimer) {
+    window.__ivLyricsPrefetchCleanupTimer = setInterval(() => {
+        Prefetcher.cleanupOldEntries();
+    }, 10 * 60 * 1000);
+}
 
 let lyricContainerUpdate;
 let reloadLyrics;
