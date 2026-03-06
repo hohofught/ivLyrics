@@ -33,6 +33,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
     const playerRef = useRef(null); // Use ref to hold player instance for reliable cleanup
     const videoRef = useRef(null); // HTML5 video element for helper mode
     const abortDownloadRef = useRef(null); // abort function for helper download
+    const playerInitRetryRef = useRef(null);
     const brightnessValue = Math.min(Math.max(Number(brightness) || 0, 0), 100);
     const brightnessRatio = brightnessValue / 100;
     const blurValue = Math.min(Math.max(Number(blurAmount) || 0, 0), 80);
@@ -57,7 +58,6 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
     // 외부에서 전달된 videoInfo가 있으면 사용
     useEffect(() => {
         if (externalVideoInfo && externalVideoInfo.youtubeVideoId) {
-            console.log(`[VideoBackground] Using external video info:`, externalVideoInfo);
             setVideoInfo(externalVideoInfo);
             setStatusMessage("");
             setIsLoading(false);
@@ -67,8 +67,9 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
     // Load YouTube IFrame API (헬퍼 모드가 아닐 때만)
     useEffect(() => {
         if (useHelper) return;
-        if (!window.YT) {
+        if (!window.YT && !document.getElementById("ivlyrics-youtube-iframe-api")) {
             const tag = document.createElement("script");
+            tag.id = "ivlyrics-youtube-iframe-api";
             tag.src = "https://www.youtube.com/iframe_api";
             const firstScriptTag = document.getElementsByTagName("script")[0];
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -567,10 +568,14 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             }
         };
 
+        if (!showStats) {
+            return undefined;
+        }
+
         const interval = setInterval(updateStats, 1000);
         updateStats(); //
         return () => clearInterval(interval);
-    }, [useHelper, isPlayerReady, videoInfo, helperStatus]);
+    }, [useHelper, isPlayerReady, videoInfo, helperStatus, showStats]);
 
     // 키보드 단축키 (Shift + S)
     useEffect(() => {
@@ -591,10 +596,6 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
 
         const syncInterval = setInterval(() => {
             const spotifyIsPlaying = Spicetify.Player.isPlaying();
-
-            if (spotifyIsPlaying !== isPlaying) {
-                setIsPlaying(spotifyIsPlaying);
-            }
 
             if (!spotifyIsPlaying) {
                 if (!video.paused) {
@@ -634,12 +635,14 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         }, 500);
 
         return () => clearInterval(syncInterval);
-    }, [useHelper, isPlayerReady, videoInfo, firstLyricTime, isPlaying, trackOffsetMs]);
+    }, [useHelper, isPlayerReady, videoInfo, firstLyricTime, trackOffsetMs]);
 
     // 일반 모드 (YouTube IFrame): Initialize Player when videoInfo is available
     useEffect(() => {
         if (useHelper) return; // 헬퍼 모드면 스킵
         if (!videoInfo || !videoInfo.youtubeVideoId || !containerRef.current) return;
+
+        let isCancelled = false;
 
         // Double check cleanup
         if (playerRef.current) {
@@ -651,7 +654,12 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
 
         const initPlayer = () => {
             if (!window.YT || !window.YT.Player) {
-                setTimeout(initPlayer, 100);
+                playerInitRetryRef.current = setTimeout(initPlayer, 100);
+                return;
+            }
+
+            playerInitRetryRef.current = null;
+            if (isCancelled || !containerRef.current) {
                 return;
             }
 
@@ -686,6 +694,12 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                 },
                 events: {
                     onReady: (event) => {
+                        if (isCancelled) {
+                            try {
+                                event.target.destroy();
+                            } catch (e) { }
+                            return;
+                        }
                         playerRef.current = event.target;
                         setIsPlayerReady(true);
                         event.target.mute();
@@ -699,6 +713,22 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         };
 
         initPlayer();
+
+        return () => {
+            isCancelled = true;
+
+            if (playerInitRetryRef.current) {
+                clearTimeout(playerInitRetryRef.current);
+                playerInitRetryRef.current = null;
+            }
+
+            if (playerRef.current) {
+                try {
+                    playerRef.current.destroy();
+                } catch (e) { }
+                playerRef.current = null;
+            }
+        };
 
     }, [useHelper, videoInfo]);
 
@@ -718,10 +748,6 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             } catch (e) {}
 
             const spotifyIsPlaying = Spicetify.Player.isPlaying();
-
-            if (spotifyIsPlaying !== isPlaying) {
-                setIsPlaying(spotifyIsPlaying);
-            }
 
             if (!spotifyIsPlaying) {
                 if (player.getPlayerState() === 1) { // Playing
@@ -766,7 +792,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         }, 500);
 
         return () => clearInterval(syncInterval);
-    }, [isPlayerReady, videoInfo, firstLyricTime, isPlaying, trackOffsetMs]);
+    }, [isPlayerReady, videoInfo, firstLyricTime, trackOffsetMs]);
 
     // Render Album Art Background (Fallback)
     const renderFallback = () => {

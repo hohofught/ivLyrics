@@ -3319,7 +3319,9 @@
                   };
                 `], { type: 'application/javascript' });
 
-                this._worker = new Worker(URL.createObjectURL(blob));
+                const workerUrl = URL.createObjectURL(blob);
+                this._worker = new Worker(workerUrl);
+                URL.revokeObjectURL(workerUrl);
 
                 this._worker.onmessage = async () => {
                     if (!this.enabled) return;
