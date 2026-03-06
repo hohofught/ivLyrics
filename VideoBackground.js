@@ -1,5 +1,11 @@
 const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, coverMode, externalVideoInfo }) => {
     const { useState, useEffect, useRef, useCallback } = react;
+    const VIDEO_BACKGROUND_DEBUG = false;
+    const videoBackgroundDebug = (...args) => {
+        if (VIDEO_BACKGROUND_DEBUG) {
+            console.log(...args);
+        }
+    };
     const [videoInfo, setVideoInfo] = useState(null);
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [statusMessage, setStatusMessage] = useState("");
@@ -17,6 +23,21 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
     const [helperStatus, setHelperStatus] = useState('off');
 
     const [showStats, setShowStats] = useState(false);
+    const updateStats = useCallback((nextStats) => {
+        setStats((prev) => {
+            const next = typeof nextStats === "function" ? nextStats(prev) : nextStats;
+            return (
+                prev.quality === next.quality &&
+                prev.resolution === next.resolution &&
+                prev.buffered === next.buffered &&
+                prev.videoId === next.videoId &&
+                prev.videoHelper === next.videoHelper &&
+                prev.helperStatus === next.helperStatus
+            )
+                ? prev
+                : next;
+        });
+    }, []);
 
     const [isPlaying, setIsPlaying] = useState(() => {
         try {
@@ -120,7 +141,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             try {
                 const savedVideo = await Utils.getSelectedVideo(trackUri);
                 if (savedVideo && savedVideo.youtubeVideoId && isMounted) {
-                    console.log(`[VideoBackground] Using saved selected video: ${savedVideo.youtubeVideoId}`);
+                    videoBackgroundDebug(`[VideoBackground] Using saved selected video: ${savedVideo.youtubeVideoId}`);
                     setIsLoading(false);
                     setVideoInfo({
                         youtubeVideoId: savedVideo.youtubeVideoId,
@@ -141,7 +162,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
 
             if (prefetchedInfo && isMounted) {
                 // 프리페치된 데이터 사용
-                console.log(`[VideoBackground] Using prefetched video info for trackId: ${trackId}`);
+                videoBackgroundDebug(`[VideoBackground] Using prefetched video info for trackId: ${trackId}`);
                 setIsLoading(false);
                 setVideoInfo(prefetchedInfo);
                 setStatusMessage("");
@@ -152,7 +173,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             try {
                 const cachedYouTube = await LyricsCache.getYouTube(trackId);
                 if (cachedYouTube && isMounted) {
-                    console.log(`[VideoBackground] Using cached YouTube info for trackId: ${trackId}`);
+                    videoBackgroundDebug(`[VideoBackground] Using cached YouTube info for trackId: ${trackId}`);
                     // 캐시 히트 로깅
                     if (window.ApiTracker) {
                         window.ApiTracker.logCacheHit('youtube', `youtube:${trackId}`, {
@@ -292,7 +313,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         setHelperStatus("checking");
 
         const videoId = videoInfo.youtubeVideoId;
-        console.log(`[VideoBackground] Helper mode: requesting video ${videoId}`);
+        videoBackgroundDebug(`[VideoBackground] Helper mode: requesting video ${videoId}`);
 
         // 1.5초 이내 응답 시 toast 숨기기 위한 변수
         const requestStartTime = Date.now();
@@ -391,7 +412,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                         setHelperStatus("ready");
                         clearTimeout(preparingToastTimeout);
                         Toast.dismissProgress();
-                        console.log(`[VideoBackground] Helper: video ready, setting URL: ${url}`);
+                        videoBackgroundDebug(`[VideoBackground] Helper: video ready, setting URL: ${url}`);
 
                         // URL 유효성 확인
                         if (!url || typeof url !== 'string' || !url.startsWith('http')) {
@@ -445,7 +466,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
     useEffect(() => {
         if (!useHelper || !helperVideoUrl || !videoRef.current) return;
 
-        console.log(`[VideoBackground] Loading helper video from: ${helperVideoUrl}`);
+        videoBackgroundDebug(`[VideoBackground] Loading helper video from: ${helperVideoUrl}`);
 
         const video = videoRef.current;
         video.src = helperVideoUrl;
@@ -488,30 +509,42 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             setIsPlayerReady(false);
         };
 
+        const handleLoadStart = () => {
+            videoBackgroundDebug("[VideoBackground] Video loadstart");
+        };
+        const handleLoadedMetadata = () => {
+            videoBackgroundDebug("[VideoBackground] Video loadedmetadata, duration:", video.duration);
+        };
+
         video.addEventListener('canplay', handleCanPlay);
         video.addEventListener('error', handleError);
-        video.addEventListener('loadstart', () => console.log("[VideoBackground] Video loadstart"));
-        video.addEventListener('loadedmetadata', () => console.log("[VideoBackground] Video loadedmetadata, duration:", video.duration));
+        video.addEventListener('loadstart', handleLoadStart);
+        video.addEventListener('loadedmetadata', handleLoadedMetadata);
 
         video.load();
 
         return () => {
             video.removeEventListener('canplay', handleCanPlay);
             video.removeEventListener('error', handleError);
+            video.removeEventListener('loadstart', handleLoadStart);
+            video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
         };
     }, [useHelper, helperVideoUrl, videoInfo, firstLyricTime, trackOffsetMs]);
 
 
     // 통계 업데이트
     useEffect(() => {
-        const updateStats = () => {
+        const refreshStats = () => {
             // 헬퍼 모드
             if (useHelper && videoInfo) {  //
                 const video = videoRef.current;
 
                 // 비디오가 준비되지 않았을 때
                 if (!isPlayerReady || !video) {
-                    setStats({
+                    updateStats({
                         quality: '-',
                         resolution: '-',
                         buffered: '-',
@@ -529,7 +562,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                         ? Math.round((buffered.end(buffered.length - 1) / video.duration) * 100)
                         : 0;
 
-                    setStats({
+                    updateStats({
                         quality: 'local',
                         resolution: `${video.videoWidth}x${video.videoHeight}`,
                         buffered: `${bufferedPercent}%`,
@@ -556,7 +589,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                         'small': '426x240', 'tiny': '256x144'
                     };
 
-                    setStats({
+                    updateStats({
                         quality: quality || '-',
                         resolution: qualityMap[quality] || '-',
                         buffered: `${Math.round(videoLoadedFraction * 100)}%`,
@@ -572,10 +605,14 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             return undefined;
         }
 
-        const interval = setInterval(updateStats, 1000);
-        updateStats(); //
+        if (document.visibilityState !== 'visible') {
+            return undefined;
+        }
+
+        const interval = setInterval(refreshStats, 1000);
+        refreshStats(); //
         return () => clearInterval(interval);
-    }, [useHelper, isPlayerReady, videoInfo, helperStatus, showStats]);
+    }, [useHelper, isPlayerReady, videoInfo, helperStatus, showStats, updateStats]);
 
     // 키보드 단축키 (Shift + S)
     useEffect(() => {
@@ -583,6 +620,10 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
             const activeElement = document.activeElement;
             const tagName = activeElement?.tagName?.toLowerCase();
             if (tagName === 'input' || tagName === 'textarea' || activeElement?.isContentEditable) {
+                return;
+            }
+
+            if (e.repeat) {
                 return;
             }
 
@@ -632,7 +673,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
 
     // 헬퍼 모드: 동기화 로직
     useEffect(() => {
-        if (!useHelper || !videoRef.current || !isPlayerReady || !videoInfo || !isPlaying) return;
+        if (!useHelper || !videoRef.current || !isPlayerReady || !videoInfo || !isPlaying || document.visibilityState !== 'visible') return;
 
         const video = videoRef.current;
 
@@ -763,7 +804,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
 
     // 일반 모드 (YouTube IFrame): Sync Logic
     useEffect(() => {
-        if (useHelper || !isPlaying) return; // 헬퍼 모드면 스킵
+        if (useHelper || !isPlaying || document.visibilityState !== 'visible') return; // 헬퍼 모드면 스킵
         // We use playerRef.current here
         const syncInterval = setInterval(() => {
             const player = playerRef.current;

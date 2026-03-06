@@ -1,5 +1,25 @@
 // NoticeSystem.js - ivLyrics 공지사항 시스템
 // 서버에서 공지사항을 가져와 사용자에게 표시합니다
+(function NoticeSystemInit() {
+const MODULE_KEY = "__ivLyricsNoticeSystemModule";
+const moduleState = window[MODULE_KEY] || (window[MODULE_KEY] = {
+    initialized: false,
+    activeContainer: null,
+    api: null,
+    showNoticeIfNeeded: null
+});
+
+if (moduleState.initialized) {
+    if (moduleState.api) {
+        window.NoticeSystem = moduleState.api;
+    }
+    if (moduleState.showNoticeIfNeeded) {
+        window.showNoticeIfNeeded = moduleState.showNoticeIfNeeded;
+    }
+    return;
+}
+
+moduleState.initialized = true;
 
 // React 및 hooks를 lazy하게 가져오기 (Spicetify가 준비된 후에만 접근)
 const getNoticeReact = () => Spicetify.React;
@@ -542,6 +562,10 @@ const showNoticeIfNeeded = async () => {
             return;
         }
 
+        if (moduleState.activeContainer?.isConnected) {
+            return;
+        }
+
         // 모달 컨테이너 생성
         let container = document.getElementById("ivLyrics-notice-container");
         if (!container) {
@@ -549,6 +573,7 @@ const showNoticeIfNeeded = async () => {
             container.id = "ivLyrics-notice-container";
             document.body.appendChild(container);
         }
+        moduleState.activeContainer = container;
 
         const closeModal = () => {
             if (container && container.parentNode) {
@@ -559,6 +584,7 @@ const showNoticeIfNeeded = async () => {
                 container.remove();
                 container = null;
             }
+            moduleState.activeContainer = null;
         };
 
         // 모달 렌더링
@@ -608,5 +634,8 @@ if (!document.getElementById("ivLyrics-notice-styles")) {
 }
 
 // 전역으로 showNoticeIfNeeded 함수 노출
+moduleState.api = NoticeSystem;
+moduleState.showNoticeIfNeeded = showNoticeIfNeeded;
 window.showNoticeIfNeeded = showNoticeIfNeeded;
 window.NoticeSystem = NoticeSystem;
+})();

@@ -5933,11 +5933,25 @@ class LyricsContainer extends react.Component {
 
 // URL Scheme 파라미터 처리
 (function handleURLScheme() {
+  const moduleState =
+    window.__ivLyricsUrlSchemeModule ||
+    (window.__ivLyricsUrlSchemeModule = {
+      initialized: false,
+      unlisten: null,
+      lastRouteKey: null,
+    });
+
   // 현재 URL의 파라미터를 확인
   const checkURLParams = () => {
     try {
       const currentPath = Spicetify.Platform.History.location.pathname;
-      const searchParams = new URLSearchParams(Spicetify.Platform.History.location.search);
+      const currentSearch = Spicetify.Platform.History.location.search || "";
+      const routeKey = `${currentPath}?${currentSearch}`;
+      if (moduleState.lastRouteKey === routeKey) {
+        return;
+      }
+      moduleState.lastRouteKey = routeKey;
+      const searchParams = new URLSearchParams(currentSearch);
 
       // spotify://ivLyrics/ 경로인지 확인
       if (currentPath.includes('/ivLyrics')) {
@@ -5945,14 +5959,12 @@ class LyricsContainer extends react.Component {
         const alertMessage = searchParams.get('alert');
         if (alertMessage) {
           Toast.show(decodeURIComponent(alertMessage), false, 3000);
-          console.log('[ivLyrics] URL Scheme alert:', alertMessage);
         }
 
         // 다른 파라미터들도 처리 가능
         // 예: action, data 등
         const action = searchParams.get('action');
         if (action) {
-          console.log('[ivLyrics] URL Scheme action:', action);
           // 향후 action 처리 로직 추가 가능
         }
       }
@@ -5963,10 +5975,15 @@ class LyricsContainer extends react.Component {
 
   // 초기 체크
   if (Spicetify.Platform?.History) {
+    if (moduleState.initialized) {
+      return;
+    }
+
+    moduleState.initialized = true;
     checkURLParams();
 
     // History 변경 감지
-    Spicetify.Platform.History.listen(() => {
+    moduleState.unlisten = Spicetify.Platform.History.listen(() => {
       checkURLParams();
     });
   }

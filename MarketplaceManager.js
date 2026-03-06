@@ -132,7 +132,7 @@
             try {
                 await this._openDB();
                 await this._loadInstalledAddons();
-                console.log('[MarketplaceManager] Initialized successfully');
+                marketplaceDebug('[MarketplaceManager] Initialized successfully');
             } catch (e) {
                 console.error('[MarketplaceManager] Initialization error:', e);
             } finally {
@@ -615,7 +615,7 @@
                 this._addonListCacheTime = 0;
 
                 this.emit('addon:installed', { id, name: addonInfo.name, type });
-                console.log(`[MarketplaceManager] Installed addon: ${id}`);
+                marketplaceDebug(`[MarketplaceManager] Installed addon: ${id}`);
                 return true;
             } catch (e) {
                 console.error(`[MarketplaceManager] Install failed for "${id}":`, e);
@@ -660,7 +660,7 @@
                 this._addonListCacheTime = 0;
 
                 this.emit('addon:uninstalled', { id: addonId, name: addon?.metadata?.name });
-                console.log(`[MarketplaceManager] Uninstalled addon: ${addonId}`);
+                marketplaceDebug(`[MarketplaceManager] Uninstalled addon: ${addonId}`);
                 return true;
             } catch (e) {
                 console.error(`[MarketplaceManager] Uninstall failed for "${addonId}":`, e);
@@ -740,7 +740,7 @@
                 this._addonListCacheTime = 0;
 
                 this.emit('addon:updated', { id, name: addonInfo.name, version: addonInfo.version });
-                console.log(`[MarketplaceManager] Updated addon: ${id} to v${addonInfo.version}`);
+                marketplaceDebug(`[MarketplaceManager] Updated addon: ${id} to v${addonInfo.version}`);
                 return true;
             } catch (e) {
                 console.error(`[MarketplaceManager] Update failed for "${id}":`, e);

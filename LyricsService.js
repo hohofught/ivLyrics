@@ -51,6 +51,14 @@
             worker.terminate();
         } catch (e) { }
     };
+    const clearSettingsPolling = (target) => {
+        if (!target) return;
+        if (target._settingsTimer) {
+            clearInterval(target._settingsTimer);
+            target._settingsTimer = null;
+        }
+        target._isSettingsOpen = false;
+    };
 
     serviceDebug("[LyricsService] Initializing LyricsService Extension...");
 
@@ -918,7 +926,7 @@
                     };
                 }
 
-                console.log('[LyricsCache] Cleanup completed');
+                serviceDebug('[LyricsCache] Cleanup completed');
             } catch (error) {
                 console.error('[LyricsCache] cleanup error:', error);
             }
@@ -1690,13 +1698,13 @@
                     mode2 = Spicetify.LocalStorage.get(`ivLyrics:visual:translation-mode-2:${modeKey}`) || "none";
                 }
 
-                console.log('[LyricsService] 언어 감지:', { detectedLanguage, friendlyLanguage, modeKey, mode1, mode2 });
+                serviceDebug('[LyricsService] 언어 감지:', { detectedLanguage, friendlyLanguage, modeKey, mode1, mode2 });
 
                 // 5. 발음/번역 요청 (설정에 따라)
                 const needsTranslation = mode1 !== "none" || mode2 !== "none";
 
                 if (needsTranslation && window.Translator?.callGemini) {
-                    console.log('[LyricsService] 발음/번역 요청:', { mode1, mode2 });
+                    serviceDebug('[LyricsService] 발음/번역 요청:', { mode1, mode2 });
 
                     try {
                         // Gemini API를 통한 발음/번역 요청
@@ -1758,7 +1766,7 @@
                                 };
                             });
 
-                            console.log('[LyricsService] 발음/번역 완료');
+                            serviceDebug('[LyricsService] 발음/번역 완료');
                         }
                     } catch (translationError) {
                         console.warn('[LyricsService] 발음/번역 실패:', translationError);
@@ -1880,14 +1888,14 @@
                 if (!ignoreCache) {
                     const cached = await LyricsCache.getTMI(trackId, userLang);
                     if (cached) {
-                        console.log(`[LyricsService] getTMI: Using cached data for ${trackId}`);
+                        serviceDebug(`[LyricsService] getTMI: Using cached data for ${trackId}`);
                         return cached;
                     }
                 }
 
                 // 2. Addon_AI 요청
                 if (window.AIAddonManager) {
-                    console.log(`[LyricsService] getTMI: Requesting from AIAddonManager${ignoreCache ? ' (ignoring cache)' : ''}`);
+                    serviceDebug(`[LyricsService] getTMI: Requesting from AIAddonManager${ignoreCache ? ' (ignoring cache)' : ''}`);
                     const result = await window.AIAddonManager.generateTMI({
                         trackId,
                         title,
@@ -2055,7 +2063,7 @@
 
             // AIAddonManager를 통한 번역 시도
             if (window.AIAddonManager) {
-                console.log(`[Translator] Using AIAddonManager for metadata`);
+                serviceDebug(`[Translator] Using AIAddonManager for metadata`);
 
                 if (this._metadataInflightRequests.has(cacheKey)) {
                     return this._metadataInflightRequests.get(cacheKey);
@@ -2088,7 +2096,7 @@
             }
 
             // AI 제공자가 설정되지 않았으면 null 반환
-            console.log('[Translator] No AI provider configured for metadata translation');
+            serviceDebug('[Translator] No AI provider configured for metadata translation');
             return null;
         }
 
@@ -2172,7 +2180,7 @@
 
             // AIAddonManager를 통한 번역 시도
             if (window.AIAddonManager) {
-                console.log(`[Translator] Using AIAddonManager for lyrics`);
+                serviceDebug(`[Translator] Using AIAddonManager for lyrics`);
 
                 const requestKey = getTranslatorRequestKey(finalTrackId, wantSmartPhonetic, userLang);
                 if (!ignoreCache && _translatorInflightRequests.has(requestKey)) {
@@ -2210,7 +2218,7 @@
             }
 
             // AI 제공자가 설정되지 않았으면 에러
-            console.log('[Translator] No AI provider configured for lyrics translation');
+            serviceDebug('[Translator] No AI provider configured for lyrics translation');
             throw new Error(getTranslatorErrorMessage("translator.noProviderConfigured", "AI 제공자가 설정되지 않았습니다. 설정에서 AI 제공자를 선택해주세요."));
         }
 
@@ -2517,19 +2525,17 @@
                 this.startProgressSync();
                 this.checkConnection();
             } else {
+                clearSettingsPolling(this);
                 this.stopProgressSync();
             }
         },
 
         setSettingsOpen(isOpen) {
             this._isSettingsOpen = isOpen;
-            if (this._settingsTimer) {
-                clearInterval(this._settingsTimer);
-                this._settingsTimer = null;
-            }
+            clearSettingsPolling(this);
 
             if (isOpen) {
-                console.log('[OverlaySender] 설정창 열림 - 연결 확인 폴링 시작');
+                helperDebug('[OverlaySender] 설정창 열림 - 연결 확인 폴링 시작');
                 this.checkConnection();
                 this._settingsTimer = setInterval(() => {
                     if (!this.isConnected) {
@@ -2537,7 +2543,7 @@
                     }
                 }, 2000);
             } else {
-                console.log('[OverlaySender] 설정창 닫힘 - 연결 확인 폴링 종료');
+                helperDebug('[OverlaySender] 설정창 닫힘 - 연결 확인 폴링 종료');
             }
         },
 
@@ -2553,11 +2559,11 @@
             }));
 
             if (value && !wasConnected) {
-                console.log('[OverlaySender] 오버레이 연결됨 ✓');
+                helperDebug('[OverlaySender] 오버레이 연결됨 ✓');
                 setTimeout(() => this.resendWithNewOffset(), 100);
             }
             else if (!value && wasConnected) {
-                console.log('[OverlaySender] 오버레이 연결 끊김');
+                helperDebug('[OverlaySender] 오버레이 연결 끊김');
             }
         },
 
@@ -2661,7 +2667,7 @@
             const offset = await this.getSyncOffset(trackInfo.uri);
 
             if (currentReqId < this._lastReqId) {
-                console.log(`[OverlaySender] 오래된 요청 무시됨 (#${currentReqId} < #${this._lastReqId})`);
+                helperDebug(`[OverlaySender] 오래된 요청 무시됨 (#${currentReqId} < #${this._lastReqId})`);
                 return;
             }
             this._lastReqId = currentReqId;
@@ -2728,7 +2734,7 @@
             const currentTitle = translatedMetadata?.translated?.title || originalTitle;
             const currentArtist = translatedMetadata?.translated?.artist || originalArtist;
 
-            console.log('[OverlaySender] 가사 전송:', {
+            helperDebug('[OverlaySender] 가사 전송:', {
                 lines: mappedLines.length,
                 offset,
                 title: currentTitle,
@@ -2753,7 +2759,7 @@
             // 오프셋 캐시 초기화
             this._offsetCache = {};
             if (this._lastTrackInfo && this._lastLyrics) {
-                console.log('[OverlaySender] 가사 재전송 (싱크 반영)');
+                helperDebug('[OverlaySender] 가사 재전송 (싱크 반영)');
                 await this.sendLyrics(this._lastTrackInfo, this._lastLyrics, true);
             }
         },
@@ -2764,7 +2770,7 @@
 
             // 번역된 메타데이터를 포함하여 가사 재전송
             this._lastTrackInfo.translatedMetadata = translatedMetadata;
-            console.log('[OverlaySender] 번역된 메타데이터로 재전송');
+            helperDebug('[OverlaySender] 번역된 메타데이터로 재전송');
             await this.sendLyrics(this._lastTrackInfo, this._lastLyrics, true);
         },
 
@@ -2910,7 +2916,7 @@
                 if (!this.enabled) return;
                 const { trackInfo, lyrics } = e.detail || {};
                 if (trackInfo) {
-                    console.log('[OverlaySender] 가사 준비 이벤트 수신:', {
+                    helperDebug('[OverlaySender] 가사 준비 이벤트 수신:', {
                         uri: trackInfo.uri,
                         title: trackInfo.title,
                         lines: lyrics?.length || 0
@@ -2922,7 +2928,7 @@
             // 페이지 가시성 변경 감지
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible' && this.enabled) {
-                    console.log('[OverlaySender] 페이지 활성화 - 가사 재전송');
+                    helperDebug('[OverlaySender] 페이지 활성화 - 가사 재전송');
                     setTimeout(() => this.resendWithNewOffset(), 200);
                 }
             });
@@ -2930,7 +2936,7 @@
             // 창 포커스 시
             window.addEventListener('focus', () => {
                 if (this.enabled && this._lastTrackInfo) {
-                    console.log('[OverlaySender] 창 포커스 - 가사 재전송');
+                    helperDebug('[OverlaySender] 창 포커스 - 가사 재전송');
                     setTimeout(() => this.resendWithNewOffset(), 300);
                 }
             });
@@ -2951,12 +2957,12 @@
                 // (lyrics-ready 이벤트를 통해 가사가 전송됨)
                 const pathname = Spicetify.Platform?.History?.location?.pathname || "";
                 if (pathname.includes("/ivLyrics")) {
-                    console.log('[OverlaySender] ivLyrics 페이지 - index.js가 처리');
+                    helperDebug('[OverlaySender] ivLyrics 페이지 - index.js가 처리');
                     return;
                 }
 
                 // 다른 페이지에서 곡 변경됨 - 직접 가사 가져와서 전송
-                console.log('[OverlaySender] 다른 페이지에서 곡 변경 감지');
+                helperDebug('[OverlaySender] 다른 페이지에서 곡 변경 감지');
 
                 // 트랙 정보가 완전히 로드될 때까지 대기
                 const waitForTrackData = () => {
@@ -2978,7 +2984,7 @@
                 try {
                     const playerData = await waitForTrackData();
                     if (!playerData?.item) {
-                        console.log('[OverlaySender] 트랙 데이터 로드 실패');
+                        helperDebug('[OverlaySender] 트랙 데이터 로드 실패');
                         return;
                     }
 
@@ -2987,7 +2993,7 @@
                     const artist = playerData.item.metadata?.artist_name || '';
                     const duration = Spicetify.Player.getDuration() || 0;
 
-                    console.log('[OverlaySender] 트랙 정보:', { title, artist });
+                    helperDebug('[OverlaySender] 트랙 정보:', { title, artist });
 
                     // LyricsService.getFullLyrics 통합 API 사용
                     // (가사 로드 + endTime 계산 + 발음/번역 + 오버레이 전송까지 한 번에 처리)
@@ -3002,12 +3008,14 @@
         },
 
         init() {
+            if (this._initialized) return;
+            this._initialized = true;
             if (this.enabled) {
                 this.startProgressSync();
                 this.setupOffsetListener();
                 setTimeout(() => this.checkConnection(), 1000);
             }
-            console.log('[OverlaySender] Initialized in Extension');
+            helperDebug('[OverlaySender] Initialized in Extension');
         }
     };
 
@@ -3030,6 +3038,8 @@
                     this.startProgressSync();
                     this.checkConnection();
                 } else {
+                    clearSettingsPolling(this);
+                    this.teardownOffsetListener();
                     this.stopProgressSync();
                 }
             }
@@ -3037,13 +3047,10 @@
         setSettingsOpen: {
             value: function (isOpen) {
                 this._isSettingsOpen = isOpen;
-                if (this._settingsTimer) {
-                    clearInterval(this._settingsTimer);
-                    this._settingsTimer = null;
-                }
+                clearSettingsPolling(this);
 
                 if (isOpen) {
-                    console.log('[lyricsHelperSender] 설정창 열림 - 연결 확인 폴링 시작');
+                    helperDebug('[lyricsHelperSender] 설정창 열림 - 연결 확인 폴링 시작');
                     this.checkConnection();
                     this._settingsTimer = setInterval(() => {
                         if (!this.isConnected) {
@@ -3051,7 +3058,7 @@
                         }
                     }, 2000);
                 } else {
-                    console.log('[lyricsHelperSender] 설정창 닫힘 - 연결 확인 폴링 종료');
+                    helperDebug('[lyricsHelperSender] 설정창 닫힘 - 연결 확인 폴링 종료');
                 }
             }
         },
@@ -3481,6 +3488,84 @@
                 this._lastProgressUri = null;
             }
         },
+        scheduleConnectionCheck: {
+            value: function () {
+                if (this._connectionCheckTimer) {
+                    clearTimeout(this._connectionCheckTimer);
+                }
+
+                if (!this.enabled) {
+                    this._connectionCheckTimer = null;
+                    return;
+                }
+
+                this._connectionCheckTimer = setTimeout(() => {
+                    this._connectionCheckTimer = null;
+                    this.checkConnection();
+                }, 1000);
+            }
+        },
+        syncRuntimeState: {
+            value: function () {
+                const enabled = !!this.enabled;
+                if (this._runtimeEnabledState === enabled) {
+                    return;
+                }
+
+                this._runtimeEnabledState = enabled;
+                if (enabled) {
+                    this.startProgressSync();
+                    this.setupOffsetListener();
+                    this.scheduleConnectionCheck();
+                } else {
+                    this.stopProgressSync();
+                    this.teardownOffsetListener();
+                    clearSettingsPolling(this);
+                    this.lastSentUri = null;
+                    this.lastSentLyrics = null;
+                    this.lastSentOffset = null;
+                    this._lastTrackInfo = null;
+                    this._lastLyrics = null;
+                    this._offsetCache = {};
+                    this.isConnected = false;
+                }
+            }
+        },
+        setupRuntimeListener: {
+            value: function () {
+                if (this._runtimeListenerSetup) return;
+                this._runtimeListenerSetup = true;
+
+                this._runtimeStorageListener = () => {
+                    this.syncRuntimeState();
+                };
+                this._runtimeEventListener = () => {
+                    this.syncRuntimeState();
+                };
+
+                window.addEventListener('storage', this._runtimeStorageListener);
+                window.addEventListener('ivLyrics', this._runtimeEventListener);
+            }
+        },
+        teardownRuntimeListener: {
+            value: function () {
+                if (!this._runtimeListenerSetup) return;
+                this._runtimeListenerSetup = false;
+
+                if (this._runtimeStorageListener) {
+                    window.removeEventListener('storage', this._runtimeStorageListener);
+                    this._runtimeStorageListener = null;
+                }
+                if (this._runtimeEventListener) {
+                    window.removeEventListener('ivLyrics', this._runtimeEventListener);
+                    this._runtimeEventListener = null;
+                }
+                if (this._connectionCheckTimer) {
+                    clearTimeout(this._connectionCheckTimer);
+                    this._connectionCheckTimer = null;
+                }
+            }
+        },
         checkConnection: {
             value: async function () {
                 if (!this.enabled) return false;
@@ -3504,11 +3589,8 @@
         },
         init: {
             value: function () {
-                if (this.enabled) {
-                    this.startProgressSync();
-                    this.setupOffsetListener();
-                    setTimeout(() => this.checkConnection(), 1000);
-                }
+                this.setupRuntimeListener();
+                this.syncRuntimeState();
                 helperDebug('[lyricsHelperSender] Initialized in Extension');
             }
         },
@@ -3516,6 +3598,8 @@
             value: function () {
                 this.stopProgressSync();
                 this.teardownOffsetListener();
+                this.teardownRuntimeListener();
+                clearSettingsPolling(this);
             }
         }
     });
