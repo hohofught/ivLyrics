@@ -5975,17 +5975,23 @@ class LyricsContainer extends react.Component {
 // 공지사항 시스템 초기화
 (function initNoticeSystem() {
   // 앱이 완전히 로드된 후 공지사항 확인
-  setTimeout(() => {
-    if (typeof window.showNoticeIfNeeded === 'function') {
-      window.showNoticeIfNeeded();
-    }
-  }, 3000); // 3초 후 실행 (앱 로드 완료 대기)
+  if (!window.__ivLyricsNoticeInitTimer) {
+    window.__ivLyricsNoticeInitTimer = setTimeout(() => {
+      window.__ivLyricsNoticeInitTimer = null;
+      if (typeof window.showNoticeIfNeeded === 'function') {
+        window.showNoticeIfNeeded();
+      }
+    }, 3000); // 3초 후 실행 (앱 로드 완료 대기)
+  }
 })();
 
 // Toast 주기적 정리 시작 (Utils.js 로드 후 실행되도록 지연)
-setTimeout(() => {
-  if (window.Toast && window.Toast.startPeriodicCleanup) {
-    window.Toast.startPeriodicCleanup();
-  }
-}, 100);
+if (!window.__ivLyricsToastCleanupInitTimer) {
+  window.__ivLyricsToastCleanupInitTimer = setTimeout(() => {
+    window.__ivLyricsToastCleanupInitTimer = null;
+    if (window.Toast && window.Toast.startPeriodicCleanup) {
+      window.Toast.startPeriodicCleanup();
+    }
+  }, 100);
+}
 

@@ -32,6 +32,13 @@
     }
     moduleState.initialized = true;
 
+    const MARKETPLACE_DEBUG = false;
+    const marketplaceDebug = (...args) => {
+        if (MARKETPLACE_DEBUG) {
+            console.log(...args);
+        }
+    };
+
     // ============================================
     // Constants
     // ============================================
@@ -215,11 +222,11 @@
             const addons = await this._dbGetAll();
 
             if (addons.length === 0) {
-                console.log('[MarketplaceManager] No marketplace addons installed');
+                marketplaceDebug('[MarketplaceManager] No marketplace addons installed');
                 return;
             }
 
-            console.log(`[MarketplaceManager] Loading ${addons.length} marketplace addon(s)...`);
+            marketplaceDebug(`[MarketplaceManager] Loading ${addons.length} marketplace addon(s)...`);
 
             const loadPromises = addons.map(addon => this._executeAddonCode(addon));
             const results = await Promise.allSettled(loadPromises);
@@ -248,7 +255,7 @@
                 }
             }, 500);
 
-            console.log(`[MarketplaceManager] Loaded: ${loaded}, Failed: ${failed}`);
+            marketplaceDebug(`[MarketplaceManager] Loaded: ${loaded}, Failed: ${failed}`);
         }
 
         _executeAddonCode(addon) {
@@ -262,7 +269,7 @@
                         style.textContent = addon.code || '';
                         document.head.appendChild(style);
                         this._loadedScripts.set(addon.id, style);
-                        console.log(`[MarketplaceManager] Loaded style addon: ${addon.id}`);
+                        marketplaceDebug(`[MarketplaceManager] Loaded style addon: ${addon.id}`);
                         resolve();
                         return;
                     }
@@ -282,7 +289,7 @@
                     script.onload = () => {
                         URL.revokeObjectURL(url);
                         this._loadedScripts.set(addon.id, script);
-                        console.log(`[MarketplaceManager] Loaded addon: ${addon.id}`);
+                        marketplaceDebug(`[MarketplaceManager] Loaded addon: ${addon.id}`);
                         resolve();
                     };
 
@@ -842,5 +849,5 @@
         window.MarketplaceManager = manager;
     }
 
-    console.log('[MarketplaceManager] MarketplaceManager registered globally');
+    marketplaceDebug('[MarketplaceManager] MarketplaceManager registered globally');
 })();

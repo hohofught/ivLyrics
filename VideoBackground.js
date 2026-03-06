@@ -588,26 +588,49 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, []);
 
-    // 헬퍼 모드: 동기화 로직
     useEffect(() => {
-        if (!useHelper || !videoRef.current || !isPlayerReady || !videoInfo) return;
+        if (useHelper) {
+            const video = videoRef.current;
+            if (!video || !isPlayerReady) return;
 
-        const video = videoRef.current;
-
-        const syncInterval = setInterval(() => {
-            const spotifyIsPlaying = Spicetify.Player.isPlaying();
-
-            if (!spotifyIsPlaying) {
+            if (!isPlaying) {
                 if (!video.paused) {
                     video.pause();
                 }
                 return;
-            } else {
-                if (video.paused) {
-                    video.play().catch(() => { });
-                }
             }
 
+            if (video.paused) {
+                video.play().catch(() => { });
+            }
+            return;
+        }
+
+        const player = playerRef.current;
+        if (!player || !isPlayerReady || typeof player.getPlayerState !== 'function') return;
+
+        try {
+            const playerState = player.getPlayerState();
+            if (!isPlaying) {
+                if (playerState === 1) {
+                    player.pauseVideo();
+                }
+                return;
+            }
+
+            if (playerState !== 1) {
+                player.playVideo();
+            }
+        } catch (e) { }
+    }, [useHelper, isPlaying, isPlayerReady, helperVideoUrl, videoInfo]);
+
+    // 헬퍼 모드: 동기화 로직
+    useEffect(() => {
+        if (!useHelper || !videoRef.current || !isPlayerReady || !videoInfo || !isPlaying) return;
+
+        const video = videoRef.current;
+
+        const syncInterval = setInterval(() => {
             const spotifyTime = Spicetify.Player.getProgress() / 1000;
             const lyricsStartTime = (firstLyricTime || 0) / 1000;
             const captionStartTime = videoInfo.captionStartTime;
@@ -635,7 +658,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         }, 500);
 
         return () => clearInterval(syncInterval);
-    }, [useHelper, isPlayerReady, videoInfo, firstLyricTime, trackOffsetMs]);
+    }, [useHelper, isPlayerReady, videoInfo, firstLyricTime, trackOffsetMs, isPlaying]);
 
     // 일반 모드 (YouTube IFrame): Initialize Player when videoInfo is available
     useEffect(() => {
@@ -734,7 +757,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
 
     // 일반 모드 (YouTube IFrame): Sync Logic
     useEffect(() => {
-        if (useHelper) return; // 헬퍼 모드면 스킵
+        if (useHelper || !isPlaying) return; // 헬퍼 모드면 스킵
         // We use playerRef.current here
         const syncInterval = setInterval(() => {
             const player = playerRef.current;
@@ -746,19 +769,6 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
                 const st = player.getPlayerState();
                 if (st === 1 || st === 3) applyFixedQuality(player);
             } catch (e) {}
-
-            const spotifyIsPlaying = Spicetify.Player.isPlaying();
-
-            if (!spotifyIsPlaying) {
-                if (player.getPlayerState() === 1) { // Playing
-                    player.pauseVideo();
-                }
-                return;
-            } else {
-                if (player.getPlayerState() !== 1) {
-                    player.playVideo();
-                }
-            }
 
             const spotifyTime = Spicetify.Player.getProgress() / 1000;
             const lyricsStartTime = (firstLyricTime || 0) / 1000;
@@ -792,7 +802,7 @@ const VideoBackground = ({ trackUri, firstLyricTime, brightness, blurAmount, cov
         }, 500);
 
         return () => clearInterval(syncInterval);
-    }, [isPlayerReady, videoInfo, firstLyricTime, trackOffsetMs]);
+    }, [isPlayerReady, videoInfo, firstLyricTime, trackOffsetMs, isPlaying]);
 
     // Render Album Art Background (Fallback)
     const renderFallback = () => {
