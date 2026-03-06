@@ -2973,13 +2973,13 @@ ruby .lyrics-karaoke-char.sung {
 /* UI 숨김 시 가사 패딩 최소화 → 풀스크린 효과 */
 .portrait-mode.ui-hidden .lyrics-lyricsContainer-SyncedLyricsPage,
 .portrait-mode.ui-hidden .lyrics-lyricsContainer-UnsyncedLyricsPage {
-  padding-top: clamp(20px, 4svh, 40px) !important;
-  padding-bottom: clamp(20px, 4svh, 40px) !important;
+  padding-top: clamp(100px, 18svh, 180px) !important;
+  padding-bottom: clamp(80px, 14svh, 150px) !important;
 }
 
 .portrait-mode.ui-hidden .lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active {
-  padding-top: clamp(20px, 4svh, 40px) !important;
-  padding-bottom: clamp(20px, 4svh, 40px) !important;
+  padding-top: clamp(100px, 18svh, 180px) !important;
+  padding-bottom: clamp(80px, 14svh, 150px) !important;
 }
 
 /* layout-reversed: 가사 패딩 반전 */
