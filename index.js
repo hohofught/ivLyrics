@@ -2521,6 +2521,7 @@ class LyricsContainer extends react.Component {
     };
     this.currentTrackUri = "";
     this.nextTrackUri = "";
+    this._cleanupFloatingMenuOutsideClick = null;
     this.availableModes = [];
     this.styleVariables = {};
     this.fullscreenContainer = document.createElement("div");
@@ -3198,9 +3199,9 @@ class LyricsContainer extends react.Component {
         CACHE[info.uri]?.[CONFIG.modes?.[mode]]
       ) {
         tempState = { provider: "", contributors: null, ...CACHE[info.uri], isCached };
-        if (CACHE[info.uri]?.mode) {
-          this.state.explicitMode = CACHE[info.uri]?.mode;
-          tempState = { ...tempState, mode: CACHE[info.uri]?.mode };
+        const cachedMode = CACHE[info.uri]?.mode;
+        if (typeof cachedMode === "number" && cachedMode !== -1) {
+          tempState = { ...tempState, mode: cachedMode };
         }
       } else {
         // Save current mode before loading to maintain UI consistency
@@ -4643,9 +4644,10 @@ class LyricsContainer extends react.Component {
           window.Translator.clearInflightRequests(previousTrackId);
         }
 
-        this.state.explicitMode = -1; // Auto-detect mode
         this.currentTrackUri = newUri;
-        this.fetchLyrics(queue.current, this.state.explicitMode);
+        this.setState({ explicitMode: -1 }, () => {
+          this.fetchLyrics(queue.current, -1);
+        });
         this.viewPort.scrollTo(0, 0);
 
         // 트랙 변경 시 videoInfo 초기화 후 저장된 영상 확인
@@ -4670,9 +4672,10 @@ class LyricsContainer extends react.Component {
     };
 
     if (Spicetify.Player?.data?.item) {
-      this.state.explicitMode = -1; // Auto-detect mode
       this.currentTrackUri = Spicetify.Player.data.item.uri;
-      this.fetchLyrics(Spicetify.Player.data.item, this.state.explicitMode);
+      this.setState({ explicitMode: -1 }, () => {
+        this.fetchLyrics(Spicetify.Player.data.item, -1);
+      });
       // 초기 로드 시 저장된 영상 확인
       this.loadSavedVideoForTrack(Spicetify.Player.data.item.uri);
     }
@@ -4878,8 +4881,7 @@ class LyricsContainer extends react.Component {
     this.handleConfigChange = (event) => {
       if (event.detail?.name === "karaoke-mode-enabled") {
         // 노래방 모드 설정이 변경되면 현재 모드를 다시 계산
-        this.state.explicitMode = -1; // 명시적 모드 초기화
-        this.forceUpdate();
+        this.setState({ explicitMode: -1 });
       }
     };
     window.addEventListener("ivLyrics", this.handleConfigChange);
@@ -4917,6 +4919,10 @@ class LyricsContainer extends react.Component {
     window.removeEventListener("fad-request", lyricContainerUpdate);
     window.removeEventListener("ivLyrics", this.handleConfigChange);
     window.removeEventListener("ivLyrics:lyric-index-changed", this.handleLyricIndexChange);
+    if (this._cleanupFloatingMenuOutsideClick) {
+      this._cleanupFloatingMenuOutsideClick();
+      this._cleanupFloatingMenuOutsideClick = null;
+    }
 
     // Mouse idle timer cleanup
     if (this.mouseIdleTimer) {
@@ -5579,6 +5585,11 @@ class LyricsContainer extends react.Component {
             (this.state.isFullscreen ? " fullscreen-mode-container" : "") +
             (this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : ""),
           ref: (el) => {
+            if (this._cleanupFloatingMenuOutsideClick) {
+              this._cleanupFloatingMenuOutsideClick();
+              this._cleanupFloatingMenuOutsideClick = null;
+            }
+
             if (el && this.state.isFullscreen) {
               // 전체화면에서 바깥 클릭 시 메뉴 닫기
               const handleClickOutside = (e) => {
@@ -5586,13 +5597,10 @@ class LyricsContainer extends react.Component {
                   this.setState({ isFloatingMenuOpen: false });
                 }
               };
-              if (!el._clickOutsideAttached) {
-                el._clickOutsideAttached = true;
-                document.addEventListener('click', handleClickOutside);
-                el._cleanupClickOutside = () => {
-                  document.removeEventListener('click', handleClickOutside);
-                };
-              }
+              document.addEventListener('click', handleClickOutside);
+              this._cleanupFloatingMenuOutsideClick = () => {
+                document.removeEventListener('click', handleClickOutside);
+              };
             }
           },
         },
@@ -5834,8 +5842,12 @@ class LyricsContainer extends react.Component {
   }
 
   switchTo(mode) {
-    this.setState({ explicitMode: mode });
-    this.fetchLyrics();
+    const currentTrack = Spicetify.Player?.data?.item;
+    this.setState({ explicitMode: mode }, () => {
+      if (currentTrack) {
+        this.fetchLyrics(currentTrack, mode);
+      }
+    });
   }
 
   lockIn(mode) {

@@ -4,7 +4,8 @@
  */
 
 const SongInfoTMI = (() => {
-    const { useState, useEffect, useRef, useCallback, useMemo } = Spicetify.React;
+    const react = Spicetify.React;
+    const { useState, useEffect, useRef, useCallback, useMemo } = react;
 
     // Cache for TMI data (메모리 캐시 - 빠른 조회용, IndexedDB도 함께 사용)
     const tmiCache = new Map();
@@ -50,7 +51,12 @@ const SongInfoTMI = (() => {
             // regenerate 기능이 중요하면 LyricsService.getTMI에 ignoreCache 파라미터를 추가하는 것이 좋음.
             // 일단은 기존 동작 유지를 위해 직접 호출하는 대신 service를 이용.
 
-            const result = await LyricsService.getTMI({
+            const lyricsService = window.LyricsService;
+            if (!lyricsService?.getTMI) {
+                return { error: true, message: 'LyricsService.getTMI is not available.' };
+            }
+
+            const result = await lyricsService.getTMI({
                 trackId,
                 title,
                 artist,
