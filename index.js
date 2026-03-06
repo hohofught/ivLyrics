@@ -1646,12 +1646,10 @@ const CONFIG = {
   },
 
   get modes() { return window.I18n ? [I18n.t("modes.karaoke"), I18n.t("modes.synced"), I18n.t("modes.unsynced")] : ["Karaoke", "Synced", "Unsynced"]; },
-  locked: -1, // Lock mode deprecated - always auto-detect
 };
 
 
 
-CONFIG.locked = Number.parseInt(CONFIG.locked);
 CONFIG.visual["lines-before"] = Number.parseInt(CONFIG.visual["lines-before"]);
 CONFIG.visual["lines-after"] = Number.parseInt(CONFIG.visual["lines-after"]);
 CONFIG.visual["font-size"] = Number.parseInt(CONFIG.visual["font-size"]);
@@ -2501,7 +2499,6 @@ class LyricsContainer extends react.Component {
       dynamicColors: null,
       tempo: "0.25s",
       explicitMode: -1,
-      lockMode: -1, // Lock mode deprecated - always auto-detect
       mode: -1,
       isLoading: false,
       showMarketplace: false,
@@ -5850,11 +5847,6 @@ class LyricsContainer extends react.Component {
     });
   }
 
-  lockIn(mode) {
-    // Lock mode feature removed - auto-detect is now always used
-    // This function is kept for backward compatibility but does nothing
-    console.log('[ivLyrics] lockIn is deprecated, modes are now auto-detected');
-  }
 }
 
 // 초기화 시 저장된 Google Fonts 로드

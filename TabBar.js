@@ -3,18 +3,12 @@ class TabBarItem extends react.Component {
 		event.preventDefault();
 		this.props.switchTo(this.props.item.key);
 	}
-	onLock(event) {
-		event.preventDefault();
-		this.props.lockIn(this.props.item.key);
-	}
 	render() {
 		return react.createElement(
 			"li",
 			{
 				className: "lyrics-tabBar-headerItem",
 				onClick: this.onSelect.bind(this),
-				onDoubleClick: this.onLock.bind(this),
-				onContextMenu: this.onLock.bind(this),
 			},
 			react.createElement(
 				"a",
@@ -36,21 +30,12 @@ class TabBarItem extends react.Component {
 	}
 }
 
-const TabBarMore = react.memo(({ items, switchTo, lockIn }) => {
+const TabBarMore = react.memo(({ items, switchTo }) => {
 	const activeItem = items.find((item) => item.active);
-
-	function onLock(event) {
-		event.preventDefault();
-		if (activeItem) {
-			lockIn(activeItem.key);
-		}
-	}
 	return react.createElement(
 		"li",
 		{
 			className: `lyrics-tabBar-headerItem ${activeItem ? "lyrics-tabBar-active" : ""}`,
-			onDoubleClick: onLock,
-			onContextMenu: onLock,
 		},
 		react.createElement(OptionsMenu, {
 			options: items,
@@ -120,7 +105,7 @@ const ResizeObserverManager = {
 	}
 };
 
-const TopBarContent = ({ links, activeLink, lockLink, switchCallback, lockCallback }) => {
+const TopBarContent = ({ links, activeLink, switchCallback }) => {
 	const [windowSize, setWindowSize] = useState(0);
 	const cleanupRef = useRef(null);
 
@@ -157,9 +142,7 @@ const TopBarContent = ({ links, activeLink, lockLink, switchCallback, lockCallba
 			className: "queue-queueHistoryTopBar-tabBar",
 			links,
 			activeLink,
-			lockLink,
 			switchCallback,
-			lockCallback,
 			windowSize,
 		})
 	);
@@ -290,7 +273,7 @@ const TabBarContext = ({ children }) => {
 	);
 };
 
-const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCallback, windowSize = Number.POSITIVE_INFINITY }) => {
+const TabBar = react.memo(({ links, activeLink, switchCallback, windowSize = Number.POSITIVE_INFINITY }) => {
 	const tabBarRef = react.useRef(null);
 	const [childrenSizes, setChildrenSizes] = useState([]);
 	const [availableSpace, setAvailableSpace] = useState(0);
@@ -300,7 +283,6 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 	for (let i = 0; i < links.length; i++) {
 		const key = links[i];
 		let value = key[0].toUpperCase() + key.slice(1);
-		if (key === lockLink) value = `• ${value}`;
 		const active = key === activeLink;
 		options.push({ key, value, active });
 	}
@@ -375,14 +357,12 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 						key: item.key,
 						item,
 						switchTo: switchCallback,
-						lockIn: lockCallback,
 					})
 				),
 			droplistItem.length || childrenSizes.length === 0
 				? react.createElement(TabBarMore, {
 					items: droplistItem.map((i) => options[i]).filter(Boolean),
 					switchTo: switchCallback,
-					lockIn: lockCallback,
 				})
 				: null
 		)

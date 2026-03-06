@@ -1773,22 +1773,14 @@ const LoadingIcon = react.createElement(
 const LyricsPage = ({ lyricsContainer }) => {
 	const modes = CONFIG.modes;
 	const activeMode = lyricsContainer.getCurrentMode();
-	const lockMode = CONFIG.locked;
 
 	const topBarProps = {
 		links: modes,
 		activeLink: modes[activeMode] || modes[0],
-		lockLink: lockMode !== -1 ? modes[lockMode] : null,
 		switchCallback: (mode) => {
 			const modeIndex = modes.indexOf(mode);
 			if (modeIndex !== -1) {
 				lyricsContainer.switchTo(modeIndex);
-			}
-		},
-		lockCallback: (mode) => {
-			const modeIndex = modes.indexOf(mode);
-			if (modeIndex !== -1) {
-				lyricsContainer.lockIn(modeIndex);
 			}
 		}
 	};
