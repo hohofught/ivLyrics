@@ -289,7 +289,7 @@ if (!window.OverlaySender) {
       if (window.OverlaySender) {
         clearInterval(window.__ivLyricsOverlaySenderWaitTimer);
         window.__ivLyricsOverlaySenderWaitTimer = null;
-        console.log("[ivLyrics] OverlaySender loaded from Extension");
+        ivLyricsDebug("[ivLyrics] OverlaySender loaded from Extension");
       }
     }, 100);
 
@@ -570,6 +570,12 @@ function render() {
 
 // Optimized utility functions with better error handling and performance
 const APP_NAME = "ivLyrics";
+const IVLYRICS_DEBUG = false;
+const ivLyricsDebug = (...args) => {
+  if (IVLYRICS_DEBUG) {
+    console.log(...args);
+  }
+};
 
 // IndexedDB for track sync offsets
 const DB_NAME = "ivLyrics-db";
@@ -594,7 +600,7 @@ const initDB = () => {
 
     request.onsuccess = () => {
       dbInstance = request.result;
-      console.log("[ivLyrics] IndexedDB initialized");
+      ivLyricsDebug("[ivLyrics] IndexedDB initialized");
       resolve(dbInstance);
     };
 
@@ -602,7 +608,7 @@ const initDB = () => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME);
-        console.log("[ivLyrics] IndexedDB object store created");
+        ivLyricsDebug("[ivLyrics] IndexedDB object store created");
       }
     };
   });
@@ -742,7 +748,7 @@ const initLangDB = () => {
 
     request.onsuccess = () => {
       langDbInstance = request.result;
-      console.log("[ivLyrics] Language IndexedDB initialized");
+      ivLyricsDebug("[ivLyrics] Language IndexedDB initialized");
       resolve(langDbInstance);
     };
 
@@ -750,7 +756,7 @@ const initLangDB = () => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains(LANG_STORE_NAME)) {
         db.createObjectStore(LANG_STORE_NAME);
-        console.log("[ivLyrics] Language IndexedDB object store created");
+        ivLyricsDebug("[ivLyrics] Language IndexedDB object store created");
       }
     };
   });
@@ -847,11 +853,11 @@ window.TrackLanguageDB = TrackLanguageDB;
   try {
     const oldOffsets = localStorage.getItem("ivLyrics:track-sync-offsets");
     if (oldOffsets) {
-      console.log("[ivLyrics] Migrating track-sync-offsets to IndexedDB");
+      ivLyricsDebug("[ivLyrics] Migrating track-sync-offsets to IndexedDB");
       const offsetsObj = JSON.parse(oldOffsets);
       await TrackSyncDB.importOffsets(offsetsObj);
       localStorage.removeItem("ivLyrics:track-sync-offsets");
-      console.log("[ivLyrics] Migration complete");
+      ivLyricsDebug("[ivLyrics] Migration complete");
     }
   } catch (error) {
     console.error("[ivLyrics] Migration failed:", error);
@@ -997,12 +1003,12 @@ const StorageManager = {
     const trackSyncOffsets = await TrackSyncDB.getAllOffsets();
     if (Object.keys(trackSyncOffsets).length > 0) {
       config["ivLyrics:track-sync-offsets"] = JSON.stringify(trackSyncOffsets);
-      console.log("[ivLyrics] Exporting track-sync-offsets from IndexedDB:", trackSyncOffsets);
+      ivLyricsDebug("[ivLyrics] Exporting track-sync-offsets from IndexedDB:", trackSyncOffsets);
     } else {
-      console.log("[ivLyrics] No track-sync-offsets found in IndexedDB");
+      ivLyricsDebug("[ivLyrics] No track-sync-offsets found in IndexedDB");
     }
 
-    console.log("[ivLyrics] Exported config keys:", Object.keys(config));
+    ivLyricsDebug("[ivLyrics] Exported config keys:", Object.keys(config));
 
     return config;
   },
@@ -1014,7 +1020,7 @@ const StorageManager = {
       try {
         const offsetsObj = JSON.parse(config["ivLyrics:track-sync-offsets"]);
         await TrackSyncDB.importOffsets(offsetsObj);
-        console.log("[ivLyrics] Imported track-sync-offsets to IndexedDB");
+        ivLyricsDebug("[ivLyrics] Imported track-sync-offsets to IndexedDB");
         delete config["ivLyrics:track-sync-offsets"]; // localStorage에 저장하지 않음
       } catch (error) {
         console.error("[ivLyrics] Failed to import track-sync-offsets:", error);
@@ -1024,7 +1030,7 @@ const StorageManager = {
     // Client ID가 있다면 삭제 (불러오기에서 제외)
     if (config[CLIENT_HASH_KEY]) {
       delete config[CLIENT_HASH_KEY];
-      console.log("[ivLyrics] Client ID excluded from import");
+      ivLyricsDebug("[ivLyrics] Client ID excluded from import");
     }
 
     // 나머지 설정을 localStorage에 저장
@@ -2028,14 +2034,14 @@ const Prefetcher = {
     this._prefetchTimer = setTimeout(async () => {
       this._lastPrefetchedUri = trackInfo.uri;
 
-      console.log(`[Prefetcher] Starting prefetch for: ${trackInfo.title}`);
+      ivLyricsDebug(`[Prefetcher] Starting prefetch for: ${trackInfo.title}`);
 
       try {
         // 1단계: 가사 먼저 프리페치 (필수)
         const lyrics = await this._prefetchLyrics(trackInfo, mode);
 
         if (!lyrics || (!lyrics.synced && !lyrics.unsynced && !lyrics.karaoke)) {
-          console.log(`[Prefetcher] No lyrics found for: ${trackInfo.title}`);
+          ivLyricsDebug(`[Prefetcher] No lyrics found for: ${trackInfo.title}`);
           return;
         }
 
@@ -2053,7 +2059,7 @@ const Prefetcher = {
         }
 
         await Promise.allSettled(prefetchPromises);
-        console.log(`[Prefetcher] Completed all prefetch for: ${trackInfo.title}`);
+        ivLyricsDebug(`[Prefetcher] Completed all prefetch for: ${trackInfo.title}`);
       } catch (error) {
         console.warn(`[Prefetcher] Prefetch failed:`, error);
       }
@@ -2068,7 +2074,7 @@ const Prefetcher = {
 
     // 이미 CACHE에 있으면 반환
     if (CACHE[uri]) {
-      console.log(`[Prefetcher] Lyrics already cached for: ${trackInfo.title}`);
+      ivLyricsDebug(`[Prefetcher] Lyrics already cached for: ${trackInfo.title}`);
       return CACHE[uri];
     }
 
@@ -2080,7 +2086,7 @@ const Prefetcher = {
 
     const prefetchPromise = (async () => {
       try {
-        console.log(`[Prefetcher] Fetching lyrics for: ${trackInfo.title}`);
+        ivLyricsDebug(`[Prefetcher] Fetching lyrics for: ${trackInfo.title}`);
 
         // 마켓플레이스 에드온 로드 대기
         if (window.MarketplaceManager?.readyPromise) {
@@ -2094,7 +2100,7 @@ const Prefetcher = {
         if (resp?.provider) {
           // 가사 캐시에 저장
           CACHE[resp.uri] = resp;
-          console.log(`[Prefetcher] Lyrics cached for: ${trackInfo.title} (provider: ${resp.provider})`);
+          ivLyricsDebug(`[Prefetcher] Lyrics cached for: ${trackInfo.title} (provider: ${resp.provider})`);
           return resp;
         }
 
@@ -2121,7 +2127,7 @@ const Prefetcher = {
 
     // 이미 캐시에 있으면 스킵
     if (this._prefetchCache.has(cacheKeyBase)) {
-      console.log(`[Prefetcher] Translation already cached for: ${trackInfo.title}`);
+      ivLyricsDebug(`[Prefetcher] Translation already cached for: ${trackInfo.title}`);
       return;
     }
 
@@ -2173,7 +2179,7 @@ const Prefetcher = {
 
     const prefetchPromise = (async () => {
       try {
-        console.log(`[Prefetcher] Fetching translation for: ${trackInfo.title} (phonetic: ${needPhonetic}, translation: ${needTranslation})`);
+        ivLyricsDebug(`[Prefetcher] Fetching translation for: ${trackInfo.title} (phonetic: ${needPhonetic}, translation: ${needTranslation})`);
 
         // CacheManager에도 저장 (getGeminiTranslation에서 사용)
         const processTranslationResult = (outText) => {
@@ -2233,7 +2239,7 @@ const Prefetcher = {
               const mapped = processTranslationResult(phoneticResponse.phonetic);
               if (mapped) {
                 CacheManager.set(`${uri}:${lyrics.provider}:gemini_romaji`, mapped);
-                console.log(`[Prefetcher] Phonetic cached for: ${trackInfo.title} (provider: ${lyrics.provider})`);
+                ivLyricsDebug(`[Prefetcher] Phonetic cached for: ${trackInfo.title} (provider: ${lyrics.provider})`);
               }
             }
           } catch (error) {
@@ -2264,7 +2270,7 @@ const Prefetcher = {
                 if (displayMode2 && displayMode2 !== "none" && displayMode2 !== "gemini_romaji") {
                   CacheManager.set(`${uri}:${lyrics.provider}:${displayMode2}`, mapped);
                 }
-                console.log(`[Prefetcher] Translation cached for: ${trackInfo.title} (provider: ${lyrics.provider})`);
+                ivLyricsDebug(`[Prefetcher] Translation cached for: ${trackInfo.title} (provider: ${lyrics.provider})`);
               }
             }
           } catch (error) {
@@ -2280,7 +2286,7 @@ const Prefetcher = {
           timestamp: Date.now(),
         });
 
-        console.log(`[Prefetcher] Prefetch completed for: ${trackInfo.title}`);
+        ivLyricsDebug(`[Prefetcher] Prefetch completed for: ${trackInfo.title}`);
         return true;
       } catch (error) {
         console.warn(`[Prefetcher] Translation prefetch failed:`, error.message);
@@ -2303,7 +2309,7 @@ const Prefetcher = {
 
     // 이미 캐시에 있으면 스킵
     if (this._prefetchCache.has(cacheKey)) {
-      console.log(`[Prefetcher] Video info already cached for trackId: ${trackId}`);
+      ivLyricsDebug(`[Prefetcher] Video info already cached for trackId: ${trackId}`);
       const cached = this._prefetchCache.get(cacheKey);
       if (cached?.data?.youtubeVideoId) {
         this._prefetchVideoWithHelper(cached.data.youtubeVideoId);
@@ -2318,7 +2324,7 @@ const Prefetcher = {
 
     const prefetchPromise = (async () => {
       try {
-        console.log(`[Prefetcher] Fetching video info for trackId: ${trackId} (fallback)`);
+        ivLyricsDebug(`[Prefetcher] Fetching video info for trackId: ${trackId} (fallback)`);
 
         const userHash = Utils.getUserHash();
         // Spotify 트랙 메타데이터를 백엔드에 전달 (백엔드가 Spotify API에 접근 불가하므로)
@@ -2338,7 +2344,7 @@ const Prefetcher = {
             data: data.data,
             timestamp: Date.now(),
           });
-          console.log(`[Prefetcher] Video info cached for trackId: ${trackId}`);
+          ivLyricsDebug(`[Prefetcher] Video info cached for trackId: ${trackId}`);
           // 헬퍼를 통한 영상 미리 다운로드
           if (data.data?.youtubeVideoId) {
             this._prefetchVideoWithHelper(data.data.youtubeVideoId);
@@ -2374,13 +2380,13 @@ const Prefetcher = {
 
     // 이미 프리페치 요청 중이면 스킵
     if (this._inflightRequests.has(helperCacheKey)) {
-      console.log(`[Prefetcher] Helper prefetch already in progress for: ${videoId}`);
+      ivLyricsDebug(`[Prefetcher] Helper prefetch already in progress for: ${videoId}`);
       return;
     }
 
     // 이미 다운로드 완료된 영상이면 스킵
     if (this._prefetchCache.has(helperCacheKey)) {
-      console.log(`[Prefetcher] Video already prefetched via helper: ${videoId}`);
+      ivLyricsDebug(`[Prefetcher] Video already prefetched via helper: ${videoId}`);
       return;
     }
 
@@ -2388,11 +2394,11 @@ const Prefetcher = {
       // 헬퍼 연결 상태 확인
       const isAvailable = await VideoHelperService.isHelperAvailable();
       if (!isAvailable) {
-        console.log(`[Prefetcher] Helper not available, skipping prefetch for: ${videoId}`);
+        ivLyricsDebug(`[Prefetcher] Helper not available, skipping prefetch for: ${videoId}`);
         return;
       }
 
-      console.log(`[Prefetcher] Starting helper prefetch for video: ${videoId}`);
+      ivLyricsDebug(`[Prefetcher] Starting helper prefetch for video: ${videoId}`);
 
       // 요청 중 표시
       this._inflightRequests.set(helperCacheKey, true);
@@ -2401,11 +2407,11 @@ const Prefetcher = {
       const abortFn = VideoHelperService.requestVideo(videoId, {
         onProgress: (percent, speed, eta, message, status) => {
           if (percent > 0 && percent < 100) {
-            console.log(`[Prefetcher] Helper prefetch progress: ${percent}% for ${videoId}`);
+            ivLyricsDebug(`[Prefetcher] Helper prefetch progress: ${percent}% for ${videoId}`);
           }
         },
         onComplete: (url) => {
-          console.log(`[Prefetcher] Helper prefetch complete for: ${videoId}`);
+          ivLyricsDebug(`[Prefetcher] Helper prefetch complete for: ${videoId}`);
           this._prefetchCache.set(helperCacheKey, {
             videoId: videoId,
             url: url,
@@ -2422,7 +2428,7 @@ const Prefetcher = {
       // 30초 후 자동 중단 (너무 오래 걸리면)
       setTimeout(() => {
         if (this._inflightRequests.has(helperCacheKey)) {
-          console.log(`[Prefetcher] Helper prefetch timeout for: ${videoId}`);
+          ivLyricsDebug(`[Prefetcher] Helper prefetch timeout for: ${videoId}`);
           abortFn();
           this._inflightRequests.delete(helperCacheKey);
         }
@@ -2656,7 +2662,7 @@ class LyricsContainer extends react.Component {
     try {
       const savedVideo = await Utils.getSelectedVideo(trackUri);
       if (savedVideo && savedVideo.youtubeVideoId) {
-        console.log(`[ivLyrics] Loading saved video for track: ${savedVideo.youtubeVideoId}`);
+        ivLyricsDebug(`[ivLyrics] Loading saved video for track: ${savedVideo.youtubeVideoId}`);
         this.setState({
           videoInfo: {
             youtubeVideoId: savedVideo.youtubeVideoId,
@@ -2836,7 +2842,7 @@ class LyricsContainer extends react.Component {
         // 메모리 캐시도 초기화
         window.Translator.clearMemoryCache(trackId);
         window.Translator.clearInflightRequests(trackId);
-        console.log(`[regenerateTranslation] Cleared local cache for ${trackId}`);
+        ivLyricsDebug(`[regenerateTranslation] Cleared local cache for ${trackId}`);
       } catch (e) {
         console.warn('[regenerateTranslation] Failed to clear cache:', e);
       }
@@ -3417,10 +3423,10 @@ class LyricsContainer extends react.Component {
 
     const processMode = async (mode, baseLyrics, onProgress = null) => {
       if (!mode || mode === "none") {
-        console.log("[processMode] Mode is none or empty:", mode);
+        ivLyricsDebug("[processMode] Mode is none or empty:", mode);
         return null;
       }
-      console.log("[processMode] Processing mode:", mode);
+      ivLyricsDebug("[processMode] Processing mode:", mode);
       try {
         if (String(mode).startsWith("gemini")) {
           const result = await this.getGeminiTranslation(
@@ -3429,7 +3435,7 @@ class LyricsContainer extends react.Component {
             mode,
             onProgress
           );
-          console.log("[processMode] Gemini result sample:", result?.[0]);
+          ivLyricsDebug("[processMode] Gemini result sample:", result?.[0]);
           return result;
         } else {
           return await this.getTraditionalConversion(
@@ -3512,7 +3518,7 @@ class LyricsContainer extends react.Component {
       const cached = this._dmResults[currentUri];
       // If provider changed, invalidate all cache for this track
       if (cached.lastProvider !== currentProvider) {
-        console.log(`[processLyricsWithDisplayModes] Provider changed from ${cached.lastProvider} to ${currentProvider}, invalidating cache`);
+        ivLyricsDebug(`[processLyricsWithDisplayModes] Provider changed from ${cached.lastProvider} to ${currentProvider}, invalidating cache`);
         cached.mode1 = null;
         cached.mode2 = null;
       }
@@ -3541,11 +3547,11 @@ class LyricsContainer extends react.Component {
       if (this.state.uri !== uri) {
         return;
       }
-      console.log(
+      ivLyricsDebug(
         "[updateCombinedLyrics] Mode1 data:",
         lyricsMode1 ? "present" : "null"
       );
-      console.log(
+      ivLyricsDebug(
         "[updateCombinedLyrics] Mode2 data:",
         lyricsMode2 ? "present" : "null"
       );
@@ -3578,13 +3584,13 @@ class LyricsContainer extends react.Component {
     const mode1Active = displayMode1 && displayMode1 !== "none";
     const mode2Active = displayMode2 && displayMode2 !== "none";
 
-    console.log(
+    ivLyricsDebug(
       "[displayTranslations] Mode1:",
       displayMode1,
       "Active:",
       mode1Active
     );
-    console.log(
+    ivLyricsDebug(
       "[displayTranslations] Mode2:",
       displayMode2,
       "Active:",
@@ -4383,7 +4389,7 @@ class LyricsContainer extends react.Component {
       // 이미 로컬에 저장된 오프셋이 있으면 스킵
       const localOffset = await Utils.getTrackSyncOffset(trackUri);
       if (localOffset && localOffset !== 0) {
-        console.log(`[ivLyrics] Using local offset: ${localOffset}ms`);
+        ivLyricsDebug(`[ivLyrics] Using local offset: ${localOffset}ms`);
         return;
       }
 
@@ -4399,7 +4405,7 @@ class LyricsContainer extends react.Component {
 
         if (offsetToApply !== 0) {
           await Utils.setTrackSyncOffset(trackUri, offsetToApply);
-          console.log(`[ivLyrics] Applied community offset: ${offsetToApply}ms (confidence: ${communityData.confidence})`);
+          ivLyricsDebug(`[ivLyrics] Applied community offset: ${offsetToApply}ms (confidence: ${communityData.confidence})`);
 
           // UI 업데이트를 위해 이벤트 발생
           window.dispatchEvent(new CustomEvent('ivLyrics:offset-changed', {
@@ -4701,7 +4707,7 @@ class LyricsContainer extends react.Component {
     };
 
     reloadLyrics = async (clearCache = true) => {
-      console.log("[ivLyrics] Reloading lyrics...", { trackId: Spicetify.Player.data?.item?.uri, clearCache });
+      ivLyricsDebug("[ivLyrics] Reloading lyrics...", { trackId: Spicetify.Player.data?.item?.uri, clearCache });
 
       // 메모리 캐시는 항상 초기화 (window.CACHE와의 참조를 유지하기 위해 객체의 키만 삭제)
       Object.keys(CACHE).forEach(key => delete CACHE[key]);
@@ -4736,7 +4742,7 @@ class LyricsContainer extends react.Component {
 
       // clearCache가 true이고 트랙 정보가 있으면 로컬 캐시도 삭제
       if (clearCache && trackId) {
-        console.log("[ivLyrics] Clearing track cache for:", trackId);
+        ivLyricsDebug("[ivLyrics] Clearing track cache for:", trackId);
         await LyricsCache.clearTrack(trackId);
         window.Translator?.clearMemoryCache?.(trackId);
         window.Translator?.clearInflightRequests?.(trackId);
@@ -4745,7 +4751,7 @@ class LyricsContainer extends react.Component {
 
       this.updateVisualOnConfigChange();
       this.forceUpdate();
-      console.log("[ivLyrics] Fetching new lyrics...");
+      ivLyricsDebug("[ivLyrics] Fetching new lyrics...");
       this.fetchLyrics(
         Spicetify.Player.data.item,
         this.state.explicitMode,
