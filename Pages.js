@@ -1803,3 +1803,138 @@ const LyricsPage = ({ lyricsContainer }) => {
 		})
 	);
 };
+
+const LyricsUnavailableView = react.memo(({ isLoading }) =>
+	react.createElement(
+		"div",
+		{
+			className: "lyrics-lyricsContainer-LyricsUnavailablePage",
+		},
+		react.createElement(
+			"span",
+			{
+				className: "lyrics-lyricsContainer-LyricsUnavailableMessage",
+			},
+			isLoading ? LoadingIcon : "(• _ • )"
+		)
+	)
+);
+
+const LyricsPageRenderer = react.memo(({
+	mode = -1,
+	karaokeMode = 0,
+	syncedMode = 1,
+	unsyncedMode = 2,
+	trackUri = "",
+	currentLyrics = [],
+	karaoke = null,
+	synced = null,
+	unsynced = null,
+	provider = null,
+	contributors = null,
+	copyright = null,
+	isLoading = false,
+	showMarketplace = false,
+	onCloseMarketplace = null,
+	reRenderLyricsPage = null,
+}) => {
+	const sharedLyrics = Array.isArray(currentLyrics) ? currentLyrics : [];
+	const karaokeLyrics = Array.isArray(currentLyrics)
+		? currentLyrics
+		: (Array.isArray(karaoke) ? karaoke : []);
+
+	const renderDescriptor = useMemo(() => {
+		if (showMarketplace && typeof MarketplacePage !== "undefined") {
+			return {
+				component: MarketplacePage,
+				props: {
+					onClose: onCloseMarketplace,
+				},
+			};
+		}
+
+		if (mode === karaokeMode && karaoke) {
+			return {
+				component: SyncedLyricsPage,
+				props: {
+					trackUri,
+					lyrics: karaokeLyrics,
+					provider,
+					contributors,
+					copyright,
+					isKara: true,
+					reRenderLyricsPage,
+				},
+			};
+		}
+
+		if (mode === syncedMode && synced) {
+			return {
+				component: CONFIG.visual["synced-compact"]
+					? SyncedLyricsPage
+					: SyncedExpandedLyricsPage,
+				props: {
+					trackUri,
+					lyrics: sharedLyrics,
+					provider,
+					contributors,
+					copyright,
+					reRenderLyricsPage,
+				},
+			};
+		}
+
+		if (mode === unsyncedMode && unsynced) {
+			return {
+				component: UnsyncedLyricsPage,
+				props: {
+					trackUri,
+					lyrics: sharedLyrics,
+					provider,
+					contributors,
+					copyright,
+					reRenderLyricsPage,
+				},
+			};
+		}
+
+		return null;
+	}, [
+		showMarketplace,
+		onCloseMarketplace,
+		mode,
+		karaokeMode,
+		syncedMode,
+		unsyncedMode,
+		karaoke,
+		synced,
+		unsynced,
+		karaokeLyrics,
+		sharedLyrics,
+		trackUri,
+		provider,
+		contributors,
+		copyright,
+		reRenderLyricsPage,
+	]);
+
+	const content = useMemo(() => {
+		if (!renderDescriptor) {
+			return react.createElement(LyricsUnavailableView, { isLoading });
+		}
+
+		return react.createElement(renderDescriptor.component, renderDescriptor.props);
+	}, [renderDescriptor, isLoading]);
+
+	return react.createElement(
+		react.Fragment,
+		null,
+		content,
+		react.createElement(CreditFooter, {
+			provider,
+			contributors,
+		})
+	);
+});
+
+window.LyricsPageRenderer = LyricsPageRenderer;

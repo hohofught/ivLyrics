@@ -5308,7 +5308,6 @@ class LyricsContainer extends react.Component {
 
     let mode = this.getCurrentMode();
 
-    let activeItem;
     let showTranslationButton;
 
     // Get current display modes to track changes
@@ -5382,51 +5381,26 @@ class LyricsContainer extends react.Component {
 
     const canRegenerateTranslation = hasLoadedGeminiTranslation;
 
-    if (mode !== -1) {
-      if (mode === KARAOKE && this.state.karaoke) {
-        activeItem = react.createElement(SyncedLyricsPage, {
-          trackUri: this.state.uri,
-          lyrics: Array.isArray(this.state.currentLyrics)
-            ? this.state.currentLyrics
-            : this.state.karaoke,
-          provider: this.state.provider,
-          contributors: this.state.contributors,
-          copyright: this.state.copyright,
-          isKara: true,
-          reRenderLyricsPage: this.reRenderLyricsPage,
-        });
-      } else if (mode === SYNCED && this.state.synced) {
-        activeItem = react.createElement(
-          CONFIG.visual["synced-compact"]
-            ? SyncedLyricsPage
-            : SyncedExpandedLyricsPage,
-          {
-            trackUri: this.state.uri,
-            lyrics: Array.isArray(this.state.currentLyrics)
-              ? this.state.currentLyrics
-              : [],
-            provider: this.state.provider,
-            contributors: this.state.contributors,
-            copyright: this.state.copyright,
-            reRenderLyricsPage: this.reRenderLyricsPage,
-          }
-        );
-      } else if (mode === UNSYNCED && this.state.unsynced) {
-        activeItem = react.createElement(UnsyncedLyricsPage, {
-          trackUri: this.state.uri,
-          lyrics: Array.isArray(this.state.currentLyrics)
-            ? this.state.currentLyrics
-            : [],
-          provider: this.state.provider,
-          contributors: this.state.contributors,
-          copyright: this.state.copyright,
-          reRenderLyricsPage: this.reRenderLyricsPage,
-        });
-      }
-    }
-
-    if (!activeItem) {
-      activeItem = react.createElement(
+    const activeLyricsPage = window.LyricsPageRenderer
+      ? react.createElement(window.LyricsPageRenderer, {
+        mode,
+        karaokeMode: KARAOKE,
+        syncedMode: SYNCED,
+        unsyncedMode: UNSYNCED,
+        trackUri: this.state.uri,
+        currentLyrics: this.state.currentLyrics,
+        karaoke: this.state.karaoke,
+        synced: this.state.synced,
+        unsynced: this.state.unsynced,
+        provider: this.state.provider,
+        contributors: this.state.contributors,
+        copyright: this.state.copyright,
+        isLoading: this.state.isLoading,
+        showMarketplace: this.state.showMarketplace,
+        onCloseMarketplace: () => this.setState({ showMarketplace: false }),
+        reRenderLyricsPage: this.reRenderLyricsPage,
+      })
+      : react.createElement(
         "div",
         {
           className: "lyrics-lyricsContainer-LyricsUnavailablePage",
@@ -5439,16 +5413,6 @@ class LyricsContainer extends react.Component {
           this.state.isLoading ? LoadingIcon : "(• _ • )"
         )
       );
-    }
-
-    this.state.mode = mode;
-
-    // 마켓플레이스 표시 시 activeItem 오버라이드
-    if (this.state.showMarketplace && typeof MarketplacePage !== 'undefined') {
-      activeItem = react.createElement(MarketplacePage, {
-        onClose: () => this.setState({ showMarketplace: false })
-      });
-    }
 
     // Tab bar removed - modes are now auto-detected
     const topBarContent = null;
@@ -5845,11 +5809,7 @@ class LyricsContainer extends react.Component {
           })
         )
       ),
-      activeItem,
-      react.createElement(CreditFooter, {
-        provider: this.state.provider,
-        contributors: this.state.contributors
-      })
+      activeLyricsPage
     );
 
     const dom = ensureReactDOM();
