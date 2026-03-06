@@ -258,6 +258,43 @@ const OverlaySettings = () => {
 };
 
 // 설정 백업/복원 컴포넌트
+const SETTINGS_BACKUP_PREFIX = "lpconfig-base64:";
+
+function uint8ArrayToBase64(bytes) {
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary);
+}
+
+function base64ToUint8Array(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+function decodeServerBackupContent(rawContent) {
+  if (typeof rawContent !== "string" || !rawContent.trim()) {
+    throw new Error("Empty backup content");
+  }
+
+  if (rawContent.startsWith(SETTINGS_BACKUP_PREFIX)) {
+    const encoded = rawContent.slice(SETTINGS_BACKUP_PREFIX.length);
+    return settingsObject.deserialize(base64ToUint8Array(encoded));
+  }
+
+  return JSON.parse(rawContent);
+}
+
 const SettingsBackup = ({ userHash }) => {
   const [settingsList, setSettingsList] = useState([]);
   const [backupName, setBackupName] = useState("");
@@ -289,9 +326,10 @@ const SettingsBackup = ({ userHash }) => {
     }
 
     try {
-      // StorageManager를 사용하여 현재 설정을 가져옴 (내보내기와 동일한 데이터)
       const config = await StorageManager.exportConfig();
-      const content = JSON.stringify(config, null, 2);
+      const content =
+        SETTINGS_BACKUP_PREFIX +
+        uint8ArrayToBase64(settingsObject.serialize(config));
 
       const res = await fetch(`https://sso.ivl.is/ivlyrics/api/settings.php?action=upload&user_hash=${encodeURIComponent(userHash)}`, {
         method: 'POST',
@@ -324,11 +362,9 @@ const SettingsBackup = ({ userHash }) => {
       const data = await res.json();
 
       if (data.data) {
-        // 설정 적용 로직
         try {
-          const config = JSON.parse(data.data);
-          localStorage.setItem('ivLyrics_config', JSON.stringify(config));
-          // 설정 적용을 위해 앱 리로드 필요 알림
+          const config = decodeServerBackupContent(data.data);
+          await StorageManager.importConfig(config);
           Toast.success(I18n.t("settingsAdvanced.aboutTab.account.backup.restoreSuccess"));
           setTimeout(() => {
             window.location.reload();
@@ -8599,11 +8635,11 @@ const ConfigModal = () => {
                             return new TextDecoder("utf-8").decode(ab);
                           };
                           const cfg = JSON.parse(arraBuffer2Text(contents));
-                          StorageManager.importConfig(cfg);
+                          await StorageManager.importConfig(cfg);
                         } else {
                           const u8 = new Uint8Array(contents);
                           const cfg = settingsObject.deserialize(u8);
-                          StorageManager.importConfig(cfg);
+                          await StorageManager.importConfig(cfg);
                         }
 
                         const settingRow = button.closest(".setting-row");
