@@ -1447,6 +1447,8 @@ window.LANG_KO = {
     "applyShort": "적용",
     "applied": "영상이 적용되었습니다",
     "videoTitle": "영상 제목",
+    "edit": "수정",
+    "updateAction": "업데이트",
     "loadingTitle": "제목 가져오는 중...",
     "startTimeLabel": "첨 가사 시작 시간 (초)",
     "startTimeHint": "YouTube 영상에서 첫 번째 가사가 시작되는 시간을 입력하세요",

@@ -1439,6 +1439,8 @@ window.LANG_ES = {
     "applyShort": "Aplicar",
     "applied": "Video aplicado",
     "videoTitle": "Título del video",
+    "edit": "Editar",
+    "updateAction": "Actualizar",
     "loadingTitle": "Obteniendo título...",
     "startTimeLabel": "Tiempo inicio primera letra (s)",
     "startTimeHint": "Ingresa el tiempo en que comienza la primera letra en el video",

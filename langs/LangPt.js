@@ -1439,6 +1439,8 @@ window.LANG_PT = {
     "applyShort": "Aplicar",
     "applied": "Vídeo aplicado",
     "videoTitle": "Título do Vídeo",
+    "edit": "Editar",
+    "updateAction": "Atualizar",
     "loadingTitle": "Obtendo título...",
     "startTimeLabel": "Início da Primeira Letra (s)",
     "startTimeHint": "Insira o tempo em que a primeira letra começa no vídeo do YouTube",

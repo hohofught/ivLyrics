@@ -1439,6 +1439,8 @@ window.LANG_ZH_CN = {
     "applyShort": "应用",
     "applied": "视频已应用",
     "videoTitle": "视频标题",
+    "edit": "编辑",
+    "updateAction": "更新",
     "loadingTitle": "正在获取标题...",
     "startTimeLabel": "第一句歌词开始时间 (秒)",
     "startTimeHint": "输入 YouTube 视频中第一句歌词开始的时间",

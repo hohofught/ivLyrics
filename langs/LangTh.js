@@ -1439,6 +1439,8 @@ window.LANG_TH = {
     "applyShort": "ใช้",
     "applied": "นำวิดีโอไปใช้แล้ว",
     "videoTitle": "ชื่อวิดีโอ",
+    "edit": "แก้ไข",
+    "updateAction": "อัปเดต",
     "loadingTitle": "กำลังดึงชื่อ...",
     "startTimeLabel": "เวลาเริ่มเนื้อเพลงแรก (วินาที)",
     "startTimeHint": "ป้อนเวลาที่เนื้อเพลงแรกเริ่มในวิดีโอ YouTube",

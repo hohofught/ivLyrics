@@ -1439,6 +1439,8 @@ window.LANG_ID = {
     "applyShort": "Terapkan",
     "applied": "Video diterapkan",
     "videoTitle": "Judul Video",
+    "edit": "Edit",
+    "updateAction": "Perbarui",
     "loadingTitle": "Mengambil judul...",
     "startTimeLabel": "Waktu Mulai Lirik Pertama (detik)",
     "startTimeHint": "Masukkan waktu di mana lirik pertama dimulai dalam video YouTube",

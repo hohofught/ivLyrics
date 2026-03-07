@@ -1439,6 +1439,8 @@ window.LANG_BN = {
     "applyShort": "প্রয়োগ",
     "applied": "ভিডিও প্রয়োগ করা হয়েছে",
     "videoTitle": "ভিডিও শিরোনাম",
+    "edit": "সম্পাদনা",
+    "updateAction": "আপডেট",
     "loadingTitle": "শিরোনাম আনা হচ্ছে...",
     "startTimeLabel": "প্রথম লিরিক্স শুরুর সময় (সেকেন্ড)",
     "startTimeHint": "YouTube ভিডিওতে প্রথম লিরিক্স যে সময়ে শুরু হয় তা লিখুন",

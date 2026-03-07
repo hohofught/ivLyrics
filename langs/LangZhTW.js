@@ -1439,6 +1439,8 @@ window.LANG_ZH_TW = {
     "applyShort": "套用",
     "applied": "影片已套用",
     "videoTitle": "影片標題",
+    "edit": "編輯",
+    "updateAction": "更新",
     "loadingTitle": "正在取得標題...",
     "startTimeLabel": "第一句歌詞開始時間 (秒)",
     "startTimeHint": "輸入 YouTube 影片中第一句歌詞開始的時間",

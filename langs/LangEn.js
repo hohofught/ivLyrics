@@ -1447,6 +1447,8 @@ window.LANG_EN = {
     "applyShort": "Apply",
     "applied": "Video applied",
     "videoTitle": "Video Title",
+    "edit": "Edit",
+    "updateAction": "Update",
     "loadingTitle": "Getting title...",
     "startTimeLabel": "First Lyrics Start Time (sec)",
     "startTimeHint": "Enter the time when the first lyrics line starts in the YouTube video",

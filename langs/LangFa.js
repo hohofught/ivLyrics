@@ -1439,6 +1439,8 @@ window.LANG_FA = {
     "applyShort": "اعمال",
     "applied": "ویدیو اعمال شد",
     "videoTitle": "عنوان ویدیو",
+    "edit": "ویرایش",
+    "updateAction": "بروزرسانی",
     "loadingTitle": "در حال دریافت عنوان...",
     "startTimeLabel": "زمان شروع اولین خط متن (ثانیه)",
     "startTimeHint": "زمانی که اولین خط متن در ویدیوی YouTube شروع می‌شود را وارد کنید",

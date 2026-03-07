@@ -615,6 +615,7 @@ const CommunityVideoSelector = ({
   const [previewStartTime, setPreviewStartTime] = useState(0);
   const [submitVideoTitle, setSubmitVideoTitle] = useState("");
   const [isLoadingTitle, setIsLoadingTitle] = useState(false);
+  const [editingVideo, setEditingVideo] = useState(null);
   const [formPreviewVideoId, setFormPreviewVideoId] = useState(null); // 폼에서 미리보기 중인 영상
   const [deletingId, setDeletingId] = useState(null); // 삭제 중인 영상 ID
   const [deleteConfirmId, setDeleteConfirmId] = useState(null); // 삭제 확인 다이얼로그용
@@ -650,13 +651,30 @@ const CommunityVideoSelector = ({
     loadVideos();
   }, [loadVideos]);
 
+  const resetSubmitForm = useCallback(() => {
+    setShowSubmitForm(false);
+    setSubmitUrl("");
+    setSubmitStartTime(0);
+    setSubmitVideoTitle("");
+    setFormPreviewVideoId(null);
+    setEditingVideo(null);
+    setIsLoadingTitle(false);
+  }, []);
+
   // URL 변경 시 YouTube 제목 자동 가져오기
   useEffect(() => {
     if (titleFetchTimeout.current) {
       clearTimeout(titleFetchTimeout.current);
     }
 
-    const videoId = Utils.extractYouTubeVideoId(submitUrl);
+    if (editingVideo && !submitUrl) {
+      setSubmitVideoTitle(editingVideo.youtubeTitle || "");
+      setFormPreviewVideoId(editingVideo.youtubeVideoId || null);
+      setIsLoadingTitle(false);
+      return;
+    }
+
+    const videoId = editingVideo?.youtubeVideoId || Utils.extractYouTubeVideoId(submitUrl);
     if (!videoId) {
       setSubmitVideoTitle("");
       setFormPreviewVideoId(null);
@@ -682,7 +700,7 @@ const CommunityVideoSelector = ({
         clearTimeout(titleFetchTimeout.current);
       }
     };
-  }, [submitUrl]);
+  }, [editingVideo, submitUrl]);
 
   // 투표 처리
   const handleVote = async (videoEntryId, currentVote, newVote) => {
@@ -721,7 +739,7 @@ const CommunityVideoSelector = ({
 
   // 영상 등록 처리
   const handleSubmit = async () => {
-    const videoId = Utils.extractYouTubeVideoId(submitUrl);
+    const videoId = editingVideo?.youtubeVideoId || Utils.extractYouTubeVideoId(submitUrl);
     if (!videoId) {
       Toast.error(I18n.t("communityVideo.invalidUrl"));
       return;
@@ -770,11 +788,7 @@ const CommunityVideoSelector = ({
             ? I18n.t("communityVideo.updated")
             : I18n.t("communityVideo.submitted")
         );
-        setShowSubmitForm(false);
-        setSubmitUrl("");
-        setSubmitStartTime(0);
-        setSubmitVideoTitle("");
-        setFormPreviewVideoId(null);
+        resetSubmitForm();
         // 캐시를 우회하여 새 데이터 가져오기
         loadVideos(true);
       }
@@ -786,6 +800,17 @@ const CommunityVideoSelector = ({
   };
 
   // 영상 적용 처리 (모달 닫지 않음)
+  const handleEdit = (video, e) => {
+    e.stopPropagation();
+    setEditingVideo(video);
+    setShowSubmitForm(true);
+    setSubmitUrl("");
+    setSubmitStartTime(video.startTime || 0);
+    setSubmitVideoTitle(video.youtubeTitle || "");
+    setFormPreviewVideoId(video.youtubeVideoId || null);
+    setIsLoadingTitle(false);
+  };
+
   const handleApply = (video) => {
     if (onVideoSelect) {
       onVideoSelect({
@@ -1029,19 +1054,29 @@ const CommunityVideoSelector = ({
                           )
                         ),
                         // Apply button
-                        react.createElement(
-                          "button",
-                          {
-                            className: "action-btn apply",
+	                        react.createElement(
+	                          "button",
+	                          {
+	                            className: "action-btn apply",
                             onClick: (e) => {
                               e.stopPropagation();
                               handleApply(video);
                             },
                             title: I18n.t("communityVideo.apply"),
-                          },
-                          I18n.t("communityVideo.applyShort")
-                        ),
-                        // Vote buttons
+	                          },
+	                          I18n.t("communityVideo.applyShort")
+	                        ),
+	                        (video.submitterId === currentUserHash || video.submitterId === "system") &&
+	                        react.createElement(
+	                          "button",
+	                          {
+	                            className: "action-btn preview",
+	                            onClick: (e) => handleEdit(video, e),
+	                            title: I18n.t("communityVideo.edit"),
+	                          },
+	                          I18n.t("communityVideo.edit")
+	                        ),
+	                        // Vote buttons
                         react.createElement(
                           "button",
                           {
@@ -1142,13 +1177,11 @@ const CommunityVideoSelector = ({
               {
                 className: "community-video-add-btn",
                 onClick: () => {
-                  setShowSubmitForm(!showSubmitForm);
                   if (showSubmitForm) {
-                    // 폼을 닫을 때 초기화
-                    setSubmitUrl("");
-                    setSubmitStartTime(0);
-                    setSubmitVideoTitle("");
-                    setFormPreviewVideoId(null);
+                    resetSubmitForm();
+                  } else {
+                    setEditingVideo(null);
+                    setShowSubmitForm(true);
                   }
                 },
               },
@@ -1164,23 +1197,33 @@ const CommunityVideoSelector = ({
               {
                 className: "community-video-submit-form",
               },
-              react.createElement(
-                "div",
-                {
-                  className: "form-group",
-                },
-                react.createElement(
-                  "label",
-                  null,
-                  I18n.t("communityVideo.youtubeUrl")
-                ),
-                react.createElement("input", {
-                  type: "text",
-                  value: submitUrl,
-                  onChange: (e) => setSubmitUrl(e.target.value),
-                  placeholder: "https://youtube.com/watch?v=... or Video ID",
-                })
-              ),
+	              react.createElement(
+	                "div",
+	                {
+	                  className: "form-group",
+	                },
+	                react.createElement(
+	                  "label",
+	                  null,
+	                  editingVideo
+	                    ? I18n.t("communityVideo.videoTitle")
+	                    : I18n.t("communityVideo.youtubeUrl")
+	                ),
+	                editingVideo
+	                  ? react.createElement(
+	                    "div",
+	                    {
+	                      className: "video-title-text",
+	                    },
+	                    `${editingVideo.youtubeTitle || editingVideo.youtubeVideoId} (${editingVideo.youtubeVideoId})`
+	                  )
+	                  : react.createElement("input", {
+	                    type: "text",
+	                    value: submitUrl,
+	                    onChange: (e) => setSubmitUrl(e.target.value),
+	                    placeholder: "https://youtube.com/watch?v=... or Video ID",
+	                  })
+	              ),
 
               // 제목 표시
               submitVideoTitle &&
@@ -1256,16 +1299,16 @@ const CommunityVideoSelector = ({
               ),
               react.createElement(
                 "button",
-                {
-                  className: "community-video-submit-btn",
-                  onClick: handleSubmit,
-                  disabled: isSubmitting || !submitUrl || isLoadingTitle,
-                },
-                isSubmitting
-                  ? I18n.t("communityVideo.submitting")
-                  : I18n.t("communityVideo.submit")
-              )
-            )
+	                {
+	                  className: "community-video-submit-btn",
+	                  onClick: handleSubmit,
+	                  disabled: isSubmitting || (!editingVideo && !submitUrl) || isLoadingTitle,
+	                },
+	                isSubmitting
+	                  ? I18n.t("communityVideo.submitting")
+	                  : (editingVideo ? I18n.t("communityVideo.updateAction") : I18n.t("communityVideo.submit"))
+	              )
+	            )
           )
     ),
 

@@ -1439,6 +1439,8 @@ window.LANG_JA = {
     "applyShort": "適用",
     "applied": "動画が適用されました",
     "videoTitle": "動画タイトル",
+    "edit": "編集",
+    "updateAction": "更新",
     "loadingTitle": "タイトルを取得中...",
     "startTimeLabel": "最初の歌詞の開始時間 (秒)",
     "startTimeHint": "YouTube動画で最初の歌詞が始まる時間を入力してください",

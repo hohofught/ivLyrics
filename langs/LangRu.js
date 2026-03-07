@@ -1439,6 +1439,8 @@ window.LANG_RU = {
     "applyShort": "Прим.",
     "applied": "Видео применено",
     "videoTitle": "Название видео",
+    "edit": "Изменить",
+    "updateAction": "Обновить",
     "loadingTitle": "Получение названия...",
     "startTimeLabel": "Начало первого слова (сек)",
     "startTimeHint": "Введите время начала первой строки текста в видео",

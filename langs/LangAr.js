@@ -1439,6 +1439,8 @@ window.LANG_AR = {
     "applyShort": "تطبيق",
     "applied": "تم تطبيق الفيديو",
     "videoTitle": "عنوان الفيديو",
+    "edit": "تعديل",
+    "updateAction": "تحديث",
     "loadingTitle": "جارٍ جلب العنوان...",
     "startTimeLabel": "وقت بدء أول كلمة (ثواني)",
     "startTimeHint": "أدخل الوقت الذي تبدأ فيه أول كلمة في فيديو YouTube",

@@ -1439,6 +1439,8 @@ window.LANG_HI = {
     "applyShort": "लागू",
     "applied": "वीडियो लागू किया गया",
     "videoTitle": "वीडियो शीर्षक",
+    "edit": "संपादित करें",
+    "updateAction": "अपडेट",
     "loadingTitle": "शीर्षक प्राप्त हो रहा है...",
     "startTimeLabel": "प्रथम लिरिक्स प्रारंभ समय (सेकंड)",
     "startTimeHint": "YouTube वीडियो में पहली लाइन शुरू होने का समय दर्ज करें",

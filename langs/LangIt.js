@@ -1439,6 +1439,8 @@ window.LANG_IT = {
     "applyShort": "Applica",
     "applied": "Video applicato",
     "videoTitle": "Titolo video",
+    "edit": "Modifica",
+    "updateAction": "Aggiorna",
     "loadingTitle": "Recupero titolo...",
     "startTimeLabel": "Tempo inizio primo testo (sec)",
     "startTimeHint": "Inserisci il tempo in cui inizia la prima riga di testo nel video YouTube",

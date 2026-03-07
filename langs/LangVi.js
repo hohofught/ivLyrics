@@ -1439,6 +1439,8 @@ window.LANG_VI = {
     "applyShort": "Áp dụng",
     "applied": "Đã áp dụng video",
     "videoTitle": "Tiêu đề video",
+    "edit": "Sửa",
+    "updateAction": "Cập nhật",
     "loadingTitle": "Đang lấy tiêu đề...",
     "startTimeLabel": "Thời gian bắt đầu lời đầu tiên (giây)",
     "startTimeHint": "Nhập thời điểm lời bài hát đầu tiên bắt đầu trong video YouTube",

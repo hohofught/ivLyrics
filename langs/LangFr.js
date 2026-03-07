@@ -1439,6 +1439,8 @@ window.LANG_FR = {
     "applyShort": "Appliquer",
     "applied": "Vidéo appliquée",
     "videoTitle": "Titre vidéo",
+    "edit": "Éditer",
+    "updateAction": "Mettre à jour",
     "loadingTitle": "Récupération titre...",
     "startTimeLabel": "Temps début 1ère ligne (sec)",
     "startTimeHint": "Entrez le moment où la première ligne de paroles commence dans la vidéo",
