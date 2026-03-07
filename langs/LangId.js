@@ -60,7 +60,8 @@ window.LANG_ID = {
     "fadWarningDesc": "Tidak didukung saat menggunakan ekstensi Full Screen.",
     "fadWarningTip": "Silakan ubah pengaturan tampilan pada ekstensi Full Screen itu sendiri.",
     "desktopOverlay": "Overlay Desktop",
-    "desktopOverlaySubtitle": "Tampilkan lirik sebagai overlay di desktop"
+    "desktopOverlaySubtitle": "Tampilkan lirik sebagai overlay di desktop",
+    "motion": "Gerakan"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_ID = {
     "albumBgBlur": {
       "label": "Blur Latar Belakang Album",
       "desc": "Atur intensitas blur pada latar belakang album"
+    },
+    "reduceMotion": {
+      "label": "Kurangi Animasi",
+      "desc": "Mengurangi animasi antarmuka."
     },
     "blurGradientBackground": {
       "label": "Latar Belakang Gradasi Blur",

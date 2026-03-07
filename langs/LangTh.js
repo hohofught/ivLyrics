@@ -60,7 +60,8 @@ window.LANG_TH = {
     "fadWarningDesc": "ไม่รองรับการใช้งานร่วมกับส่วนขยาย Full Screen",
     "fadWarningTip": "โปรดเปลี่ยนวิธีการจัดเรียงในการตั้งค่าของ Full Screen เอง",
     "desktopOverlay": "โอเวอร์เลย์บนเดสก์ท็อป",
-    "desktopOverlaySubtitle": "แสดงเนื้อเพลงเป็นโอเวอร์เลย์บนเดสก์ท็อป"
+    "desktopOverlaySubtitle": "แสดงเนื้อเพลงเป็นโอเวอร์เลย์บนเดสก์ท็อป",
+    "motion": "การเคลื่อนไหว"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_TH = {
     "albumBgBlur": {
       "label": "เบลอพื้นหลังอัลบั้ม",
       "desc": "ปรับความเข้มของการเบลอพื้นหลังอัลบั้ม"
+    },
+    "reduceMotion": {
+      "label": "ลดการเคลื่อนไหว",
+      "desc": "ลดแอนิเมชันของอินเทอร์เฟซ"
     },
     "blurGradientBackground": {
       "label": "พื้นหลังไล่เฉดสีแบบเบลอ",

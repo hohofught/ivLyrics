@@ -60,7 +60,8 @@ window.LANG_BN = {
     "fadWarningDesc": "Full Screen এক্সটেনশন ব্যবহার করার সময় এটি সমর্থিত নয়।",
     "fadWarningTip": "Full Screen এর নিজস্ব সেটিংসে বিন্যাস পরিবর্তন করুন।",
     "desktopOverlay": "ডেস্কটপ ওভারলে",
-    "desktopOverlaySubtitle": "ডেস্কটপে ওভারলে হিসেবে লিরিক্স প্রদর্শন করুন"
+    "desktopOverlaySubtitle": "ডেস্কটপে ওভারলে হিসেবে লিরিক্স প্রদর্শন করুন",
+    "motion": "মোশন"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_BN = {
     "albumBgBlur": {
       "label": "অ্যালবাম ব্যাকগ্রাউন্ড ব্লার",
       "desc": "অ্যালবাম ব্যাকগ্রাউন্ডের ব্লার বা অস্পষ্টতার মাত্রা নিয়ন্ত্রণ করুন"
+    },
+    "reduceMotion": {
+      "label": "মোশন কমান",
+      "desc": "ইন্টারফেসের অ্যানিমেশন কমায়।"
     },
     "blurGradientBackground": {
       "label": "ব্লার গ্রেডিয়েন্ট ব্যাকগ্রাউন্ড",

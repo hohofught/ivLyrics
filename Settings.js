@@ -3970,9 +3970,26 @@ const MODAL_STYLES = {
   previewTitle: { marginTop: 0, marginBottom: "10px" },
 };
 
-const ConfigModal = () => {
+const getEffectiveReducedMotionPreference = () =>
+  CONFIG.visual["reduce-motion"] === true;
+
+const getSettingsMotionDurationMs = () =>
+  getEffectiveReducedMotionPreference() ? 24 : 280;
+
+const applySettingsMotionClasses = () => {
+  const reduceMotion = getEffectiveReducedMotionPreference();
+  document
+    .getElementById("ivLyrics-settings-overlay")
+    ?.classList.toggle("motion-reduced", reduceMotion);
+  document
+    .getElementById(`${APP_NAME}-config-container`)
+    ?.classList.toggle("motion-reduced", reduceMotion);
+};
+
+const ConfigModal = ({ onRequestClose = () => {} }) => {
   const [activeTab, setActiveTab] = react.useState("general");
   const [searchQuery, setSearchQuery] = react.useState("");
+  const shouldReduceMotion = getEffectiveReducedMotionPreference();
 
   // 검색어 변경 시 검색 결과 탭으로 자동 전환
   const handleSearchChange = (e) => {
@@ -4046,6 +4063,14 @@ const ConfigModal = () => {
       name: I18n.t("settings.noise.label"),
       desc: I18n.t("settings.noise.desc"),
       i18nKeys: ["tabs.general", "settings.noise.label", "settings.noise.desc"]
+    },
+    {
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
+      settingKey: "reduce-motion",
+      name: I18n.t("settings.reduceMotion.label"),
+      desc: I18n.t("settings.reduceMotion.desc"),
+      i18nKeys: ["tabs.appearance", "sections.motion", "settings.reduceMotion.label", "settings.reduceMotion.desc"]
     },
     {
       section: I18n.t("tabs.general"),
@@ -4857,6 +4882,14 @@ const ConfigModal = () => {
               },
             }),
             react.createElement("span", null, I18n.t("settingsAdvanced.donate.button"))
+          ),
+          react.createElement(
+            "button",
+            {
+              className: "settings-close-btn",
+              onClick: onRequestClose,
+            },
+            react.createElement("span", null, "×")
           )
         )
       )
@@ -5013,6 +5046,7 @@ const ConfigModal = () => {
     "div",
     {
       id: `${APP_NAME}-config-container`,
+      className: shouldReduceMotion ? "motion-reduced" : "",
     },
     react.createElement("style", {
       dangerouslySetInnerHTML: {
@@ -5046,9 +5080,9 @@ const ConfigModal = () => {
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
     --shadow-glow: 0 0 20px var(--accent-glow);
-    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: var(--iv-motion-duration-fast, 180ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+    --transition-normal: var(--iv-motion-duration-medium, 280ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+    --transition-slow: var(--iv-motion-duration-slow, 420ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 /* 전체 컨테이너 */
@@ -5099,6 +5133,34 @@ const ConfigModal = () => {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+#${APP_NAME}-config-container .settings-close-btn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg-hover);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: transform var(--transition-normal), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-normal);
+    font-size: 24px;
+    line-height: 1;
+    padding: 0;
+}
+
+#${APP_NAME}-config-container .settings-close-btn:hover {
+    background: var(--glass-bg-active);
+    border-color: var(--glass-border-light);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: var(--shadow-md);
+}
+
+#${APP_NAME}-config-container .settings-close-btn:active {
+    transform: scale(0.96);
 }
 
 #${APP_NAME}-config-container .settings-title-section h1 {
@@ -5534,13 +5596,13 @@ const ConfigModal = () => {
 
 #${APP_NAME}-config-container .tab-content.active {
     display: block;
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideUp var(--iv-motion-duration-medium, 280ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translateY(var(--iv-motion-distance-md, 16px));
     }
     to {
         opacity: 1;
@@ -7567,6 +7629,32 @@ const ConfigModal = () => {
             )
           )
         ),
+        react.createElement(SectionTitle, {
+          title: I18n.t("sections.motion"),
+          subtitle: I18n.t("settings.reduceMotion.desc"),
+        }),
+        react.createElement(OptionList, {
+          items: [
+            {
+              desc: I18n.t("settings.reduceMotion.label"),
+              info: I18n.t("settings.reduceMotion.desc"),
+              key: "reduce-motion",
+              defaultValue: CONFIG.visual["reduce-motion"] ?? false,
+              type: ConfigSlider,
+            },
+          ],
+          onChange: (name, value) => {
+            CONFIG.visual[name] = value;
+            StorageManager.setItem(`${APP_NAME}:visual:${name}`, value);
+            applySettingsMotionClasses();
+            lyricContainerUpdate?.();
+            window.dispatchEvent(
+              new CustomEvent("ivLyrics", {
+                detail: { type: "config", name, value },
+              })
+            );
+          },
+        }),
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.originalStyle.title"),
           subtitle: I18n.t("settingsAdvanced.originalStyle.subtitle"),
@@ -10461,60 +10549,22 @@ const ConfigModal = () => {
 };
 
 function openConfig() {
-  const configContainer = react.createElement(ConfigModal);
+  const existingOverlay = document.getElementById("ivLyrics-settings-overlay");
+  if (existingOverlay) {
+    return;
+  }
 
   // Create a full-screen overlay instead of nested modal
   const overlay = document.createElement("div");
   overlay.id = "ivLyrics-settings-overlay";
-  overlay.style.cssText = `
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		z-index: 9999;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		backdrop-filter: blur(8px);
-		-webkit-backdrop-filter: blur(8px);
-	`;
+  overlay.className = "ivlyrics-settings-overlay is-entering";
+  if (getEffectiveReducedMotionPreference()) {
+    overlay.classList.add("motion-reduced");
+  }
 
   const modalContainer = document.createElement("div");
-  modalContainer.style.cssText = `
-		background: rgba(24, 24, 24, 0.95);
-		backdrop-filter: blur(40px) saturate(180%);
-		-webkit-backdrop-filter: blur(40px) saturate(180%);
-		border-radius: 16px;
-		max-width: 90vw;
-		max-height: 90vh;
-		width: 800px;
-		overflow: hidden;
-		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-	`;
+  modalContainer.className = "ivlyrics-settings-modal-shell";
 
-  // Close on outside click
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) {
-      document.body.removeChild(overlay);
-    }
-  });
-
-  // Close on escape key
-  const handleEscape = (e) => {
-    if (e.key === "Escape") {
-      document.body.removeChild(overlay);
-      document.removeEventListener("keydown", handleEscape);
-    }
-  };
-  document.addEventListener("keydown", handleEscape);
-
-  overlay.appendChild(modalContainer);
-  document.body.appendChild(overlay);
-
-  // Render React component
   const dom =
     window.ivLyricsEnsureReactDOM?.() ||
     (typeof reactDOM !== "undefined"
@@ -10523,7 +10573,53 @@ function openConfig() {
   if (!dom?.render) {
     return;
   }
-  dom.render(configContainer, modalContainer);
+
+  let isClosing = false;
+  const closeOverlay = () => {
+    if (isClosing) {
+      return;
+    }
+
+    isClosing = true;
+    overlay.classList.remove("is-open");
+    overlay.classList.remove("is-entering");
+    overlay.classList.add("is-closing");
+
+    window.setTimeout(() => {
+      dom.unmountComponentAtNode?.(modalContainer);
+      if (overlay.parentNode) {
+        overlay.remove();
+      }
+      document.removeEventListener("keydown", handleEscape);
+    }, getSettingsMotionDurationMs());
+  };
+
+  // Close on outside click
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      closeOverlay();
+    }
+  });
+
+  // Close on escape key
+  const handleEscape = (e) => {
+    if (e.key === "Escape") {
+      closeOverlay();
+    }
+  };
+  document.addEventListener("keydown", handleEscape);
+
+  overlay.appendChild(modalContainer);
+  document.body.appendChild(overlay);
+  window.requestAnimationFrame(() => {
+    overlay.classList.remove("is-entering");
+    overlay.classList.add("is-open");
+  });
+
+  dom.render(
+    react.createElement(ConfigModal, { onRequestClose: closeOverlay }),
+    modalContainer
+  );
 }
 
 // 언어 변경 후 자동으로 설정 페이지 열기

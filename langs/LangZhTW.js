@@ -60,7 +60,8 @@ window.LANG_ZH_TW = {
     "fadWarningDesc": "與 Full Screen 擴充功能同時使用時不支援此功能。",
     "fadWarningTip": "請在 Full Screen 本身的設定中變更排列方式。",
     "desktopOverlay": "桌面覆蓋",
-    "desktopOverlaySubtitle": "將歌詞以覆蓋層顯示於桌面上"
+    "desktopOverlaySubtitle": "將歌詞以覆蓋層顯示於桌面上",
+    "motion": "動效"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_ZH_TW = {
     "albumBgBlur": {
       "label": "專輯背景模糊",
       "desc": "調整專輯背景的模糊強度"
+    },
+    "reduceMotion": {
+      "label": "減少動效",
+      "desc": "減少介面動畫。"
     },
     "blurGradientBackground": {
       "label": "模糊漸層背景",

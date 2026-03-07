@@ -60,7 +60,8 @@ window.LANG_FR = {
     "fadWarningDesc": "Non pris en charge lors de l'utilisation de l'extension Full Screen.",
     "fadWarningTip": "Veuillez modifier l'alignement dans les paramètres de Full Screen.",
     "desktopOverlay": "Overlay de bureau",
-    "desktopOverlaySubtitle": "Affiche les paroles en superposition sur le bureau"
+    "desktopOverlaySubtitle": "Affiche les paroles en superposition sur le bureau",
+    "motion": "Animations"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_FR = {
     "albumBgBlur": {
       "label": "Flou pochette album",
       "desc": "Ajuste l'intensité du flou de l'arrière-plan de l'album"
+    },
+    "reduceMotion": {
+      "label": "Réduire les animations",
+      "desc": "Réduit les animations de l’interface."
     },
     "blurGradientBackground": {
       "label": "Fond dégradé flou",

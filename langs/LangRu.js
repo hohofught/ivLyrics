@@ -60,7 +60,8 @@ window.LANG_RU = {
     "fadWarningDesc": "Не поддерживается при использовании стороннего расширения Full Screen.",
     "fadWarningTip": "Пожалуйста, измените настройки выравнивания в самом расширении Full Screen.",
     "desktopOverlay": "Оверлей на рабочем столе",
-    "desktopOverlaySubtitle": "Отображение текста песни поверх окон рабочего стола"
+    "desktopOverlaySubtitle": "Отображение текста песни поверх окон рабочего стола",
+    "motion": "Анимация"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_RU = {
     "albumBgBlur": {
       "label": "Размытие фона альбома",
       "desc": "Регулирует интенсивность размытия обложки на фоне"
+    },
+    "reduceMotion": {
+      "label": "Уменьшить анимацию",
+      "desc": "Уменьшает анимацию интерфейса."
     },
     "blurGradientBackground": {
       "label": "Размытый градиент",

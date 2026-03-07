@@ -60,7 +60,8 @@ window.LANG_KO = {
     "fadWarningDesc": "Full Screen 확장 프로그램 사용 중에는 지원하지 않습니다.",
     "fadWarningTip": "정렬 방식은 Full Screen 자체 설정에서 변경하십시오.",
     "desktopOverlay": "데스크탑 오버레이",
-    "desktopOverlaySubtitle": "가사를 데스크탑에 오버레이로 표시합니다"
+    "desktopOverlaySubtitle": "가사를 데스크탑에 오버레이로 표시합니다",
+    "motion": "모션"
   },
   "overlay": {
     "enabled": {
@@ -110,6 +111,10 @@ window.LANG_KO = {
     "albumBgBlur": {
       "label": "앨범 배경 블러",
       "desc": "앨범 배경의 블러 강도를 조절합니다"
+    },
+    "reduceMotion": {
+      "label": "모션 줄이기",
+      "desc": "인터페이스 애니메이션을 줄입니다."
     },
     "blurGradientBackground": {
       "label": "블러 그라데이션 배경",

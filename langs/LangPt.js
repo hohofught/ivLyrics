@@ -60,7 +60,8 @@ window.LANG_PT = {
     "fadWarningDesc": "Não suportado enquanto a extensão Full Screen está ativa.",
     "fadWarningTip": "Altere o método de alinhamento nas configurações da própria extensão Full Screen.",
     "desktopOverlay": "Overlay de Desktop",
-    "desktopOverlaySubtitle": "Exibe a letra como uma sobreposição na área de trabalho"
+    "desktopOverlaySubtitle": "Exibe a letra como uma sobreposição na área de trabalho",
+    "motion": "Movimento"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_PT = {
     "albumBgBlur": {
       "label": "Desfoque do Fundo do Álbum",
       "desc": "Ajusta a intensidade do desfoque do fundo do álbum"
+    },
+    "reduceMotion": {
+      "label": "Reduzir animações",
+      "desc": "Reduz as animações da interface."
     },
     "blurGradientBackground": {
       "label": "Fundo Gradiente Desfocado",

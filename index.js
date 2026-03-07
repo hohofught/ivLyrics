@@ -1213,6 +1213,10 @@ const CONFIG = {
     ),
     "album-bg-blur":
       StorageManager.getItem("ivLyrics:visual:album-bg-blur") || "20",
+    "reduce-motion": StorageManager.get(
+      "ivLyrics:visual:reduce-motion",
+      false
+    ),
 
     "blur-gradient-background": StorageManager.get(
       "ivLyrics:visual:blur-gradient-background",
@@ -2534,6 +2538,7 @@ class LyricsContainer extends react.Component {
       versionIndex2: 0,
       isFullscreen: false,
       isFloatingMenuOpen: false,
+      isFloatingMenuClosing: false,
       isFADMode: false,
       isCached: false,
       language: null,
@@ -2571,6 +2576,7 @@ class LyricsContainer extends react.Component {
     this.translationLoadingTimer = null;
     this.streamingApplyTimer = null;
     this.pendingStreamingPayload = null;
+    this.floatingMenuCloseTimer = null;
 
     // Portrait viewport detection
     this._isPortraitViewport = typeof window !== "undefined" && typeof window.matchMedia === "function"
@@ -2619,6 +2625,55 @@ class LyricsContainer extends react.Component {
 
     // Bind regenerate translation method
     this.regenerateTranslation = this.regenerateTranslation.bind(this);
+  }
+
+  shouldReduceMotion() {
+    return CONFIG.visual["reduce-motion"] === true;
+  }
+
+  getMotionDurationMs() {
+    return this.shouldReduceMotion() ? 24 : 280;
+  }
+
+  clearFloatingMenuCloseTimer() {
+    if (this.floatingMenuCloseTimer) {
+      clearTimeout(this.floatingMenuCloseTimer);
+      this.floatingMenuCloseTimer = null;
+    }
+  }
+
+  openFloatingMenu() {
+    this.clearFloatingMenuCloseTimer();
+    this.setState({
+      isFloatingMenuOpen: true,
+      isFloatingMenuClosing: false,
+    });
+  }
+
+  closeFloatingMenu() {
+    if (!this.state.isFloatingMenuOpen && !this.state.isFloatingMenuClosing) {
+      return;
+    }
+
+    this.clearFloatingMenuCloseTimer();
+    this.setState({
+      isFloatingMenuOpen: false,
+      isFloatingMenuClosing: true,
+    });
+
+    this.floatingMenuCloseTimer = setTimeout(() => {
+      this.setState({ isFloatingMenuClosing: false });
+      this.floatingMenuCloseTimer = null;
+    }, this.getMotionDurationMs());
+  }
+
+  toggleFloatingMenu() {
+    if (this.state.isFloatingMenuOpen) {
+      this.closeFloatingMenu();
+      return;
+    }
+
+    this.openFloatingMenu();
   }
 
   /**
@@ -5069,6 +5124,8 @@ class LyricsContainer extends react.Component {
       this.setState({
         isFullscreen: isEnabled,
         justEnteredFullscreen: isEnabled, // 전체화면 진입 시 true로 설정하여 축소 아이콘 대신 메뉴 아이콘 표시
+        isFloatingMenuOpen: isEnabled ? this.state.isFloatingMenuOpen : false,
+        isFloatingMenuClosing: false,
       });
     };
     this.mousetrap.reset();
@@ -5121,6 +5178,7 @@ class LyricsContainer extends react.Component {
       this._cleanupFloatingMenuOutsideClick();
       this._cleanupFloatingMenuOutsideClick = null;
     }
+    this.clearFloatingMenuCloseTimer();
 
     // Mouse idle timer cleanup
     if (this.mouseIdleTimer) {
@@ -5477,6 +5535,12 @@ class LyricsContainer extends react.Component {
       "--animation-tempo": this.state.tempo,
       "--lyrics-fullscreen-right-padding": `${CONFIG.visual["fullscreen-lyrics-right-padding"] || 40}px`,
       "--fullscreen-tmi-font-size": (CONFIG.visual["fullscreen-tmi-font-size"] || 100) / 100,
+      "--iv-motion-ease-standard": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "--iv-motion-duration-fast": this.shouldReduceMotion() ? "1ms" : "180ms",
+      "--iv-motion-duration-medium": this.shouldReduceMotion() ? "1ms" : "280ms",
+      "--iv-motion-duration-slow": this.shouldReduceMotion() ? "1ms" : "420ms",
+      "--iv-motion-distance-sm": this.shouldReduceMotion() ? "0px" : "10px",
+      "--iv-motion-distance-md": this.shouldReduceMotion() ? "0px" : "18px",
     };
 
     let mode = this.getCurrentMode();
@@ -5603,6 +5667,11 @@ class LyricsContainer extends react.Component {
     const isTwoColumn = CONFIG.visual["fullscreen-two-column"] !== false;
     const isLayoutReversed = CONFIG.visual["fullscreen-layout-reverse"] === true;
     const centerWhenNoLyrics = CONFIG.visual["fullscreen-center-when-no-lyrics"] !== false;
+    const shouldReduceMotion = this.shouldReduceMotion();
+    const shouldRenderFloatingMenu =
+      !this.state.isFullscreen ||
+      this.state.isFloatingMenuOpen ||
+      this.state.isFloatingMenuClosing;
 
     // Build fullscreen class names
     let fullscreenClasses = "";
@@ -5636,7 +5705,7 @@ class LyricsContainer extends react.Component {
       "div",
       {
         className: `lyrics-lyricsContainer-LyricsContainer${CONFIG.visual["fade-blur"] ? " blur-enabled" : ""
-          }${CONFIG.visual["highlight-mode"] ? " highlight-mode-enabled" : ""}${fadLyricsContainer ? " fad-enabled" : ""}${fullscreenClasses}`,
+          }${CONFIG.visual["highlight-mode"] ? " highlight-mode-enabled" : ""}${fadLyricsContainer ? " fad-enabled" : ""}${fullscreenClasses}${shouldReduceMotion ? " motion-reduced" : ""}`,
         style: this.styleVariables,
         ref: (el) => {
           if (!el) return;
@@ -5745,7 +5814,8 @@ class LyricsContainer extends react.Component {
         {
           className: "lyrics-config-button-container" +
             (this.state.isFullscreen ? " fullscreen-mode-container" : "") +
-            (this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : ""),
+            (this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : "") +
+            (this.state.isFullscreen && this.state.isFloatingMenuClosing ? " menu-closing" : ""),
           ref: (el) => {
             if (this._cleanupFloatingMenuOutsideClick) {
               this._cleanupFloatingMenuOutsideClick();
@@ -5755,8 +5825,8 @@ class LyricsContainer extends react.Component {
             if (el && this.state.isFullscreen) {
               // 전체화면에서 바깥 클릭 시 메뉴 닫기
               const handleClickOutside = (e) => {
-                if (!el.contains(e.target) && this.state.isFloatingMenuOpen) {
-                  this.setState({ isFloatingMenuOpen: false });
+                if (!el.contains(e.target) && (this.state.isFloatingMenuOpen || this.state.isFloatingMenuClosing)) {
+                  this.closeFloatingMenu();
                 }
               };
               document.addEventListener('click', handleClickOutside);
@@ -5773,7 +5843,7 @@ class LyricsContainer extends react.Component {
             className: "lyrics-config-button lyrics-floating-menu-toggle",
             onClick: (e) => {
               e.stopPropagation();
-              this.setState({ isFloatingMenuOpen: !this.state.isFloatingMenuOpen });
+              this.toggleFloatingMenu();
             },
           },
           react.createElement("svg", {
@@ -5793,9 +5863,11 @@ class LyricsContainer extends react.Component {
           })
         ),
         // 메뉴 내용 (일반 모드: 항상 표시, 전체화면: 열렸을 때만 표시)
-        (!this.state.isFullscreen || this.state.isFloatingMenuOpen) && react.createElement(
-          react.Fragment,
-          null,
+        shouldRenderFloatingMenu && react.createElement(
+          "div",
+          {
+            className: `lyrics-floating-menu-content${this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : ""}${this.state.isFullscreen && this.state.isFloatingMenuClosing ? " menu-closing" : ""}`,
+          },
           showTranslationButton &&
           react.createElement(TranslationMenu, {
             friendlyLanguage,
@@ -5872,7 +5944,7 @@ class LyricsContainer extends react.Component {
                 className: "lyrics-config-button lyrics-fullscreen-toggle-button",
                 onClick: () => {
                   if (this.state.isFullscreen) {
-                    this.setState({ isFloatingMenuOpen: false });
+                    this.closeFloatingMenu();
                   }
                   this.toggleFullscreen();
                 },

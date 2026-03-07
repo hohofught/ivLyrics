@@ -11,6 +11,199 @@
 
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
 
+:root {
+  --iv-motion-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --iv-motion-ease-emphasis: cubic-bezier(0.2, 0.9, 0.2, 1);
+  --iv-motion-duration-fast: 260ms;
+  --iv-motion-duration-medium: 420ms;
+  --iv-motion-duration-slow: 640ms;
+  --iv-motion-distance-sm: 10px;
+  --iv-motion-distance-md: 18px;
+  --iv-motion-distance-lg: 28px;
+  --iv-fullscreen-controls-height: 228px;
+  --iv-fullscreen-progress-height: 56px;
+}
+
+.ivlyrics-settings-overlay.motion-reduced,
+#ivLyrics-config-container.motion-reduced {
+  --iv-motion-duration-fast: 1ms;
+  --iv-motion-duration-medium: 1ms;
+  --iv-motion-duration-slow: 1ms;
+  --iv-motion-distance-sm: 0px;
+  --iv-motion-distance-md: 0px;
+}
+
+@keyframes ivlyricsSoftRiseIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--iv-motion-distance-lg)) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ivlyricsSoftFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ivlyricsPulseDot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: scale(1.45);
+    opacity: 1;
+  }
+}
+
+/* Shared motion layer across settings, community UI, and marketplace */
+#ivLyrics-config-container button,
+#ivLyrics-config-container .btn,
+.lyrics-tooltip-wrapper button,
+.community-video-selector button,
+.community-video-overlay button,
+.ivlyrics-marketplace-root button,
+.ivlyrics-marketplace-root .ivlyrics-marketplace-btn,
+.ivlyrics-marketplace-root .ivlyrics-marketplace-confirm-btn {
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
+}
+
+#ivLyrics-config-container button:hover:not(:disabled),
+#ivLyrics-config-container .btn:hover:not(:disabled),
+.lyrics-tooltip-wrapper button:hover:not(:disabled),
+.community-video-selector button:hover:not(:disabled),
+.community-video-overlay button:hover:not(:disabled),
+.ivlyrics-marketplace-root button:hover:not(:disabled),
+.ivlyrics-marketplace-root .ivlyrics-marketplace-btn:hover:not(:disabled),
+.ivlyrics-marketplace-root .ivlyrics-marketplace-confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+#ivLyrics-config-container button:active:not(:disabled),
+#ivLyrics-config-container .btn:active:not(:disabled),
+.lyrics-tooltip-wrapper button:active:not(:disabled),
+.community-video-selector button:active:not(:disabled),
+.community-video-overlay button:active:not(:disabled),
+.ivlyrics-marketplace-root button:active:not(:disabled),
+.ivlyrics-marketplace-root .ivlyrics-marketplace-btn:active:not(:disabled),
+.ivlyrics-marketplace-root .ivlyrics-marketplace-confirm-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+#ivLyrics-config-container input,
+#ivLyrics-config-container select,
+#ivLyrics-config-container textarea,
+.community-video-submit-form input,
+.ivlyrics-marketplace-search-input,
+.ivlyrics-marketplace-disclaimer-checkbox input[type="checkbox"] {
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
+}
+
+#ivLyrics-config-container input:focus,
+#ivLyrics-config-container select:focus,
+#ivLyrics-config-container textarea:focus,
+.community-video-submit-form input:focus,
+.ivlyrics-marketplace-search-input:focus {
+  transform: translateY(-1px);
+}
+
+#ivLyrics-config-container .setting-row,
+.lyrics-tooltip-wrapper .setting-row,
+.community-video-item,
+.community-video-submit-form,
+.community-video-embed,
+.ivlyrics-marketplace-card,
+.ivlyrics-marketplace-sidebar-dev,
+.ivlyrics-marketplace-sidebar-minicard,
+.ivlyrics-marketplace-notice,
+.ivlyrics-marketplace-confirm-modal {
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+#ivLyrics-config-container .setting-row:hover,
+.lyrics-tooltip-wrapper .setting-row:hover,
+.community-video-item:hover,
+.ivlyrics-marketplace-sidebar-dev:hover,
+.ivlyrics-marketplace-sidebar-minicard:hover {
+  transform: translateY(-2px);
+}
+
+.ivlyrics-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  opacity: 0;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    backdrop-filter var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    -webkit-backdrop-filter var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.ivlyrics-settings-overlay.is-open {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ivlyrics-settings-modal-shell {
+  background: rgba(24, 24, 24, 0.95);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border-radius: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 800px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transform: translateY(var(--iv-motion-distance-md)) scale(0.985);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.ivlyrics-settings-overlay.is-open .ivlyrics-settings-modal-shell {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
 /* Translation Loading Indicator */
 /* Translation Loading Indicator */
 .lyrics-translation-loading-indicator {
@@ -330,6 +523,10 @@ body.ivlyrics-page-active .main-topBar-container {
   will-change: transform, opacity;
 }
 
+.lyrics-lyricsContainer-SyncedLyrics .lyrics-lyricsContainer-LyricsLine:not(.lyrics-lyricsContainer-LyricsLine-active) {
+  letter-spacing: -0.005em;
+}
+
 .lyrics-lyricsContainer-LyricsContainer.blur-enabled .lyrics-lyricsContainer-SyncedLyrics .lyrics-lyricsContainer-LyricsLine {
   filter: blur(calc(var(--blur-index) * 1.5px));
 }
@@ -372,8 +569,14 @@ body.ivlyrics-page-active .main-topBar-container {
 .lyrics-lyricsContainer-UnsyncedLyricsPage .lyrics-lyricsContainer-LyricsLine {
   color: var(--lyrics-color-inactive);
   opacity: 0.5;
-  transition: color 0.25s cubic-bezier(0, 0, 0.58, 1),
-    opacity 0.25s cubic-bezier(0, 0, 0.58, 1);
+  filter: blur(0px);
+  transform: translateY(0);
+  transition:
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    filter var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    text-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* 일반 가사: active 클래스 제거 (더 이상 사용하지 않음) */
@@ -387,6 +590,7 @@ body.ivlyrics-page-active .main-topBar-container {
 .lyrics-lyricsContainer-UnsyncedLyricsPage .lyrics-lyricsContainer-LyricsLine:hover {
   color: var(--lyrics-color-active);
   opacity: 1;
+  transform: translateX(4px);
 }
 
 .lyrics-lyricsContainer-SyncedLyrics .lyrics-lyricsContainer-LyricsLine:hover,
@@ -402,12 +606,31 @@ body.ivlyrics-page-active .main-topBar-container {
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.lyrics-lyricsContainer-LyricsLine > p,
+.lyrics-lyricsContainer-LyricsLine-phonetic,
+.lyrics-lyricsContainer-LyricsLine-translation,
+.lyrics-karaoke-line {
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    letter-spacing var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    text-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.lyrics-lyricsContainer-LyricsLine-active > p,
+.lyrics-lyricsContainer-LyricsLine-active .lyrics-lyricsContainer-LyricsLine-phonetic,
+.lyrics-lyricsContainer-LyricsLine-active .lyrics-lyricsContainer-LyricsLine-translation,
+.lyrics-lyricsContainer-LyricsLine-active .lyrics-karaoke-line {
+  transform: translateY(-2px);
+}
+
 .lyrics-lyricsContainer-SyncedLyrics .lyrics-lyricsContainer-LyricsLine.lyrics-lyricsContainer-LyricsLine-active {
   transform: translateY(calc(var(--position-index) * var(--lyrics-line-height) + var(--offset)));
 }
 
 .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-paddingLine {
   opacity: 0;
+  filter: blur(6px);
   pointer-events: none;
 }
 
@@ -746,6 +969,7 @@ div.lyrics-tabBar-headerItemLink {
 
 .lyrics-karaoke-line.is-active .lyrics-karaoke-char {
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.12);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.08));
 }
 
 .lyrics-karaoke-line.is-complete .lyrics-karaoke-char {
@@ -887,10 +1111,28 @@ div.lyrics-tabBar-headerItemLink {
   clear: both;
 }
 
+.lyrics-tooltip-wrapper .setting-row,
+#ivLyrics-config-container .setting-row {
+  border-radius: 14px;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.lyrics-tooltip-wrapper .setting-row:hover,
+#ivLyrics-config-container .setting-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
 .lyrics-tooltip-wrapper .setting-row .col,
 #ivLyrics-config-container .setting-row .col {
   padding: 16px 0 4px;
   align-items: center;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-tooltip-wrapper .setting-row .col.description,
@@ -906,6 +1148,16 @@ div.lyrics-tabBar-headerItemLink {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.lyrics-tooltip-wrapper .setting-row:hover .col.description,
+#ivLyrics-config-container .setting-row:hover .col.description {
+  transform: translateX(2px);
+}
+
+.lyrics-tooltip-wrapper .setting-row:hover .col.action,
+#ivLyrics-config-container .setting-row:hover .col.action {
+  transform: translateX(-2px);
 }
 
 .lyrics-tooltip-wrapper button.switch,
@@ -1114,10 +1366,11 @@ div.lyrics-tabBar-headerItemLink {
 
   /* Auto-hide functionality */
   opacity: 1;
-  transform: translateX(0) scale(1);
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s ease;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) ease;
 }
 
 .lyrics-config-button-container:hover {
@@ -1127,7 +1380,7 @@ div.lyrics-tabBar-headerItemLink {
 /* Hide controls when mouse is idle */
 .lyrics-lyricsContainer-LyricsContainer.controls-hidden .lyrics-config-button-container {
   opacity: 0;
-  transform: translateX(20px) scale(0.95);
+  transform: translateY(var(--iv-motion-distance-md)) scale(0.98);
   pointer-events: none;
 }
 
@@ -1135,7 +1388,7 @@ div.lyrics-tabBar-headerItemLink {
 .lyrics-lyricsContainer-LyricsContainer.controls-hidden .lyrics-config-button-container:hover,
 .lyrics-lyricsContainer-LyricsContainer.controls-hidden .lyrics-config-button-container:focus-within {
   opacity: 1;
-  transform: translateX(0) scale(1);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
@@ -1178,7 +1431,7 @@ div.lyrics-tabBar-headerItemLink {
   height: 44px;
   width: 44px;
   position: relative;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -1189,7 +1442,7 @@ div.lyrics-tabBar-headerItemLink {
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .lyrics-config-button:hover {
@@ -1223,7 +1476,7 @@ div.lyrics-tabBar-headerItemLink {
 
 .lyrics-config-button svg {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-  transition: transform 0.25s ease;
+  transition: transform var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .lyrics-config-button:hover svg {
@@ -2072,7 +2325,18 @@ ruby rt {
   position: relative;
   filter: none !important;
   opacity: 0.72;
-  transition: color 0.24s ease, opacity 0.24s ease, text-shadow 0.24s ease, background-color 0.24s ease;
+  transition:
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    text-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background-color var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    padding-inline var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollView:hover {
+  transform: translateX(4px);
 }
 
 .lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollView:last-child {
@@ -2089,6 +2353,7 @@ ruby rt {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
   border-radius: 14px;
   padding-inline: clamp(10px, 1.2vw, 18px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 .lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-SyncedLyrics>.lyrics-lyricsContainer-LyricsLine-scrollCurrent::before {
@@ -2101,6 +2366,7 @@ ruby rt {
   border-radius: 999px;
   background: var(--lyrics-color-active);
   box-shadow: 0 0 10px var(--lyrics-color-active);
+  animation: ivlyricsPulseDot 1.6s ease-in-out infinite;
 }
 
 .lyrics-lyricsContainer-SyncedLyricsPage.scrolling-active .lyrics-lyricsContainer-Provider {
@@ -2122,7 +2388,7 @@ ruby rt {
   overflow: hidden;
   width: 100%;
   height: 100vh;
-  transition: grid-template-columns 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: grid-template-columns var(--iv-motion-duration-slow) var(--iv-motion-ease-standard);
 }
 
 /* Background elements in fullscreen should cover entire area */
@@ -2163,7 +2429,10 @@ ruby rt {
   padding: 40px;
   box-sizing: border-box;
   z-index: 10;
-  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-standard),
+    padding var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-fullscreen-left-panel.tmi-mode {
@@ -2180,6 +2449,9 @@ ruby rt {
   text-align: center;
   max-width: 90%;
   width: 100%;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-fullscreen-album-art {
@@ -2188,6 +2460,10 @@ ruby rt {
   margin-bottom: 32px;
   object-fit: cover;
   flex-shrink: 0;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    margin var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-fullscreen-album-art.with-shadow {
@@ -2199,6 +2475,10 @@ ruby rt {
   flex-direction: column;
   gap: 12px;
   width: 100%;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-fullscreen-title {
@@ -2208,6 +2488,10 @@ ruby rt {
   line-height: 1.1;
   word-break: keep-all;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    letter-spacing var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-fullscreen-artist {
@@ -2215,6 +2499,9 @@ ruby rt {
   font-weight: 500;
   color: var(--spice-subtext);
   opacity: 0.9;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* Normal Fullscreen Album Name */
@@ -2224,6 +2511,9 @@ ruby rt {
   color: var(--spice-subtext);
   opacity: 0.7;
   margin-top: 4px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* Right Panel (Lyrics) Adjustments */
@@ -2238,7 +2528,13 @@ ruby rt {
   grid-template-rows: 1fr 30px;
   overflow: hidden;
   text-align: var(--lyrics-align-text);
-  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-standard),
+    padding-top var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding-bottom var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding-left var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding-right var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* UnsyncedLyricsPage는 스크롤 가능하도록 별도 스타일 */
@@ -2253,7 +2549,13 @@ ruby rt {
   overflow-y: auto;
   overflow-x: hidden;
   text-align: var(--lyrics-align-text);
-  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-standard),
+    padding-top var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding-bottom var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding-left var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding-right var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
   /* 스크롤바 스타일링 */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
@@ -2336,10 +2638,11 @@ ruby rt {
 /* Menu buttons in fullscreen - hidden by default, show on mouse move */
 .lyrics-lyricsContainer-LyricsContainer.fullscreen-active .lyrics-config-button-container {
   opacity: 1;
-  transform: translateX(0) scale(1);
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.3s ease;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) ease;
   pointer-events: auto;
   position: fixed;
   bottom: 40px;
@@ -2355,7 +2658,7 @@ ruby rt {
 
 .lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container {
   opacity: 0;
-  transform: translateX(20px) scale(0.95);
+  transform: translateY(var(--iv-motion-distance-md)) scale(0.98);
   pointer-events: none;
 }
 
@@ -2363,7 +2666,7 @@ ruby rt {
 .lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container:hover,
 .lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container:focus-within {
   opacity: 1;
-  transform: translateX(0) scale(1);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
@@ -2421,12 +2724,14 @@ ruby rt {
   bottom: 24px;
   left: 24px;
   z-index: 50;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-bottom-left.hidden {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(var(--iv-motion-distance-sm));
   pointer-events: none;
 }
 
@@ -2440,23 +2745,27 @@ ruby rt {
   flex-direction: column;
   align-items: flex-end;
   gap: 16px;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-top-right.hidden {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(calc(var(--iv-motion-distance-sm) * -1));
   pointer-events: none;
 }
 
 /* Clock wrapper for auto-hide */
 .fullscreen-clock-wrapper {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-clock-wrapper.hidden {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(calc(var(--iv-motion-distance-sm) * -1));
   pointer-events: none;
 }
 
@@ -2481,6 +2790,11 @@ ruby rt {
   -webkit-backdrop-filter: blur(20px);
   border-radius: 12px;
   max-width: 350px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-context-image {
@@ -2489,6 +2803,10 @@ ruby rt {
   border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-context-text {
@@ -2496,6 +2814,9 @@ ruby rt {
   flex-direction: column;
   gap: 2px;
   overflow: hidden;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-context-type {
@@ -2525,14 +2846,19 @@ ruby rt {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 12px;
-  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideInRight var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
   max-width: 300px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(var(--iv-motion-distance-md));
   }
 
   to {
@@ -2553,6 +2879,9 @@ ruby rt {
   display: flex;
   align-items: center;
   gap: 12px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-next-track-image {
@@ -2562,6 +2891,10 @@ ruby rt {
   object-fit: cover;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-next-track-info {
@@ -2569,6 +2902,9 @@ ruby rt {
   flex-direction: column;
   gap: 4px;
   overflow: hidden;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-next-track-title {
@@ -2599,13 +2935,26 @@ ruby rt {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  transform-origin: bottom center;
+  max-height: var(--iv-fullscreen-controls-height);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    max-height var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis);
 }
 
 .fullscreen-bottom.hidden {
   opacity: 0;
-  transform: translateX(-50%) translateY(20px);
+  transform: translateX(-50%) translateY(var(--iv-motion-distance-md)) scale(0.985);
+  max-height: 0;
   pointer-events: none;
+}
+
+.fullscreen-bottom.hidden .fullscreen-player-controls,
+.fullscreen-bottom.hidden .fullscreen-progress-standalone {
+  transform: translateY(var(--iv-motion-distance-sm)) scale(0.985);
+  opacity: 0;
 }
 
 /* Player controls container */
@@ -2616,6 +2965,9 @@ ruby rt {
   gap: 12px;
   padding: 16px 24px;
   min-width: 350px;
+  transition:
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* Compact mode for left panel */
@@ -2635,12 +2987,25 @@ ruby rt {
   flex-direction: column;
   align-items: center;
   gap: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  transform-origin: top center;
+  max-height: var(--iv-fullscreen-controls-height);
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    margin-top var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    max-height var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis);
+}
+
+.fullscreen-left-controls.left-controls-progress-only {
+  max-height: var(--iv-fullscreen-progress-height);
 }
 
 .fullscreen-left-controls.hidden {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(var(--iv-motion-distance-md)) scale(0.985);
+  margin-top: 0;
+  max-height: 0;
   pointer-events: none;
 }
 
@@ -2650,12 +3015,14 @@ ruby rt {
   bottom: 24px;
   right: 24px;
   z-index: 50;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis);
 }
 
 .fullscreen-lyrics-progress-container.hidden {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(var(--iv-motion-distance-md));
   pointer-events: none;
 }
 
@@ -2668,6 +3035,10 @@ ruby rt {
   width: 100%;
   max-width: 400px;
   margin-bottom: 12px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-time {
@@ -2685,7 +3056,10 @@ ruby rt {
   border-radius: 3px;
   cursor: pointer;
   position: relative;
-  transition: height 0.15s ease;
+  transition:
+    height var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-progress-bar:hover {
@@ -2696,7 +3070,7 @@ ruby rt {
   height: 100%;
   background: var(--spice-text);
   border-radius: 3px;
-  transition: width 0.1s linear;
+  transition: width var(--iv-motion-duration-medium) var(--iv-motion-ease-emphasis);
 }
 
 .fullscreen-progress-handle {
@@ -2708,12 +3082,15 @@ ruby rt {
   border-radius: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition:
+    opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .fullscreen-progress-bar:hover .fullscreen-progress-handle {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1.06);
 }
 
 /* Player controls - 개선된 레이아웃 */
@@ -2723,6 +3100,10 @@ ruby rt {
   align-items: center;
   gap: 12px;
   width: 100%;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-player-controls.with-background {
@@ -2731,6 +3112,12 @@ ruby rt {
   -webkit-backdrop-filter: blur(20px);
   padding: 16px 20px;
   border-radius: 16px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* Control rows */
@@ -2740,6 +3127,10 @@ ruby rt {
   justify-content: center;
   gap: 8px;
   width: 100%;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-control-main-row {
@@ -2762,18 +3153,24 @@ ruby rt {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
   opacity: 0.7;
 }
 
 .fullscreen-control-btn:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.1);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
 }
 
 .fullscreen-control-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.94);
 }
 
 .fullscreen-control-btn svg {
@@ -2795,7 +3192,7 @@ ruby rt {
 }
 
 .fullscreen-control-btn.fullscreen-control-play:hover {
-  transform: scale(1.1);
+  transform: translateY(-2px) scale(1.08);
   box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
   background: var(--spice-text);
 }
@@ -2815,6 +3212,9 @@ ruby rt {
   display: flex;
   align-items: center;
   gap: 8px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-volume-slider {
@@ -2826,11 +3226,14 @@ ruby rt {
   border-radius: 2px;
   outline: none;
   cursor: pointer;
-  transition: width 0.2s ease;
+  transition:
+    width var(--iv-motion-duration-medium) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-volume-wrapper:hover .fullscreen-volume-slider {
-  width: 100px;
+  width: 108px;
 }
 
 .fullscreen-volume-slider::-webkit-slider-thumb {
@@ -2841,7 +3244,7 @@ ruby rt {
   border-radius: 50%;
   background: var(--spice-text);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis);
 }
 
 .fullscreen-volume-slider::-webkit-slider-thumb:hover {
@@ -2876,6 +3279,11 @@ ruby rt {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-lyrics-progress-bar {
@@ -2890,7 +3298,42 @@ ruby rt {
   height: 100%;
   background: var(--spice-text);
   border-radius: 2px;
-  transition: width 0.3s ease;
+  transition: width var(--iv-motion-duration-medium) var(--iv-motion-ease-emphasis);
+}
+
+.fullscreen-bottom-left.hidden .fullscreen-context-info {
+  transform: translateY(var(--iv-motion-distance-sm)) scale(0.985);
+  opacity: 0;
+}
+
+.fullscreen-bottom-left.hidden .fullscreen-context-image {
+  transform: scale(0.92);
+}
+
+.fullscreen-bottom-left.hidden .fullscreen-context-text {
+  transform: translateY(6px);
+  opacity: 0;
+}
+
+.fullscreen-top-right>* {
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.fullscreen-top-right.hidden .fullscreen-next-track {
+  transform: translateY(calc(var(--iv-motion-distance-sm) * -1)) scale(0.985);
+  opacity: 0;
+}
+
+.fullscreen-top-right.hidden .fullscreen-next-track-image {
+  transform: scale(0.92);
+}
+
+.fullscreen-top-right.hidden .fullscreen-next-track-info,
+.fullscreen-top-right.hidden .fullscreen-next-track-label {
+  transform: translateY(-6px);
+  opacity: 0;
 }
 
 .fullscreen-lyrics-progress-text {
@@ -2902,8 +3345,34 @@ ruby rt {
 /* Left panel controls hidden state */
 .lyrics-fullscreen-left-panel.controls-hidden .fullscreen-left-controls {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(var(--iv-motion-distance-md)) scale(0.985);
+  margin-top: 0;
+  max-height: 0;
   pointer-events: none;
+}
+
+.lyrics-fullscreen-left-panel.controls-hidden .lyrics-fullscreen-left-content {
+  transform: translateY(18px);
+}
+
+.lyrics-fullscreen-left-panel.controls-hidden .lyrics-fullscreen-album-art {
+  transform: translateY(14px) scale(0.99);
+}
+
+.lyrics-fullscreen-left-panel.controls-hidden .lyrics-fullscreen-track-info {
+  transform: translateY(12px);
+  opacity: 0.975;
+}
+
+.lyrics-fullscreen-left-panel.controls-hidden .lyrics-fullscreen-title {
+  transform: translateY(10px);
+  letter-spacing: 0.01em;
+}
+
+.lyrics-fullscreen-left-panel.controls-hidden .lyrics-fullscreen-artist,
+.lyrics-fullscreen-left-panel.controls-hidden .lyrics-fullscreen-album-name {
+  transform: translateY(8px);
+  opacity: 0.88;
 }
 
 /* Responsive adjustments */
@@ -3036,13 +3505,16 @@ ruby rt {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
   pointer-events: auto;
 }
 
 .portrait-overlay-top.hidden {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(calc(var(--iv-motion-distance-md) * -1));
   pointer-events: none;
 }
 
@@ -3135,13 +3607,16 @@ ruby rt {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
   pointer-events: auto;
 }
 
 .portrait-overlay-bottom.hidden {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(var(--iv-motion-distance-md));
   pointer-events: none;
 }
 
@@ -3166,7 +3641,7 @@ ruby rt {
 }
 
 .portrait-overlay-top.layout-reversed.hidden {
-  transform: translateY(20px);
+  transform: translateY(var(--iv-motion-distance-md));
 }
 
 .portrait-overlay-bottom.layout-reversed {
@@ -3176,7 +3651,7 @@ ruby rt {
 }
 
 .portrait-overlay-bottom.layout-reversed.hidden {
-  transform: translateY(-20px);
+  transform: translateY(calc(var(--iv-motion-distance-md) * -1));
 }
 
 /* ---- 코너 요소 위치 조정 ---- */
@@ -3248,7 +3723,7 @@ ruby rt {
 
 .portrait-mode.fullscreen-no-lyrics .portrait-overlay-top.hidden {
   opacity: 0;
-  transform: translate(-50%, calc(-50% - 20px));
+  transform: translate(-50%, calc(-50% - var(--iv-motion-distance-md)));
 }
 
 /* ---- 태블릿 (>= 768px) 확장 ---- */
@@ -3282,6 +3757,8 @@ ruby rt {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: ivlyricsSoftRiseIn var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis);
+  transform-origin: center top;
 }
 
 @keyframes modalFadeIn {
@@ -3396,13 +3873,29 @@ ruby rt {
   border: 1px solid rgba(var(--spice-rgb-text), 0.05);
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .community-video-item:hover {
   background: rgba(var(--spice-rgb-text), 0.08);
   border-color: rgba(var(--spice-rgb-text), 0.1);
 }
+
+.community-video-list .community-video-item {
+  animation: ivlyricsSoftRiseIn var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis) both;
+}
+
+.community-video-list .community-video-item:nth-child(1) { animation-delay: 20ms; }
+.community-video-list .community-video-item:nth-child(2) { animation-delay: 40ms; }
+.community-video-list .community-video-item:nth-child(3) { animation-delay: 60ms; }
+.community-video-list .community-video-item:nth-child(4) { animation-delay: 80ms; }
+.community-video-list .community-video-item:nth-child(5) { animation-delay: 100ms; }
+.community-video-list .community-video-item:nth-child(6) { animation-delay: 120ms; }
 
 .community-video-item.active {
   background: rgba(var(--spice-rgb-button), 0.15);
@@ -3501,12 +3994,18 @@ ruby rt {
   cursor: pointer;
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.8);
-  transition: all 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .community-video-actions .action-btn:hover {
   background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
 }
 
 .community-video-actions .action-btn.preview {
@@ -3553,7 +4052,12 @@ ruby rt {
   cursor: pointer;
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .community-video-actions .vote-btn span {
@@ -3563,6 +4067,8 @@ ruby rt {
 
 .community-video-actions .vote-btn:hover {
   background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
 }
 
 .community-video-actions .vote-btn.like.active {
@@ -3741,7 +4247,7 @@ ruby rt {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 99998 !important;
-  animation: fadeIn 0.2s ease;
+  animation: ivlyricsSoftFadeIn var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 @keyframes fadeIn {
@@ -3900,8 +4406,10 @@ ruby rt {
   /* Slide animation */
   transform: translateX(100%);
   opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.35s ease;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    backdrop-filter var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-queue-panel.visible {
@@ -4022,7 +4530,9 @@ ruby rt {
   margin: 0;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
   position: relative;
   background: transparent;
 }
@@ -4034,11 +4544,15 @@ ruby rt {
   border-radius: 12px;
   background: transparent;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition:
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-queue-item:hover {
-  transform: translateX(-4px);
+  transform: translateX(-6px) scale(1.01);
 }
 
 .fullscreen-queue-item:hover::before {
@@ -4047,7 +4561,7 @@ ruby rt {
 }
 
 .fullscreen-queue-item:active {
-  transform: translateX(-4px) scale(0.98);
+  transform: translateX(-3px) scale(0.975);
 }
 
 .fullscreen-queue-item:active::before {
@@ -4091,7 +4605,9 @@ ruby rt {
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-queue-item:hover .fullscreen-queue-item-image {
@@ -4125,11 +4641,14 @@ ruby rt {
   text-overflow: ellipsis;
   line-height: 1.4;
   letter-spacing: -0.01em;
-  transition: color 0.2s ease;
+  transition:
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis);
 }
 
 .fullscreen-queue-item:hover .fullscreen-queue-item-title {
   color: rgba(255, 255, 255, 1);
+  transform: translateX(-2px);
 }
 
 .fullscreen-queue-item.current .fullscreen-queue-item-title {
@@ -4145,11 +4664,14 @@ ruby rt {
   text-overflow: ellipsis;
   line-height: 1.4;
   margin-top: 3px;
-  transition: color 0.2s ease;
+  transition:
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis);
 }
 
 .fullscreen-queue-item:hover .fullscreen-queue-item-artist {
   color: rgba(255, 255, 255, 0.55);
+  transform: translateX(-2px);
 }
 
 /* Playing Indicator */
@@ -5537,13 +6059,16 @@ ruby rt {
   display: flex;
   align-items: flex-end;
   gap: 20px;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
   pointer-events: auto;
 }
 
 .fullscreen-tv-song-info.hidden {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(var(--iv-motion-distance-md));
+  pointer-events: none;
 }
 
 /* TV Mode Album Art */
@@ -5580,6 +6105,9 @@ ruby rt {
   font-family: "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
     "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* TV Mode Artist */
@@ -5594,6 +6122,9 @@ ruby rt {
   font-family: "Pretendard Variable", Pretendard, -apple-system,
     BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
     "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* TV Mode Album Name */
@@ -5727,16 +6258,22 @@ ruby rt {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: color 0.2s, background 0.2s, transform 0.1s;
+  transition:
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-tv-control-btn:hover {
   color: white;
   background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
 }
 
 .fullscreen-tv-control-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.94);
 }
 
 .fullscreen-tv-control-btn.play-pause {
@@ -5755,6 +6292,9 @@ ruby rt {
   align-items: center;
   gap: 8px;
   width: 200px;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-tv-time {
@@ -5775,6 +6315,9 @@ ruby rt {
   border-radius: 2px;
   overflow: hidden;
   cursor: pointer;
+  transition:
+    height var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .fullscreen-tv-progress-bar:hover {
@@ -5785,7 +6328,14 @@ ruby rt {
   height: 100%;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 2px;
-  transition: width 0.1s linear;
+  transition: width var(--iv-motion-duration-medium) var(--iv-motion-ease-emphasis);
+}
+
+.fullscreen-tv-song-info.hidden .fullscreen-tv-title,
+.fullscreen-tv-song-info.hidden .fullscreen-tv-artist,
+.fullscreen-tv-song-info.hidden .fullscreen-tv-progress {
+  transform: translateY(8px);
+  opacity: 0;
 }
 
 /* Sync Creator Glitter & Hint */
@@ -5890,7 +6440,16 @@ ruby rt {
   width: 48px;
   height: 48px;
 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    width var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    height var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    padding var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 /* 메뉴 토글 버튼 스타일 - 접힌 상태에서는 완전히 투명 */
@@ -5906,7 +6465,7 @@ ruby rt {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
   flex-shrink: 0;
 }
 
@@ -5966,7 +6525,7 @@ ruby rt {
   height: 44px;
   width: 44px;
   position: relative;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -6009,9 +6568,61 @@ ruby rt {
   pointer-events: auto;
 }
 
+.lyrics-floating-menu-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-content {
+  overflow: hidden;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-content>* {
+  opacity: 0;
+  transform: translateY(var(--iv-motion-distance-sm));
+  transition:
+    opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>* {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(1) {
+  transition-delay: 20ms;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(2) {
+  transition-delay: 40ms;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(3) {
+  transition-delay: 60ms;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(4) {
+  transition-delay: 80ms;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(5) {
+  transition-delay: 100ms;
+}
+
+.lyrics-config-button-container.fullscreen-mode-container.menu-closing .lyrics-floating-menu-content>* {
+  opacity: 0;
+  transform: translateY(var(--iv-motion-distance-sm));
+  transition-delay: 0ms;
+  pointer-events: none;
+}
+
 /* TranslationMenu, RegenerateButton 등 하위 메뉴들 */
 .lyrics-config-button-container.fullscreen-mode-container .TranslationMenu,
-.lyrics-config-button-container.fullscreen-mode-container>div {
+.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-content>div {
   display: flex;
   flex-direction: column;
 }
@@ -6024,8 +6635,10 @@ ruby rt {
 /* 마우스가 3초 이상 움직이지 않으면 살짝 투명해짐 */
 .lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container.fullscreen-mode-container {
   opacity: 0.4;
-  transform: translateY(5px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(calc(var(--iv-motion-distance-sm) / 2));
+  transition:
+    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container.fullscreen-mode-container:hover {
@@ -6344,12 +6957,18 @@ ruby rt {
   color: var(--spice-text);
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    border-color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-search-input:focus {
   border-color: rgba(var(--spice-rgb-text), 0.3);
   background: rgba(var(--spice-rgb-text), 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
 }
 
 .ivlyrics-marketplace-search-input::placeholder {
@@ -6373,12 +6992,19 @@ ruby rt {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-filter-tab:hover {
   background: rgba(var(--spice-rgb-text), 0.08);
   color: var(--spice-text);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
 .ivlyrics-marketplace-filter-tab.active {
@@ -6403,7 +7029,10 @@ ruby rt {
   border: 1px solid rgba(var(--spice-rgb-text), 0.08);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-card:hover {
@@ -6411,6 +7040,17 @@ ruby rt {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   border-color: rgba(var(--spice-rgb-text), 0.15);
 }
+
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card {
+  animation: ivlyricsSoftRiseIn var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis) both;
+}
+
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card:nth-child(1) { animation-delay: 20ms; }
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card:nth-child(2) { animation-delay: 40ms; }
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card:nth-child(3) { animation-delay: 60ms; }
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card:nth-child(4) { animation-delay: 80ms; }
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card:nth-child(5) { animation-delay: 100ms; }
+.ivlyrics-marketplace-grid .ivlyrics-marketplace-card:nth-child(6) { animation-delay: 120ms; }
 
 .ivlyrics-marketplace-card:focus-visible {
   outline: 2px solid var(--spice-text);
@@ -6432,6 +7072,14 @@ ruby rt {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition:
+    transform var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis),
+    filter var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+}
+
+.ivlyrics-marketplace-card:hover .ivlyrics-marketplace-card-image img {
+  transform: scale(1.04);
+  filter: saturate(1.06);
 }
 
 .ivlyrics-marketplace-card-image-placeholder {
@@ -6563,11 +7211,16 @@ ruby rt {
   color: var(--spice-text);
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-detail-back:hover {
   background: rgba(var(--spice-rgb-text), 0.2);
+  transform: translateX(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
 /* Detail content (used by DeveloperProfile) */
@@ -6675,7 +7328,10 @@ ruby rt {
   background: rgba(var(--spice-rgb-text), 0.05);
   border: 1px solid rgba(var(--spice-rgb-text), 0.08);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-sidebar-dev:hover {
@@ -6725,12 +7381,24 @@ ruby rt {
   padding: 8px;
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-emphasis),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-sidebar-minicard:hover {
   background: rgba(var(--spice-rgb-text), 0.08);
 }
+
+.ivlyrics-marketplace-sidebar-list .ivlyrics-marketplace-sidebar-minicard {
+  animation: ivlyricsSoftRiseIn var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis) both;
+}
+
+.ivlyrics-marketplace-sidebar-list .ivlyrics-marketplace-sidebar-minicard:nth-child(1) { animation-delay: 20ms; }
+.ivlyrics-marketplace-sidebar-list .ivlyrics-marketplace-sidebar-minicard:nth-child(2) { animation-delay: 40ms; }
+.ivlyrics-marketplace-sidebar-list .ivlyrics-marketplace-sidebar-minicard:nth-child(3) { animation-delay: 60ms; }
+.ivlyrics-marketplace-sidebar-list .ivlyrics-marketplace-sidebar-minicard:nth-child(4) { animation-delay: 80ms; }
 
 .ivlyrics-marketplace-sidebar-minicard-img {
   width: 36px;
@@ -7128,6 +7796,7 @@ ruby rt {
   justify-content: center;
   z-index: 9999;
   backdrop-filter: blur(4px);
+  animation: ivlyricsSoftFadeIn var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
 }
 
 .ivlyrics-marketplace-confirm-modal {
@@ -7137,6 +7806,7 @@ ruby rt {
   min-width: 320px;
   max-width: 420px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: ivlyricsSoftRiseIn var(--iv-motion-duration-slow) var(--iv-motion-ease-emphasis);
 }
 
 .ivlyrics-marketplace-confirm-message {

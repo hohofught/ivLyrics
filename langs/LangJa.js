@@ -60,7 +60,8 @@ window.LANG_JA = {
     "fadWarningDesc": "Full Screen 拡張機能の使用中はサポートされていません。",
     "fadWarningTip": "配置方法は Full Screen 自体の設定で変更してください。",
     "desktopOverlay": "デスクトップオーバーレイ",
-    "desktopOverlaySubtitle": "歌詞をデスクトップにオーバーレイ表示します"
+    "desktopOverlaySubtitle": "歌詞をデスクトップにオーバーレイ表示します",
+    "motion": "モーション"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_JA = {
     "albumBgBlur": {
       "label": "アルバム背景のぼかし",
       "desc": "アルバム背景のぼかし強度を調整します"
+    },
+    "reduceMotion": {
+      "label": "モーションを減らす",
+      "desc": "インターフェースアニメーションを控えめにします。"
     },
     "blurGradientBackground": {
       "label": "ブラーグラデーション背景",

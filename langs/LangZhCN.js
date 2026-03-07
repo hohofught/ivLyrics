@@ -60,7 +60,8 @@ window.LANG_ZH_CN = {
     "fadWarningDesc": "在使用 Full Screen 扩展程序时不支持此功能。",
     "fadWarningTip": "请在 Full Screen 扩展本身的设置中更改对齐方式。",
     "desktopOverlay": "桌面悬浮窗",
-    "desktopOverlaySubtitle": "在桌面上以悬浮窗形式显示歌词"
+    "desktopOverlaySubtitle": "在桌面上以悬浮窗形式显示歌词",
+    "motion": "动效"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_ZH_CN = {
     "albumBgBlur": {
       "label": "专辑背景模糊",
       "desc": "调节专辑背景的模糊强度"
+    },
+    "reduceMotion": {
+      "label": "减少动效",
+      "desc": "减少界面动画。"
     },
     "blurGradientBackground": {
       "label": "模糊渐变背景",

@@ -60,7 +60,8 @@ window.LANG_EN = {
     "fadWarningDesc": "Not supported while using a Full Screen extension.",
     "fadWarningTip": "Please change the alignment settings within the Full Screen extension itself.",
     "desktopOverlay": "Desktop Overlay",
-    "desktopOverlaySubtitle": "Display lyrics as an overlay on your desktop"
+    "desktopOverlaySubtitle": "Display lyrics as an overlay on your desktop",
+    "motion": "Motion"
   },
   "overlay": {
     "enabled": {
@@ -110,6 +111,10 @@ window.LANG_EN = {
     "albumBgBlur": {
       "label": "Album Background Blur",
       "desc": "Adjust the blur intensity of the album background"
+    },
+    "reduceMotion": {
+      "label": "Reduce Motion",
+      "desc": "Reduce interface animations."
     },
     "blurGradientBackground": {
       "label": "Blur Gradient Background",

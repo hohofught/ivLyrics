@@ -60,7 +60,8 @@ window.LANG_DE = {
     "fadWarningDesc": "Wird nicht unterstützt, während die Full Screen Erweiterung verwendet wird.",
     "fadWarningTip": "Bitte ändern Sie die Ausrichtung in den Einstellungen von Full Screen.",
     "desktopOverlay": "Desktop-Overlay",
-    "desktopOverlaySubtitle": "Zeigt Songtexte als Overlay auf dem Desktop an"
+    "desktopOverlaySubtitle": "Zeigt Songtexte als Overlay auf dem Desktop an",
+    "motion": "Bewegung"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_DE = {
     "albumBgBlur": {
       "label": "Album-Hintergrundunschärfe",
       "desc": "Passt die Stärke der Unschärfe des Albumhintergrunds an"
+    },
+    "reduceMotion": {
+      "label": "Bewegungen reduzieren",
+      "desc": "Reduziert die Interface-Animationen."
     },
     "blurGradientBackground": {
       "label": "Verschwommener Verlaufshintergrund",

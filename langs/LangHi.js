@@ -60,7 +60,8 @@ window.LANG_HI = {
     "fadWarningDesc": "Full Screen एक्सटेंशन का उपयोग करते समय यह समर्थित नहीं है।",
     "fadWarningTip": "कृपया Full Screen की अपनी सेटिंग्स में संरेखण बदलें।",
     "desktopOverlay": "डेस्कटॉप ओवरले",
-    "desktopOverlaySubtitle": "डेस्कटॉप पर लिरिक्स को ओवरले के रूप में दिखाएं"
+    "desktopOverlaySubtitle": "डेस्कटॉप पर लिरिक्स को ओवरले के रूप में दिखाएं",
+    "motion": "मोशन"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_HI = {
     "albumBgBlur": {
       "label": "एल्बम बैकग्राउंड ब्लर",
       "desc": "एल्बम बैकग्राउंड की ब्लर तीव्रता को समायोजित करें"
+    },
+    "reduceMotion": {
+      "label": "मोशन कम करें",
+      "desc": "इंटरफ़ेस एनीमेशन कम करता है।"
     },
     "blurGradientBackground": {
       "label": "ब्लर ग्रेडिएंट बैकग्राउंड",

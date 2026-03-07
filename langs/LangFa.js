@@ -60,7 +60,8 @@ window.LANG_FA = {
     "fadWarningDesc": "هنگام استفاده از افزونه Full Screen پشتیبانی نمی‌شود.",
     "fadWarningTip": "لطفاً روش مرتب‌سازی را در تنظیمات خود افزونه Full Screen تغییر دهید.",
     "desktopOverlay": "پوشش دسکتاپ (Overlay)",
-    "desktopOverlaySubtitle": "نمایش متن آهنگ به صورت لایه روی دسکتاپ"
+    "desktopOverlaySubtitle": "نمایش متن آهنگ به صورت لایه روی دسکتاپ",
+    "motion": "حرکت"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_FA = {
     "albumBgBlur": {
       "label": "تاری پس‌زمینه آلبوم",
       "desc": "تنظیم شدت تاری پس‌زمینه آلبوم"
+    },
+    "reduceMotion": {
+      "label": "کاهش حرکت",
+      "desc": "انیمیشن‌های رابط را کمتر می‌کند."
     },
     "blurGradientBackground": {
       "label": "پس‌زمینه گرادیان تار",

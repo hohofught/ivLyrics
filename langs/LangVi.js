@@ -60,7 +60,8 @@ window.LANG_VI = {
     "fadWarningDesc": "Không hỗ trợ khi đang sử dụng tiện ích mở rộng Full Screen khác.",
     "fadWarningTip": "Vui lòng thay đổi cài đặt sắp xếp trong chính tiện ích Full Screen đó.",
     "desktopOverlay": "Lớp phủ màn hình (Desktop)",
-    "desktopOverlaySubtitle": "Hiển thị lời bài hát dạng lớp phủ trên màn hình desktop"
+    "desktopOverlaySubtitle": "Hiển thị lời bài hát dạng lớp phủ trên màn hình desktop",
+    "motion": "Chuyển động"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_VI = {
     "albumBgBlur": {
       "label": "Làm mờ nền Album",
       "desc": "Điều chỉnh độ mờ của hình nền album"
+    },
+    "reduceMotion": {
+      "label": "Giảm chuyển động",
+      "desc": "Giảm hoạt ảnh giao diện."
     },
     "blurGradientBackground": {
       "label": "Nền Gradient mờ",

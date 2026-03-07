@@ -1182,6 +1182,8 @@ const FullscreenOverlay = (() => {
             "fullscreen-left-controls",
             !uiVisible ? "hidden" : ""
         ].filter(Boolean).join(" ");
+        const leftPlayerControlsClass = `${leftControlsClass} left-controls-player`;
+        const leftProgressOnlyClass = `${leftControlsClass} left-controls-progress-only`;
 
         // In TV mode, hide the left panel (album/info shown at bottom-left instead)
         const hideLeftPanelForTvMode = tvModeEnabled;
@@ -1224,7 +1226,7 @@ const FullscreenOverlay = (() => {
             ),
             // Bottom-left: TV Mode Song Info OR Context info
             tvModeEnabled ? react.createElement("div", {
-                className: "fullscreen-tv-song-info"
+                className: `fullscreen-tv-song-info ${!uiVisible ? 'hidden' : ''}`
             },
                 // Album art (clickable for TMI)
                 react.createElement("div", {
@@ -1419,10 +1421,10 @@ const FullscreenOverlay = (() => {
             ),
             // Top-right: Clock & Next track
             react.createElement("div", {
-                className: "fullscreen-top-right"
+                className: `fullscreen-top-right ${!uiVisible ? 'hidden' : ''}`
             },
                 react.createElement("div", {
-                    className: `fullscreen-clock-wrapper ${!uiVisible ? 'hidden' : ''}`
+                    className: "fullscreen-clock-wrapper"
                 },
                     react.createElement(Clock, {
                         show: showClockInOverlay,
@@ -1430,7 +1432,6 @@ const FullscreenOverlay = (() => {
                         size: clockSizeInOverlay
                     })
                 ),
-                // NextTrackPreview는 UI 숨김과 관계없이 항상 표시
                 react.createElement(NextTrackPreview, {
                     show: showNextTrackInOverlay,
                     secondsBeforeEnd: nextTrackSeconds
@@ -1440,7 +1441,7 @@ const FullscreenOverlay = (() => {
             isPortraitFullscreen && react.createElement(react.Fragment, null,
                 // [상단 오버레이] 앨범아트 + 곡정보
                 (showAlbum || showInfo) && react.createElement("div", {
-                    className: `portrait-overlay-top ${isLayoutReversed ? 'layout-reversed' : ''}`
+                    className: `portrait-overlay-top ${!uiVisible ? 'hidden' : ''} ${isLayoutReversed ? 'layout-reversed' : ''}`
                 },
                     // 앨범아트
                     showAlbum && react.createElement("div", {
@@ -1880,7 +1881,7 @@ const FullscreenOverlay = (() => {
                         ),
                         // Controls in left panel (under album)
                         showControlsInLeftPanel && react.createElement("div", {
-                            className: leftControlsClass
+                            className: leftPlayerControlsClass
                         },
                             // Progress bar (독립적으로 표시)
                             showProgress && react.createElement(ProgressBar, { show: true }),
@@ -1894,7 +1895,7 @@ const FullscreenOverlay = (() => {
                         ),
                         // Progress bar only (컨트롤 없이 진행바만 표시)
                         !showControls && showProgress && react.createElement("div", {
-                            className: leftControlsClass
+                            className: leftProgressOnlyClass
                         },
                             react.createElement(ProgressBar, { show: true })
                         )

@@ -60,7 +60,8 @@ window.LANG_AR = {
     "fadWarningDesc": "غير مدعوم أثناء استخدام إضافة Full Screen.",
     "fadWarningTip": "يرجى تغيير طريقة الترتيب من إعدادات Full Screen نفسها.",
     "desktopOverlay": "تراكب سطح المكتب",
-    "desktopOverlaySubtitle": "عرض الكلمات كتراكب (Overlay) على سطح المكتب"
+    "desktopOverlaySubtitle": "عرض الكلمات كتراكب (Overlay) على سطح المكتب",
+    "motion": "الحركة"
   },
   "overlay": {
     "enabled": {
@@ -103,6 +104,10 @@ window.LANG_AR = {
     "albumBgBlur": {
       "label": "تمويه خلفية الألبوم",
       "desc": "ضبط شدة تمويه خلفية الألبوم"
+    },
+    "reduceMotion": {
+      "label": "تقليل الحركة",
+      "desc": "يقلل من رسوم الواجهة المتحركة."
     },
     "blurGradientBackground": {
       "label": "خلفية تدرج مموهة",

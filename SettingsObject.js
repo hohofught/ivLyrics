@@ -172,6 +172,7 @@ const SettingKeys = [
   "ivLyrics:visual:album-bg-rotate-speed",
   "ivLyrics:visual:blur-gradient-background",
   "ivLyrics:visual:translate:target-language",
+  "ivLyrics:visual:reduce-motion",
 ];
 
 const BYTES_FOR_INDEX = Math.ceil(SettingKeys.length / 255);
