@@ -5360,10 +5360,6 @@ class LyricsContainer extends react.Component {
         backgroundStyle.filter = `brightness(${brightness}) blur(${blurAmount}px)`;
         backgroundStyle.backgroundSize = "cover";
         backgroundStyle.backgroundPosition = "center";
-        // 블러 경계선 숨기기 - scale 대신 inset 사용하여 스크롤 방지
-        backgroundStyle.inset = "-5%";
-        backgroundStyle.width = "100%";
-        backgroundStyle.height = "100%";
       }
     } else if (!this.state.isFADMode && CONFIG.visual["blur-gradient-background"]) {
       const brightness = CONFIG.visual["background-brightness"] / 100;
