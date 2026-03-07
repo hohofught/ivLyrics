@@ -20,6 +20,27 @@ Spicetify용 가사 확장 프로그램입니다. Google Gemini API를 활용하
 
 ---
 
+> [!IMPORTANT]
+> ⚠️ 면책 조항 (Disclaimer)
+>
+> **비공식 프로젝트 안내**
+>
+> 본 프로젝트와 기여자는 Spotify, 또는 그 계열사 및 자회사와 어떠한 제휴, 권한 부여, 승인 또는 공식적인 연결 관계도 없음을 밝힙니다. **본 프로젝트는 데스크톱 경험 제공을 목적으로 자원봉사 팀이 개발한 독립적이고 비영리적인 비공식 확장 프로그램입니다.**
+>
+> **상표권 안내**
+>
+> "Spotify"라는 명칭을 포함하여 관련 명칭, 마크, 엠블럼 및 이미지는 해당 소유자의 등록 상표입니다. 이러한 상표의 사용은 식별 및 참조 목적으로만 사용되며, 상표권자와의 어떠한 연관성도 시사하지 않습니다. 본 프로젝트는 해당 상표권을 침해하거나 상표권자에게 피해를 줄 의도가 없음을 명시합니다.
+>
+> **책임의 한계**
+>
+> 본 애플리케이션(확장 프로그램)은 "있는 그대로(AS IS)" 제공되며, 사용 시 발생하는 위험은 전적으로 사용자의 책임입니다. 개발자 또는 기여자는 본 소프트웨어의 사용 또는 기타 거래와 관련하여 발생하는 청구, 손해 또는 법적 결과를 포함한 어떠한 책임도 지지 않습니다. 본 소프트웨어 사용으로 인한 모든 결과에 대한 책임은 전적으로 사용자에게 있습니다.
+>
+> **저작권 및 약관 준수**
+>
+> 본 프로젝트는 가사, 번역문, 영상 또는 기타 제3자 콘텐츠의 소유권을 주장하지 않으며, 해당 콘텐츠에 대한 라이선스를 부여하지도 않습니다. 사용자는 관련 저작권법, 플랫폼 정책, API 이용약관 및 현지 법령을 직접 확인하고 준수할 책임이 있으며, 본 프로젝트를 이용한 저장, 복제, 배포, 송신 또는 상업적 이용에 대한 책임은 전적으로 사용자에게 있습니다.
+>
+
+
 ## 주요 기능
 
 ### 가사 번역 및 발음 표기
@@ -40,51 +61,7 @@ Spicetify용 가사 확장 프로그램입니다. Google Gemini API를 활용하
 
 ---
 
-## 설치 방법
-
-### 1. Spotify 설치
-
-Spotify 공식 홈페이지를 통해 설치한 최신 버전은 Spicetify와 호환되지 않을 수 있습니다. 아래 방법으로 호환 가능한 버전을 설치하세요.
-
-기존에 Spotify가 설치되어 있다면 먼저 삭제해주세요.
-
-#### Windows
-PowerShell을 실행하고 다음 명령어를 입력합니다:
-```powershell
-iex "& { $(iwr -useb 'https://amd64fox.github.io/Rollback-Spotify/run.ps1') } -version 1.2.76.298-x64"
-```
-
-#### macOS
-터미널을 실행하고 다음 명령어를 입력합니다:
-```bash
-bash <(curl -sSL https://raw.githubusercontent.com/jetfir3/TBZify/main/tbzify.sh) -v 1.2.76.298
-```
-
-#### 수동 다운로드
-- Windows: https://loadspot.pages.dev/?os=win&build=release&search=1.2.76.298
-- macOS: https://loadspot.pages.dev/?os=mac&build=release&search=1.2.76.298
-
-### 2. Spicetify 설치
-
-이미 Spicetify가 설치되어 있다면 이 단계를 건너뛰세요.
-
-관리자 권한으로 실행하지 마세요.
-
-#### Windows
-PowerShell을 실행하고 다음 명령어를 입력합니다:
-```powershell
-iwr -useb https://raw.githubusercontent.com/spicetify/cli/main/install.ps1 | iex
-```
-
-#### macOS / Linux
-터미널을 실행하고 다음 명령어를 입력합니다:
-```bash
-curl -fsSL https://raw.githubusercontent.com/spicetify/cli/main/install.sh | bash
-```
-
-설치 과정에서 Marketplace 설치 여부를 묻는 질문이 나오면 Y를 입력하세요. Marketplace의 FullScreen 확장 프로그램과 함께 사용하면 더 나은 경험을 할 수 있습니다.
-
-### 3. ivLyrics 설치
+## 가이드
 
 #### 자동 설치 (권장)
 
@@ -131,7 +108,7 @@ curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | bash
 
 ## 초기 설정
 
-1. Spotify를 실행하고 좌측 메뉴에서 ivLyrics를 선택합니다.
+1. 플레이어를 실행하고 좌측 메뉴에서 ivLyrics를 선택합니다.
 2. 우측 하단의 설정 버튼을 클릭합니다.
 3. 고급 탭에서 Gemini API 키를 입력합니다.
    - API 키는 [Google AI Studio](https://aistudio.google.com/apikey?hl=ko)에서 무료로 발급받을 수 있습니다.
@@ -146,15 +123,15 @@ curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | bash
 설정이나 가사 표시에 문제가 있는 경우:
 
 1. 터미널에서 `spicetify enable-devtools` 명령어를 실행합니다.
-2. Spotify 창에서 우클릭 후 "Inspect Element" 또는 "개발자 도구"를 선택합니다.
+2. 창에서 우클릭 후 "Inspect Element" 또는 "개발자 도구"를 선택합니다.
 3. Application 탭 > Storage > "Clear site data"를 클릭합니다.
-4. Spotify 창을 클릭하고 Ctrl+Shift+R (macOS: Cmd+Shift+R)을 눌러 새로고침합니다.
+4. 음악 프로그램을 클릭하고 Ctrl+Shift+R (macOS: Cmd+Shift+R)을 눌러 새로고침합니다.
 
 ### 자주 발생하는 문제
 
 - **가사가 표시되지 않음**: 인터넷 연결을 확인하거나 다른 노래를 재생해보세요.
 - **번역이 작동하지 않음**: Gemini API 키가 올바르게 입력되었는지 확인하세요.
-- **Spotify가 실행되지 않음**: `spicetify restore` 후 `spicetify apply`를 다시 실행하세요.
+- **Spicetify가 실행되지 않음**: `spicetify restore` 후 `spicetify apply`를 다시 실행하세요.
 
 ---
 
@@ -165,4 +142,6 @@ curl -fsSL https://ivlis.kr/ivLyrics/uninstall.sh | bash
 <a href="https://www.buymeacoffee.com/ivlis" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
 
+## 크레딧
 
+Original <a href="https://github.com/spicetify/cli/tree/main/CustomApps/lyrics-plus">Lyrics-Plus</a> Project by spicetify 
