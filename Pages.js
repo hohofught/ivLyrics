@@ -1700,11 +1700,6 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 
 const UnsyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright }) => {
 	const lyricsArray = useMemo(() => normalizeUnsyncedLyrics(lyrics), [lyrics]);
-
-	if (lyricsArray.length === 0) {
-		return react.createElement("div", { className: "lyrics-lyricsContainer-UnsyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
-	}
-
 	const renderItems = useMemo(() => lyricsArray.map(({ text, originalText, text2 }, index) => {
 		const {
 			lineText,
@@ -1730,6 +1725,10 @@ const UnsyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, co
 			originalText,
 		};
 	}), [lyricsArray, lyrics]);
+
+	if (lyricsArray.length === 0) {
+		return react.createElement("div", { className: "lyrics-lyricsContainer-UnsyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
+	}
 
 	return react.createElement(
 		"div",
