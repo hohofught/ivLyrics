@@ -1521,7 +1521,6 @@ window.LANG_ZH_CN = {
       "gradient": "渐变",
       "minimal": "极简",
       "glass": "玻璃",
-      "story": "快拍"
     },
     "advancedSettings": "详细设置",
     "sections": {

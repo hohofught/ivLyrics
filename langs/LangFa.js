@@ -1521,7 +1521,6 @@ window.LANG_FA = {
       "gradient": "گرادیان",
       "minimal": "مینیمال",
       "glass": "شیشه‌ای",
-      "story": "استوری"
     },
     "advancedSettings": "تنظیمات پیشرفته",
     "sections": {

@@ -1521,7 +1521,6 @@ window.LANG_ZH_TW = {
       "gradient": "漸層",
       "minimal": "極簡",
       "glass": "玻璃",
-      "story": "動態"
     },
     "advancedSettings": "詳細設定",
     "sections": {

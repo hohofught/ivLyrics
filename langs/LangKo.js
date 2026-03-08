@@ -1521,7 +1521,6 @@ window.LANG_KO = {
       "gradient": "그라디언트",
       "minimal": "미니멀",
       "glass": "글래스",
-      "story": "스토리"
     },
     "advancedSettings": "세부 설정",
     "sections": {

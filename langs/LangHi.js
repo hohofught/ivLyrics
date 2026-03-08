@@ -1521,7 +1521,6 @@ window.LANG_HI = {
       "gradient": "ग्रेडिएंट",
       "minimal": "मिनिमल",
       "glass": "ग्लास",
-      "story": "स्टोरी"
     },
     "advancedSettings": "विस्तृत सेटिंग्स",
     "sections": {

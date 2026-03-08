@@ -1521,7 +1521,6 @@ window.LANG_ID = {
       "gradient": "Gradien",
       "minimal": "Minimal",
       "glass": "Glass",
-      "story": "Story"
     },
     "advancedSettings": "Pengaturan Lanjutan",
     "sections": {

@@ -1521,7 +1521,6 @@ window.LANG_BN = {
       "gradient": "গ্রেডিয়েন্ট",
       "minimal": "মিনিমাল",
       "glass": "গ্লাস",
-      "story": "স্টোরি"
     },
     "advancedSettings": "বিস্তারিত সেটিংস",
     "sections": {

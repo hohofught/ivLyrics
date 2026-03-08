@@ -1521,7 +1521,6 @@ window.LANG_TH = {
       "gradient": "ไล่เฉดสี",
       "minimal": "มินิมอล",
       "glass": "Glass",
-      "story": "สตอรี่"
     },
     "advancedSettings": "การตั้งค่าขั้นสูง",
     "sections": {

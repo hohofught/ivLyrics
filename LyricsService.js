@@ -1687,8 +1687,8 @@
                 }
 
                 // 설정을 LocalStorage에서 직접 읽기
-                const translationProvider = Spicetify.LocalStorage.get("ivLyrics:visual:translate:translated-lyrics-source") || "geminiKo";
-                const modeKey = translationProvider === "geminiKo" && !friendlyLanguage ? "gemini" : friendlyLanguage;
+                const translationProvider = Spicetify.LocalStorage.get("ivLyrics:visual:translate:translated-lyrics-source") || "auto";
+                const modeKey = friendlyLanguage || "gemini";
 
                 // 설정 키: translation-mode:japanese, translation-mode-2:japanese 등
                 if (mode1 === null) {

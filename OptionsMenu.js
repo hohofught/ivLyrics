@@ -1851,13 +1851,6 @@ const getStaticOptions = () => ({
 const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
   // Open modal on click instead of ContextMenu to avoid xpui hook errors
   const open = () => {
-    // Force geminiKo provider
-    CONFIG.visual["translate:translated-lyrics-source"] = "geminiKo";
-    StorageManager.setItem(
-      `${APP_NAME}:visual:translate:translated-lyrics-source`,
-      "geminiKo"
-    );
-
     // Force "below" display mode
     CONFIG.visual["translate:display-mode"] = "below";
     StorageManager.setItem(
@@ -1866,11 +1859,7 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
     );
 
     // Determine the correct mode key based on language
-    const provider = CONFIG.visual["translate:translated-lyrics-source"];
-    const modeKey =
-      provider === "geminiKo" && !friendlyLanguage
-        ? "gemini"
-        : friendlyLanguage;
+    const modeKey = friendlyLanguage || "gemini";
 
     window.__ivLyricsDebugLog?.(
       "[TranslationMenu] Language:",

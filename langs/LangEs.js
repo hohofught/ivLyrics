@@ -1521,7 +1521,6 @@ window.LANG_ES = {
       "gradient": "Degradado",
       "minimal": "Minimalista",
       "glass": "Cristal",
-      "story": "Historia"
     },
     "advancedSettings": "Configuración avanzada",
     "sections": {

@@ -1521,7 +1521,6 @@ window.LANG_IT = {
       "gradient": "Gradiente",
       "minimal": "Minimal",
       "glass": "Glass",
-      "story": "Story"
     },
     "advancedSettings": "Impostazioni avanzate",
     "sections": {

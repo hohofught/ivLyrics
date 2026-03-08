@@ -1521,7 +1521,6 @@ window.LANG_AR = {
       "gradient": "تدرج",
       "minimal": "بسيط (Minimal)",
       "glass": "زجاجي",
-      "story": "قصة (Story)"
     },
     "advancedSettings": "إعدادات متقدمة",
     "sections": {

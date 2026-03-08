@@ -1521,7 +1521,6 @@ window.LANG_RU = {
       "gradient": "Градиент",
       "minimal": "Минимализм",
       "glass": "Стекло",
-      "story": "Сториз"
     },
     "advancedSettings": "Детали",
     "sections": {

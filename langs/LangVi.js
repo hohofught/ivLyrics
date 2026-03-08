@@ -1521,7 +1521,6 @@ window.LANG_VI = {
       "gradient": "Gradient",
       "minimal": "Tối giản",
       "glass": "Kính",
-      "story": "Story"
     },
     "advancedSettings": "Cài đặt chi tiết",
     "sections": {

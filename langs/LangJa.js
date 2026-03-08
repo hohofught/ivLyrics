@@ -1521,7 +1521,6 @@ window.LANG_JA = {
       "gradient": "グラデーション",
       "minimal": "ミニマル",
       "glass": "グラス",
-      "story": "ストーリー"
     },
     "advancedSettings": "詳細設定",
     "sections": {

@@ -1339,7 +1339,7 @@ const CONFIG = {
     "translate:translated-lyrics-source":
       StorageManager.getItem(
         "ivLyrics:visual:translate:translated-lyrics-source"
-      ) || "geminiKo",
+      ) || "auto",
     "translate:display-mode":
       StorageManager.getItem("ivLyrics:visual:translate:display-mode") ||
       "replace",
@@ -2167,8 +2167,7 @@ const Prefetcher = {
       // ignore
     }
 
-    const provider = CONFIG.visual["translate:translated-lyrics-source"];
-    const modeKey = provider === "geminiKo" && !friendlyLanguage ? "gemini" : friendlyLanguage;
+    const modeKey = friendlyLanguage || "gemini";
     const displayMode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const displayMode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
 
@@ -2863,10 +2862,7 @@ class LyricsContainer extends react.Component {
       new Intl.DisplayNames(["en"], { type: "language" })
         .of(originalLanguage.split("-")[0])
         ?.toLowerCase();
-    const modeKey =
-      provider === "geminiKo" && !friendlyLanguage
-        ? "gemini"
-        : friendlyLanguage;
+    const modeKey = friendlyLanguage || "gemini";
     const mode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const mode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
 
@@ -3659,11 +3655,7 @@ class LyricsContainer extends react.Component {
     }
 
     // For Gemini mode, use generic keys if no specific language detected
-    const provider = CONFIG.visual["translate:translated-lyrics-source"];
-    const modeKey =
-      provider === "geminiKo" && !friendlyLanguage
-        ? "gemini"
-        : friendlyLanguage;
+    const modeKey = friendlyLanguage || "gemini";
 
     const displayMode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const displayMode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
@@ -4446,24 +4438,6 @@ class LyricsContainer extends react.Component {
     if (this.trackLanguageOverride) {
       Utils.setDetectedLanguage(this.trackLanguageOverride);
       return this.trackLanguageOverride;
-    }
-
-    const provider = CONFIG.visual["translate:translated-lyrics-source"];
-
-    // For Gemini API, always detect language from lyrics (no override needed)
-    if (provider === "geminiKo") {
-      // If we have a cached language in state, use it
-      if (this.state.language) {
-        // Update Utils detected language for furigana check
-        Utils.setDetectedLanguage(this.state.language);
-        return this.state.language;
-      }
-
-      // Otherwise, detect language from lyrics
-      const detectedLanguage = Utils.detectLanguage(lyrics);
-      // Update Utils detected language for furigana check
-      Utils.setDetectedLanguage(detectedLanguage);
-      return detectedLanguage;
     }
 
     // For Kuromoji mode, use language override if set
@@ -5571,11 +5545,7 @@ class LyricsContainer extends react.Component {
         ?.toLowerCase();
 
     // For Gemini mode, use generic keys if no specific language detected
-    const provider = CONFIG.visual["translate:translated-lyrics-source"];
-    const modeKey =
-      provider === "geminiKo" && !friendlyLanguage
-        ? "gemini"
-        : friendlyLanguage;
+    const modeKey = friendlyLanguage || "gemini";
 
     const displayMode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const displayMode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
