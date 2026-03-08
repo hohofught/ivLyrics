@@ -2026,25 +2026,14 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
             type: ConfigButton,
             text: I18n.t("menu.openSettings"),
             onChange: () => {
-              // Close the current modal and open settings at AI Providers tab
               const overlay = document.getElementById(
                 "ivLyrics-settings-overlay"
               );
               if (overlay) {
                 overlay.remove();
               }
-              // Open main settings and switch to ai-providers tab
               setTimeout(() => {
-                openConfig();
-                // Wait for modal to render, then switch to ai-providers tab
-                setTimeout(() => {
-                  const aiProvidersTab = document.querySelector(
-                    '[data-tab-id="ai-providers"]'
-                  );
-                  if (aiProvidersTab) {
-                    aiProvidersTab.click();
-                  }
-                }, 100);
+                openConfig({ initialTab: "ai-providers" });
               }, 100);
             },
             info: I18n.t("menu.apiKeySettingsInfo"),

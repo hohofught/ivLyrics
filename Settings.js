@@ -1102,33 +1102,6 @@ const AddonSettingsCard = ({ addon, isEnabled, onToggle, isExpanded, onExpandTog
           }),
           react.createElement("span", { className: "toggle-slider" })
         ),
-        react.createElement("div", { className: "lyrics-provider-icon" },
-          addon.id === 'gemini'
-            ? react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none" },
-              react.createElement("path", {
-                d: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
-                stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round"
-              })
-            )
-            : addon.id === 'chatgpt'
-              ? react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none" },
-                react.createElement("path", {
-                  d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
-                  stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round"
-                })
-              )
-              : addon.id === 'pollinations'
-                ? react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none" },
-                  react.createElement("circle", { cx: "12", cy: "12", r: "3", stroke: "currentColor", strokeWidth: "2" }),
-                  react.createElement("path", {
-                    d: "M12 2a4 4 0 0 1 4 4v1a4 4 0 0 0 4 4h1a4 4 0 0 1 0 8h-1a4 4 0 0 0-4 4v1a4 4 0 0 1-8 0v-1a4 4 0 0 0-4-4H3a4 4 0 0 1 0-8h1a4 4 0 0 0 4-4V6a4 4 0 0 1 4-4z",
-                    stroke: "currentColor", strokeWidth: "2"
-                  })
-                )
-                : react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none" },
-                  react.createElement("circle", { cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "2" })
-                )
-        ),
         react.createElement("div", { className: "lyrics-provider-title-group" },
           react.createElement("span", { className: "lyrics-provider-name" }, addon.name),
           react.createElement("div", { className: "lyrics-provider-title-meta" },
@@ -1265,24 +1238,6 @@ const LyricsProviderCard = ({ provider, isEnabled, onToggle, isExpanded, onExpan
             onChange: (e) => onToggle(e.target.checked)
           }),
           react.createElement("span", { className: "toggle-slider" })
-        ),
-        react.createElement("div", { className: "lyrics-provider-icon" },
-          provider.id === 'spotify'
-            ? react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "currentColor" },
-              react.createElement("path", {
-                d: "M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"
-              })
-            )
-            : provider.id === 'lrclib'
-              ? react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2" },
-                react.createElement("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }),
-                react.createElement("polyline", { points: "14 2 14 8 20 8" }),
-                react.createElement("line", { x1: "16", y1: "13", x2: "8", y2: "13" }),
-                react.createElement("line", { x1: "16", y1: "17", x2: "8", y2: "17" })
-              )
-              : react.createElement("svg", { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2" },
-                react.createElement("circle", { cx: "12", cy: "12", r: "10" })
-              )
         ),
         react.createElement("div", { className: "lyrics-provider-title-group" },
           react.createElement("span", { className: "lyrics-provider-name" }, provider.name),
@@ -3840,7 +3795,11 @@ const applySettingsMotionClasses = () => {
 const SettingsSidebarShell = ({ sidebarRef, children }) =>
   react.createElement(
     "aside",
-    { className: "settings-sidebar", ref: sidebarRef },
+    {
+      className: "settings-sidebar",
+      ref: sidebarRef,
+      "aria-label": "Settings navigation",
+    },
     children
   );
 
@@ -3853,7 +3812,10 @@ const SettingsMainPanelShell = ({
 }) =>
   react.createElement(
     "section",
-    { className: "settings-main-panel" },
+    {
+      className: "settings-main-panel",
+      "aria-label": label || "Settings content",
+    },
     react.createElement(
       "div",
       {
@@ -3875,8 +3837,8 @@ const SettingsMainPanelShell = ({
     )
   );
 
-const ConfigModal = ({ onRequestClose = () => {} }) => {
-  const [activeTab, setActiveTab] = react.useState("general");
+const ConfigModal = ({ onRequestClose = () => {}, initialTab = "general" }) => {
+  const [activeTab, setActiveTab] = react.useState(initialTab || "general");
   const [searchQuery, setSearchQuery] = react.useState("");
   const shouldReduceMotion = getEffectiveReducedMotionPreference();
   const [uiTheme, setUiTheme] = react.useState(getSettingsUiTheme);
@@ -4943,11 +4905,16 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             "button",
             {
               className: "settings-theme-btn",
+              type: "button",
               onClick: () =>
                 setUiTheme((currentTheme) =>
                   currentTheme === "dark" ? "light" : "dark"
                 ),
               title:
+                uiTheme === "dark"
+                  ? getSettingsText("settingsUi.theme.light", "Switch to light mode")
+                  : getSettingsText("settingsUi.theme.dark", "Switch to dark mode"),
+              "aria-label":
                 uiTheme === "dark"
                   ? getSettingsText("settingsUi.theme.light", "Switch to light mode")
                   : getSettingsText("settingsUi.theme.dark", "Switch to dark mode"),
@@ -4980,12 +4947,14 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             "button",
             {
               className: "settings-github-btn",
+              type: "button",
               onClick: () =>
                 window.open(
                   "https://github.com/ivLis-Studio/ivLyrics",
                   "_blank"
                 ),
               title: I18n.t("settingsAdvanced.aboutTab.visitGithub"),
+              "aria-label": I18n.t("settingsAdvanced.aboutTab.visitGithub"),
             },
             react.createElement("svg", {
               width: 16,
@@ -5003,12 +4972,14 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             "button",
             {
               className: "settings-discord-btn",
+              type: "button",
               onClick: () =>
                 window.open(
                   "https://ivlis.kr/ivLyrics/discord.php",
                   "_blank"
                 ),
               title: I18n.t("settingsAdvanced.aboutTab.joinDiscord"),
+              "aria-label": I18n.t("settingsAdvanced.aboutTab.joinDiscord"),
             },
             react.createElement("svg", {
               width: 16,
@@ -5026,12 +4997,14 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             "button",
             {
               className: "settings-coffee-btn",
+              type: "button",
               onClick: () =>
                 window.open(
                   "https://buymeacoffee.com/ivlis",
                   "_blank"
                 ),
               title: I18n.t("settingsAdvanced.donate.title"),
+              "aria-label": I18n.t("settingsAdvanced.donate.title"),
             },
             react.createElement("svg", {
               width: 16,
@@ -5049,7 +5022,10 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             "button",
             {
               className: "settings-close-btn",
+              type: "button",
               onClick: onRequestClose,
+              title: getSettingsText("settingsUi.close", "Close settings"),
+              "aria-label": getSettingsText("settingsUi.close", "Close settings"),
             },
             react.createElement("span", null, "×")
           )
@@ -5397,46 +5373,26 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
   }, [activeSidebarTab, activeTab]);
 
   // ---- 5. Scroll-spy: update sidebar highlight on user scroll ----
-  // Read the current scroll container from the ref on every frame so the
-  // active section stays in sync even after normal React re-renders.
   react.useEffect(() => {
     if (activeTab === "search") return;
 
-    let active = true;
-    let prevScrollTop = -1;
+    let frameId = null;
+    const container = settingsContentRef.current;
 
-    const tick = () => {
-      if (!active) return;
-
-      // Always read the CURRENT container from the ref (it may have
-      // been replaced by a React re-render since the last tick).
-      const container = settingsContentRef.current;
-
-      if (!container || isProgrammaticScrollRef.current) {
-        requestAnimationFrame(tick);
-        return;
-      }
-
-      // Only do the expensive work when scrollTop has actually changed
-      const st = container.scrollTop;
-      if (st === prevScrollTop) {
-        requestAnimationFrame(tick);
-        return;
-      }
-      prevScrollTop = st;
+    const updateActiveSection = () => {
+      const currentContainer = settingsContentRef.current;
+      if (!currentContainer || isProgrammaticScrollRef.current) return;
 
       const nodes = Array.from(
-        container.querySelectorAll(
+        currentContainer.querySelectorAll(
           ".tab-content.active .section-title[data-setting-key]"
         )
       );
-      if (nodes.length === 0) {
-        requestAnimationFrame(tick);
-        return;
-      }
+      if (nodes.length === 0) return;
 
-      const containerTop = container.getBoundingClientRect().top;
-      const anchorLine = containerTop + 100;
+      const containerTop = currentContainer.getBoundingClientRect().top;
+      const anchorLine =
+        containerTop + Math.min(120, Math.max(72, currentContainer.clientHeight * 0.2));
 
       let bestNode = nodes[0];
       for (const node of nodes) {
@@ -5451,17 +5407,28 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
       if (key && key !== activeNavItemIdRef.current) {
         setActiveNavItemId(key);
       }
-
-      requestAnimationFrame(tick);
     };
 
-    const frameId = requestAnimationFrame(tick);
+    const scheduleUpdate = () => {
+      if (frameId != null) return;
+      frameId = requestAnimationFrame(() => {
+        frameId = null;
+        updateActiveSection();
+      });
+    };
+
+    container?.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    scheduleUpdate();
 
     return () => {
-      active = false;
-      cancelAnimationFrame(frameId);
+      container?.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (frameId != null) {
+        cancelAnimationFrame(frameId);
+      }
     };
-  }, [activeTab, searchQuery]);
+  }, [activeTab, searchQuery, sidebarSectionsByTab]);
 
   // ---- 6. Restore sidebar scroll position after tab / group changes ----
   react.useLayoutEffect(() => {
@@ -5711,6 +5678,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           const hasSubmenu = !tab.standalone && sectionItems.length > 0;
           const isExpanded = expandedGroupIds.includes(tab.id);
           const isTabActive = activeTab === tab.id;
+          const isGroupOpen = isExpanded || isTabActive;
 
           if (!hasSubmenu) {
             return react.createElement(
@@ -5743,11 +5711,11 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             },
             react.createElement(
               "button",
-              {
-                className: `settings-nav-group-toggle ${
-                  isExpanded || isTabActive ? "expanded" : ""
-                }`,
-                type: "button",
+                {
+                  className: `settings-nav-group-toggle ${
+                    isGroupOpen ? "expanded" : ""
+                  }`,
+                  type: "button",
                 onClick: () => {
                   if (activeTab !== tab.id) {
                     navigateToDestination(tab.id, null, resolveNavItemId(tab.id));
@@ -5760,24 +5728,24 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   }
 
                   toggleNavigationGroup(tab.id);
+                  },
+                  "aria-expanded": isGroupOpen,
                 },
-                "aria-expanded": isExpanded,
-              },
               react.createElement(
                 "span",
                 { className: "settings-nav-group-title" },
                 tab.label
               ),
-              react.createElement(
-                "span",
-                { className: "settings-nav-group-indicator" },
-                isExpanded ? "-" : "+"
-              )
-            ),
-            isExpanded &&
-              react.createElement(
-                "div",
-                { className: "settings-nav-group-items" },
+                react.createElement(
+                  "span",
+                  { className: "settings-nav-group-indicator" },
+                  isGroupOpen ? "-" : "+"
+                )
+              ),
+              isGroupOpen &&
+                react.createElement(
+                  "div",
+                  { className: "settings-nav-group-items" },
                 sectionItems.map((item) => {
                   const isItemActive =
                     activeTab === item.tabId && activeNavItemId === item.settingKey;
@@ -6566,52 +6534,6 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-}
-
-@media (max-width: 1100px) {
-    #${APP_NAME}-config-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto minmax(0, 1fr);
-    }
-
-    #${APP_NAME}-config-container .settings-header,
-    #${APP_NAME}-config-container .settings-sidebar,
-    #${APP_NAME}-config-container .settings-search-container,
-    #${APP_NAME}-config-container .settings-main-panel {
-        grid-column: 1;
-    }
-
-    #${APP_NAME}-config-container .settings-sidebar {
-        grid-row: 2;
-        padding: 16px 20px 8px;
-    }
-
-    #${APP_NAME}-config-container .settings-search-container {
-        grid-row: 3;
-        padding: 12px 20px 12px;
-    }
-
-    #${APP_NAME}-config-container .settings-main-panel {
-        grid-row: 4;
-        margin: 0 20px 20px;
-    }
-
-    #${APP_NAME}-config-container .setting-row-content {
-        align-items: flex-start;
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
-    #${APP_NAME}-config-container .setting-row-right {
-        width: 100%;
-        max-width: none;
-        justify-content: flex-start;
-    }
-
-    #${APP_NAME}-config-container .slider-container {
-        width: 100%;
-        max-width: none;
-    }
 }
 
 @keyframes slideUp {
@@ -7886,18 +7808,6 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     transform: translateX(16px);
 }
 
-#${APP_NAME}-config-container .lyrics-provider-icon {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(139, 92, 246, 0.1));
-    border-radius: var(--radius-md);
-    color: var(--accent-primary);
-    flex-shrink: 0;
-}
-
 #${APP_NAME}-config-container .lyrics-provider-title-group {
     display: flex;
     flex-direction: column;
@@ -8471,7 +8381,6 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 #${APP_NAME}-config-container .ai-addon-cap-chip,
 #${APP_NAME}-config-container .lyrics-type-toggle-chip,
 #${APP_NAME}-config-container .support-badge,
-#${APP_NAME}-config-container .lyrics-provider-icon,
 #${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider,
 #${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider:before {
     border-radius: 0 !important;
@@ -8555,13 +8464,6 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 #${APP_NAME}-config-container .lyrics-provider-toggle input:checked + .toggle-slider:before {
     background: var(--accent-primary);
     transform: translateX(18px);
-}
-
-#${APP_NAME}-config-container .lyrics-provider-icon {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--glass-border);
-    background: color-mix(in srgb, var(--accent-primary) 7%, transparent);
 }
 
 #${APP_NAME}-config-container .support-badges {
@@ -9550,6 +9452,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           type: "text",
           className: "settings-search-input",
           placeholder: I18n.t("search.placeholder"),
+          "aria-label": I18n.t("search.placeholder"),
           value: searchQuery,
           onChange: handleSearchChange,
         }),
@@ -9557,8 +9460,10 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           "button",
           {
             className: "settings-search-clear",
+            type: "button",
             onClick: handleClearSearch,
             title: I18n.t("search.clear"),
+            "aria-label": I18n.t("search.clear"),
           },
           "×"
         )
@@ -12854,7 +12759,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
   );
 };
 
-function openConfig() {
+function openConfig(options = {}) {
+  const { initialTab = "general" } = options || {};
   const existingOverlay = document.getElementById("ivLyrics-settings-overlay");
   if (existingOverlay) {
     return;
@@ -12923,7 +12829,10 @@ function openConfig() {
   });
 
   dom.render(
-    react.createElement(ConfigModal, { onRequestClose: closeOverlay }),
+    react.createElement(ConfigModal, {
+      onRequestClose: closeOverlay,
+      initialTab,
+    }),
     modalContainer
   );
 }

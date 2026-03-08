@@ -3543,6 +3543,8 @@ class LyricsContainer extends react.Component {
         }
       }
 
+      const initialLyricsForMode = this.resolveLyricsForMode(tempState, finalMode);
+
       // if song changed one time
       if (tempState.uri !== this.state.uri || refresh) {
         // Detect language from the new lyrics data
@@ -3567,6 +3569,7 @@ class LyricsContainer extends react.Component {
           ...tempState,
           language: defaultLanguage,
           ...this.applyTranslationStates(tempState),
+          currentLyrics: initialLyricsForMode || [],
         });
         return;
       }
@@ -3575,6 +3578,7 @@ class LyricsContainer extends react.Component {
       this.setState({
         ...tempState,
         ...this.applyTranslationStates(tempState),
+        currentLyrics: initialLyricsForMode || [],
       });
     } catch (error) {
       this.setState({
@@ -3585,28 +3589,39 @@ class LyricsContainer extends react.Component {
     }
   }
 
+  resolveLyricsForMode(lyricsState, mode) {
+    if (!lyricsState) return null;
+
+    const preferredModeKey =
+      typeof mode === "number" && mode >= 0 ? CONFIG.modes?.[mode] : null;
+    const preferredLyrics =
+      preferredModeKey && lyricsState[preferredModeKey]
+        ? lyricsState[preferredModeKey]
+        : null;
+
+    return (
+      preferredLyrics ||
+      lyricsState.karaoke ||
+      lyricsState.synced ||
+      lyricsState.unsynced ||
+      null
+    );
+  }
+
   lyricsSource(lyricsState, mode) {
     if (!lyricsState) return;
 
-    let lyrics = lyricsState[CONFIG.modes[mode]];
-    // Fallback: if the preferred mode has no lyrics, use any available lyrics
+    const lyrics = this.resolveLyricsForMode(lyricsState, mode);
     if (!lyrics) {
-      lyrics =
-        lyricsState.karaoke ||
-        lyricsState.synced ||
-        lyricsState.unsynced ||
-        null;
-      if (!lyrics) {
-        this.setState({ currentLyrics: [] });
-        // 오버레이에 가사 없음 상태 전송 (트랙 정보 업데이트용)
-        window.dispatchEvent(new CustomEvent('ivLyrics:lyrics-ready', {
-          detail: {
-            trackInfo: { uri: lyricsState.uri, title: this.state.title, artist: this.state.artist },
-            lyrics: []
-          }
-        }));
-        return;
-      }
+      this.setState({ currentLyrics: [] });
+      // 오버레이에 가사 없음 상태 전송 (트랙 정보 업데이트용)
+      window.dispatchEvent(new CustomEvent('ivLyrics:lyrics-ready', {
+        detail: {
+          trackInfo: { uri: lyricsState.uri, title: this.state.title, artist: this.state.artist },
+          lyrics: []
+        }
+      }));
+      return;
     }
 
     // Clean up any existing progress flags from previous songs
@@ -6072,12 +6087,14 @@ class LyricsContainer extends react.Component {
   }
 
   switchTo(mode) {
-    const currentTrack = Spicetify.Player?.data?.item;
-    this.setState({ explicitMode: mode }, () => {
-      if (currentTrack) {
-        this.fetchLyrics(currentTrack, mode);
-      }
-    });
+    this.lastProcessedMode = null;
+    this.setState((prevState) => ({
+      explicitMode: mode,
+      currentLyrics:
+        this.resolveLyricsForMode(prevState, mode) ||
+        prevState.currentLyrics ||
+        [],
+    }));
   }
 
 }
