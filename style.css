@@ -1324,13 +1324,13 @@ div.lyrics-tabBar-headerItemLink {
   align-items: center;
   gap: 8px;
   z-index: 100;
-  padding: 12px 8px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  padding: 10px;
+  border-radius: 0;
+  background: rgba(18, 22, 28, 0.9);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.16);
 
   /* Auto-hide functionality */
   opacity: 1;
@@ -1342,7 +1342,7 @@ div.lyrics-tabBar-headerItemLink {
 }
 
 .lyrics-config-button-container:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3), 0 6px 16px rgba(0, 0, 0, 0.18);
 }
 
 /* Hide controls when mouse is idle */
@@ -1386,10 +1386,10 @@ div.lyrics-tabBar-headerItemLink {
 
 .lyrics-config-button {
   align-items: center;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   margin: 0;
-  border-radius: 50%;
+  border-radius: 0;
   color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
   display: flex;
@@ -1400,34 +1400,24 @@ div.lyrics-tabBar-headerItemLink {
   width: 44px;
   position: relative;
   transition: all var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 .lyrics-config-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
+  display: none;
 }
 
 .lyrics-config-button:hover {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
   color: #fff;
-  transform: scale(1.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 20px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.15);
-}
-
-.lyrics-config-button:hover::before {
-  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .lyrics-config-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 .lyrics-config-button:disabled {
@@ -1437,18 +1427,17 @@ div.lyrics-tabBar-headerItemLink {
 }
 
 .lyrics-config-button:disabled:hover {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: rgba(255, 255, 255, 0.06);
   transform: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 .lyrics-config-button svg {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
   transition: transform var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
 .lyrics-config-button:hover svg {
-  transform: scale(1.05);
+  transform: none;
 }
 
 /* Loading spin animation for regenerate button */
@@ -1458,21 +1447,21 @@ div.lyrics-tabBar-headerItemLink {
 
 /* Accent color highlight on specific buttons */
 .lyrics-config-button[data-active="true"] {
-  background: linear-gradient(145deg, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.3) 0%, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.15) 100%);
+  background: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.16);
   border-color: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.4);
 }
 
 .lyrics-config-button[data-active="true"]:hover {
-  background: linear-gradient(145deg, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.4) 0%, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.2) 100%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 24px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.25);
+  background: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.2);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.12);
 }
 
 /* Separator between tools and mode buttons */
 .lyrics-config-separator {
   width: 28px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
-  border-radius: 1px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 0;
   margin: 4px 0;
   pointer-events: none;
 }
@@ -1491,13 +1480,13 @@ div.lyrics-tabBar-headerItemLink {
 
 .lyrics-mode-button.active {
   opacity: 1;
-  background: linear-gradient(145deg, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.35) 0%, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.15) 100%) !important;
+  background: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.16) !important;
   border-color: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.5) !important;
-  box-shadow: 0 2px 12px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.12);
 }
 
 .lyrics-mode-button.active:hover {
-  box-shadow: 0 4px 16px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.12);
 }
 
 .lyrics-mode-button.active svg {
@@ -6109,11 +6098,6 @@ ruby rt {
   }
 }
 
-.lyrics-config-button.glitter-effect {
-  animation: glitter 2s infinite ease-in-out;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
 .sync-creator-hint {
   position: absolute;
   right: 45px;
@@ -6167,164 +6151,132 @@ ruby rt {
   }
 }
 
-/* Fullscreen Floating Icons Logic */
-
-/* ============================================ */
-/* 전체화면 플로팅 바 - 메뉴 토글 방식 (v4)      */
-/* ============================================ */
-
-/* 전체화면 모드 플로팅 바 컨테이너 - 기본(접힌 상태) */
-.lyrics-config-button-container.fullscreen-mode-container {
+/* Fluent floating toolbar refresh */
+.lyrics-fluent-floating-toolbar {
+  --iv-floating-toolbar-shell: rgba(18, 22, 28, 0.9);
+  --iv-floating-toolbar-border: rgba(255, 255, 255, 0.12);
+  --iv-floating-button-shell: rgba(255, 255, 255, 0.06);
+  --iv-floating-button-shell-hover: rgba(255, 255, 255, 0.1);
+  --iv-floating-button-border: rgba(255, 255, 255, 0.1);
+  --iv-floating-button-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.22);
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 0;
+  background: var(--iv-floating-toolbar-shell);
+  border: 1px solid var(--iv-floating-toolbar-border);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.16);
+  isolation: isolate;
+}
+
+.lyrics-fluent-floating-toolbar::before {
+  display: none;
+}
+
+.lyrics-fluent-floating-toolbar:hover {
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.3),
+    0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.lyrics-fluent-floating-toolbar .lyrics-floating-menu-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 10000;
-  pointer-events: auto;
+  gap: 10px;
+  width: 100%;
+}
 
-  /* 접힌 상태 스타일 - 일반 모드와 비슷한 glassmorphism */
-  padding: 0;
-  gap: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  width: 48px;
-  height: 48px;
-
+.lyrics-fluent-floating-toolbar .lyrics-config-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  border: 1px solid var(--iv-floating-button-border);
+  background: var(--iv-floating-button-shell);
+  color: var(--spice-text, rgba(255, 255, 255, 0.92));
+  box-shadow: var(--iv-floating-button-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition:
-    width var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    height var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    padding var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    gap var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    border-radius var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    background var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    box-shadow var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    background var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    border-color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    box-shadow var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
-/* 메뉴 토글 버튼 스타일 - 접힌 상태에서는 완전히 투명 */
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-toggle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
-  flex-shrink: 0;
+.lyrics-fluent-floating-toolbar .lyrics-config-button::before {
+  display: none;
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-toggle:hover {
+.lyrics-fluent-floating-toolbar .lyrics-config-button:hover {
+  transform: translateY(-1px);
+  background: var(--iv-floating-button-shell-hover);
+  border-color: rgba(255, 255, 255, 0.16);
   color: #fff;
-  transform: scale(1.05);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
-/* 메뉴 열린 상태 - 일반 모드와 완전히 동일한 스타일 */
-.lyrics-config-button-container.fullscreen-mode-container.menu-open {
-  padding: 12px 8px;
-  gap: 8px;
-  border-radius: 24px;
-  width: auto;
-  height: auto;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.lyrics-fluent-floating-toolbar .lyrics-config-button:active {
+  transform: translateY(0);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container.menu-open:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+.lyrics-fluent-floating-toolbar .lyrics-config-button:focus-visible {
+  outline: none;
+  border-color: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.7);
+  box-shadow:
+    0 0 0 3px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.2),
+    0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-toggle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  margin-bottom: 0;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.lyrics-fluent-floating-toolbar .lyrics-config-button svg {
+  transition:
+    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    color var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
+    opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-toggle:hover {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+.lyrics-fluent-floating-toolbar .lyrics-config-button:hover svg {
+  transform: none;
 }
 
-/* 플로팅 바 내부 버튼 기본 스타일 - 일반 모드와 동일 */
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-config-button {
-  align-items: center;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  margin: 0;
-  border-radius: 50%;
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  display: flex;
-  gap: 0;
-  justify-content: center;
-  padding: 0;
-  height: 44px;
-  width: 44px;
-  position: relative;
-  transition: all var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+.lyrics-fluent-floating-toolbar .lyrics-config-button[data-active="true"],
+.lyrics-fluent-floating-toolbar .lyrics-config-button.active,
+.lyrics-fluent-floating-toolbar .lyrics-marketplace-button.active,
+.lyrics-fluent-floating-toolbar .lyrics-mode-button.active {
+  background: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.16);
+  border-color: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.42);
+  color: var(--spice-text, #fff);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.12);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-config-button:hover {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  transform: scale(1.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 20px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.15);
+.lyrics-fluent-floating-toolbar .lyrics-mode-button.active svg,
+.lyrics-fluent-floating-toolbar .lyrics-marketplace-button.active svg {
+  color: var(--spice-accent, #1ed760);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-config-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+.lyrics-fluent-floating-toolbar .lyrics-fullscreen-toggle-button {
+  background: rgba(255, 112, 112, 0.14);
+  border-color: rgba(255, 122, 122, 0.32);
 }
 
-/* 전체화면 토글 버튼 특별 스타일 */
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-fullscreen-toggle-button {
-  background: linear-gradient(145deg, rgba(255, 107, 107, 0.3) 0%, rgba(255, 107, 107, 0.15) 100%);
-  border-color: rgba(255, 107, 107, 0.3);
+.lyrics-fluent-floating-toolbar .lyrics-fullscreen-toggle-button:hover {
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 112, 112, 0.16);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-fullscreen-toggle-button:hover {
-  background: linear-gradient(145deg, rgba(255, 107, 107, 0.4) 0%, rgba(255, 107, 107, 0.2) 100%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 20px rgba(255, 107, 107, 0.25);
-}
-
-/* 구분선 스타일 - 일반 모드와 동일 */
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-config-separator {
-  width: 28px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
-  border-radius: 1px;
-  margin: 4px 0;
-  pointer-events: none;
-}
-
-/* 하위 컴포넌트들 */
-.lyrics-config-button-container.fullscreen-mode-container>* {
-  pointer-events: auto;
-}
-
-.lyrics-floating-menu-content {
+.lyrics-fluent-floating-toolbar .lyrics-config-mode-section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -6332,89 +6284,97 @@ ruby rt {
   width: 100%;
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-content {
-  overflow: hidden;
+.lyrics-fluent-floating-toolbar .lyrics-config-separator {
+  width: 32px;
+  height: 1px;
+  margin: 0;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-content>* {
-  opacity: 0;
-  transform: translateY(var(--iv-motion-distance-sm));
-  transition:
-    opacity var(--iv-motion-duration-fast) var(--iv-motion-ease-standard),
-    transform var(--iv-motion-duration-fast) var(--iv-motion-ease-standard);
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>* {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(1) {
-  transition-delay: 20ms;
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(2) {
-  transition-delay: 40ms;
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(3) {
-  transition-delay: 60ms;
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(4) {
-  transition-delay: 80ms;
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>*:nth-child(5) {
-  transition-delay: 100ms;
-}
-
-.lyrics-config-button-container.fullscreen-mode-container.menu-closing .lyrics-floating-menu-content>* {
-  opacity: 0;
-  transform: translateY(var(--iv-motion-distance-sm));
-  transition-delay: 0ms;
-  pointer-events: none;
-}
-
-/* TranslationMenu, RegenerateButton 등 하위 메뉴들 */
-.lyrics-config-button-container.fullscreen-mode-container .TranslationMenu,
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-floating-menu-content>div {
+.lyrics-fluent-floating-toolbar .lyrics-config-mode-group {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
-/* 드롭다운 메뉴 위치 조정 */
-.lyrics-config-button-container.fullscreen-mode-container .main-contextMenu-menu {
-  z-index: 10001;
+.lyrics-fluent-floating-toolbar .lyrics-config-mode-group .main-tooltipWrapper-container {
+  display: flex;
 }
 
-/* 마우스가 3초 이상 움직이지 않으면 살짝 투명해짐 */
-.lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container.fullscreen-mode-container {
-  opacity: 0.4;
-  transform: translateY(calc(var(--iv-motion-distance-sm) / 2));
-  transition:
-    opacity var(--iv-motion-duration-medium) var(--iv-motion-ease-standard),
-    transform var(--iv-motion-duration-medium) var(--iv-motion-ease-standard);
+.lyrics-fluent-floating-toolbar .lyrics-config-mode-group .lyrics-mode-button {
+  width: 42px !important;
+  height: 42px !important;
+  opacity: 0.92;
 }
 
-.lyrics-lyricsContainer-LyricsContainer.fullscreen-active.controls-hidden .lyrics-config-button-container.fullscreen-mode-container:hover {
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  gap: 0;
+  border-radius: 0;
+}
+
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container .lyrics-floating-menu-toggle {
+  width: 52px;
+  height: 52px;
+  border-radius: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container .lyrics-floating-menu-toggle:hover {
+  transform: none;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container.menu-open {
+  width: auto;
+  height: auto;
+  padding: 10px;
+  gap: 10px;
+  border-radius: 0;
+}
+
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container.menu-open .lyrics-floating-menu-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  background: var(--iv-floating-button-shell) !important;
+  border: 1px solid var(--iv-floating-button-border) !important;
+  box-shadow: var(--iv-floating-button-shadow) !important;
+}
+
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container.menu-open .lyrics-floating-menu-content>* {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* 모드 버튼 활성화 상태 - 일반 모드와 동일 */
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-mode-button.active {
-  background: linear-gradient(145deg, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.35) 0%, rgba(var(--spice-rgb-accent, 30, 215, 96), 0.15) 100%) !important;
-  border-color: rgba(var(--spice-rgb-accent, 30, 215, 96), 0.5) !important;
-  box-shadow: 0 2px 12px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.lyrics-fluent-floating-toolbar.fullscreen-mode-container.menu-closing .lyrics-floating-menu-content>* {
+  opacity: 0;
+  transform: translateY(var(--iv-motion-distance-sm));
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-mode-button.active:hover {
-  box-shadow: 0 4px 16px rgba(var(--spice-rgb-accent, 30, 215, 96), 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+.lyrics-fluent-floating-toolbar .main-contextMenu-menu {
+  padding: 12px 12px 6px;
+  border-radius: 0;
+  backdrop-filter: blur(24px) saturate(135%);
+  -webkit-backdrop-filter: blur(24px) saturate(135%);
 }
 
-.lyrics-config-button-container.fullscreen-mode-container .lyrics-mode-button.active svg {
-  color: var(--spice-accent, #1ed760);
+@media (max-width: 900px) {
+  .lyrics-fluent-floating-toolbar {
+    right: 14px;
+    bottom: 14px;
+  }
 }
 
 /* AI Addon Settings Styles */

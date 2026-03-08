@@ -5657,6 +5657,90 @@ class LyricsContainer extends react.Component {
       !this.state.isFullscreen ||
       this.state.isFloatingMenuOpen ||
       this.state.isFloatingMenuClosing;
+    const modeButtons = [
+      this.state.karaoke &&
+      CONFIG.visual["karaoke-mode-enabled"] &&
+      react.createElement(
+        Spicetify.ReactComponent.TooltipWrapper,
+        { key: "karaoke", label: I18n.t("modes.karaoke") },
+        react.createElement(
+          "button",
+          {
+            type: "button",
+            className: `lyrics-config-button lyrics-mode-button ${mode === KARAOKE ? "active" : ""}`,
+            onClick: () => this.switchTo(KARAOKE),
+            "aria-pressed": mode === KARAOKE,
+          },
+          react.createElement("svg", {
+            width: 18,
+            height: 18,
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: 2,
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            dangerouslySetInnerHTML: {
+              __html: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
+            },
+          })
+        )
+      ),
+      this.state.synced &&
+      react.createElement(
+        Spicetify.ReactComponent.TooltipWrapper,
+        { key: "synced", label: I18n.t("modes.synced") },
+        react.createElement(
+          "button",
+          {
+            type: "button",
+            className: `lyrics-config-button lyrics-mode-button ${mode === SYNCED ? "active" : ""}`,
+            onClick: () => this.switchTo(SYNCED),
+            "aria-pressed": mode === SYNCED,
+          },
+          react.createElement("svg", {
+            width: 18,
+            height: 18,
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: 2,
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            dangerouslySetInnerHTML: {
+              __html: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+            },
+          })
+        )
+      ),
+      this.state.unsynced &&
+      react.createElement(
+        Spicetify.ReactComponent.TooltipWrapper,
+        { key: "unsynced", label: I18n.t("modes.unsynced") },
+        react.createElement(
+          "button",
+          {
+            type: "button",
+            className: `lyrics-config-button lyrics-mode-button ${mode === UNSYNCED ? "active" : ""}`,
+            onClick: () => this.switchTo(UNSYNCED),
+            "aria-pressed": mode === UNSYNCED,
+          },
+          react.createElement("svg", {
+            width: 18,
+            height: 18,
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: 2,
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            dangerouslySetInnerHTML: {
+              __html: '<path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/>',
+            },
+          })
+        )
+      ),
+    ].filter(Boolean);
 
     // Build fullscreen class names
     let fullscreenClasses = "";
@@ -5797,7 +5881,7 @@ class LyricsContainer extends react.Component {
       react.createElement(
         "div",
         {
-          className: "lyrics-config-button-container" +
+          className: "lyrics-config-button-container lyrics-fluent-floating-toolbar" +
             (this.state.isFullscreen ? " fullscreen-mode-container" : "") +
             (this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : "") +
             (this.state.isFullscreen && this.state.isFloatingMenuClosing ? " menu-closing" : ""),
@@ -5826,6 +5910,7 @@ class LyricsContainer extends react.Component {
           "button",
           {
             className: "lyrics-config-button lyrics-floating-menu-toggle",
+            type: "button",
             onClick: (e) => {
               e.stopPropagation();
               this.toggleFloatingMenu();
@@ -5899,6 +5984,7 @@ class LyricsContainer extends react.Component {
               "button",
               {
                 className: `lyrics-config-button lyrics-marketplace-button${this.state.showMarketplace ? " active" : ""}`,
+                type: "button",
                 onClick: () => this.setState({ showMarketplace: !this.state.showMarketplace }),
               },
               react.createElement("svg", {
@@ -5927,6 +6013,7 @@ class LyricsContainer extends react.Component {
               "button",
               {
                 className: "lyrics-config-button lyrics-fullscreen-toggle-button",
+                type: "button",
                 onClick: () => {
                   if (this.state.isFullscreen) {
                     this.closeFloatingMenu();
@@ -5951,79 +6038,18 @@ class LyricsContainer extends react.Component {
               })
             )
           ),
-          // 구분선
-          react.createElement("div", { className: "lyrics-config-separator" }),
-          // 모드 전환 버튼들
-          this.state.karaoke && CONFIG.visual["karaoke-mode-enabled"] && react.createElement(
-            Spicetify.ReactComponent.TooltipWrapper,
-            { label: I18n.t("modes.karaoke") },
+          modeButtons.length > 0 &&
+          react.createElement(
+            "div",
+            { className: "lyrics-config-mode-section" },
+            react.createElement("div", { className: "lyrics-config-separator" }),
             react.createElement(
-              "button",
+              "div",
               {
-                className: `lyrics-config-button lyrics-mode-button ${mode === KARAOKE ? "active" : ""}`,
-                onClick: () => this.switchTo(KARAOKE),
+                className: "lyrics-config-mode-group",
+                role: "group",
               },
-              react.createElement("svg", {
-                width: 18,
-                height: 18,
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: 2,
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                dangerouslySetInnerHTML: {
-                  __html: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
-                },
-              })
-            )
-          ),
-          this.state.synced && react.createElement(
-            Spicetify.ReactComponent.TooltipWrapper,
-            { label: I18n.t("modes.synced") },
-            react.createElement(
-              "button",
-              {
-                className: `lyrics-config-button lyrics-mode-button ${mode === SYNCED ? "active" : ""}`,
-                onClick: () => this.switchTo(SYNCED),
-              },
-              react.createElement("svg", {
-                width: 18,
-                height: 18,
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: 2,
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                dangerouslySetInnerHTML: {
-                  __html: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
-                },
-              })
-            )
-          ),
-          this.state.unsynced && react.createElement(
-            Spicetify.ReactComponent.TooltipWrapper,
-            { label: I18n.t("modes.unsynced") },
-            react.createElement(
-              "button",
-              {
-                className: `lyrics-config-button lyrics-mode-button ${mode === UNSYNCED ? "active" : ""}`,
-                onClick: () => this.switchTo(UNSYNCED),
-              },
-              react.createElement("svg", {
-                width: 18,
-                height: 18,
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: 2,
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                dangerouslySetInnerHTML: {
-                  __html: '<path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/>',
-                },
-              })
+              ...modeButtons
             )
           ),
           react.createElement(SyncDataCreatorButton, {

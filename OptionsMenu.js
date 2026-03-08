@@ -3816,7 +3816,7 @@ const SyncDataCreatorButton = react.memo(({ trackInfo, showHint, provider, initi
       react.createElement(
         "button",
         {
-          className: "lyrics-config-button glitter-effect",
+        className: "lyrics-config-button",
           onClick: handleClick,
         },
         react.createElement(
