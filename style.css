@@ -204,6 +204,31 @@
   transform: translateY(0) scale(1);
 }
 
+/* 좁은 화면: 오버레이/모달 반응형 */
+@media (max-width: 800px) {
+  .ivlyrics-settings-overlay {
+    padding: 16px;
+  }
+
+  .ivlyrics-settings-modal-shell {
+    max-height: 92vh;
+  }
+}
+
+@media (max-width: 650px) {
+  .ivlyrics-settings-overlay {
+    padding: 8px;
+  }
+
+  .ivlyrics-settings-modal-shell {
+    max-width: 100vw;
+    max-height: 96vh;
+    width: 100vw;
+    border-radius: 0;
+    border: none;
+  }
+}
+
 /* Translation Loading Indicator */
 /* Translation Loading Indicator */
 .lyrics-translation-loading-indicator {

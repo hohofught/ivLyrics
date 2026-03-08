@@ -9306,12 +9306,215 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 }
 
 @media (max-width: 1100px) {
+    #${APP_NAME}-config-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+    }
+
+    #${APP_NAME}-config-container .settings-header,
+    #${APP_NAME}-config-container .settings-sidebar,
+    #${APP_NAME}-config-container .settings-search-container,
     #${APP_NAME}-config-container .settings-main-panel {
+        grid-column: 1;
+    }
+
+    #${APP_NAME}-config-container .settings-header {
+        grid-row: 1;
+    }
+
+    #${APP_NAME}-config-container .settings-sidebar {
+        grid-row: 2;
+        padding: 14px 20px 6px;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        max-height: min(26vh, 220px);
+        scrollbar-gutter: stable;
+    }
+
+    #${APP_NAME}-config-container .settings-search-container {
+        grid-row: 3;
+        padding: 12px 20px;
+    }
+
+    #${APP_NAME}-config-container .settings-main-panel {
+        grid-row: 4;
         margin: 0 20px 20px;
     }
 
     #${APP_NAME}-config-container .setting-row-content {
+        align-items: flex-start;
         grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    #${APP_NAME}-config-container .setting-row-right {
+        width: 100%;
+        max-width: none;
+        justify-content: flex-start;
+    }
+
+    #${APP_NAME}-config-container .slider-container {
+        width: 100%;
+        max-width: none;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-group-toggle {
+        min-height: 36px;
+        padding: 0 12px;
+        font-size: 11px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-card {
+        min-height: 40px;
+        padding: 0 12px;
+        gap: 8px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-subitem {
+        min-height: 36px;
+        padding: 0 12px 0 20px;
+        font-size: 12px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-subitem-label,
+    #${APP_NAME}-config-container .settings-nav-card-title {
+        line-height: 1.25;
+    }
+}
+
+@media (max-width: 800px) {
+    #${APP_NAME}-config-container .settings-header {
+        padding: 20px 20px 14px;
+    }
+
+    #${APP_NAME}-config-container .settings-header-content {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    #${APP_NAME}-config-container .settings-title-section {
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    #${APP_NAME}-config-container .settings-buttons {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 6px;
+    }
+
+    #${APP_NAME}-config-container .settings-sidebar {
+        padding: 12px 16px 6px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-card,
+    #${APP_NAME}-config-container .settings-nav-subitem,
+    #${APP_NAME}-config-container .settings-nav-group-toggle {
+        min-height: 34px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-card {
+        padding: 0 10px;
+        gap: 6px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-card-title {
+        font-size: 12px;
+    }
+
+    #${APP_NAME}-config-container .settings-nav-subitem {
+        padding: 0 10px 0 18px;
+        font-size: 12px;
+    }
+
+    #${APP_NAME}-config-container .settings-search-container {
+        padding: 12px 16px 10px;
+    }
+
+    #${APP_NAME}-config-container .settings-main-panel {
+        margin: 0 16px 16px;
+    }
+
+    #${APP_NAME}-config-container .settings-content {
+        padding: 20px 20px 32px;
+    }
+
+    #${APP_NAME}-config-container .settings-panel-hero {
+        gap: 10px;
+        padding: 0 0 16px;
+    }
+
+    #${APP_NAME}-config-container .settings-panel-copy h2 {
+        font-size: 24px;
+        line-height: 1.05;
+    }
+
+    #${APP_NAME}-config-container .settings-panel-copy p {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 650px) {
+    #${APP_NAME}-config-container .settings-header {
+        padding: 16px 16px 12px;
+    }
+
+    #${APP_NAME}-config-container .settings-title-section h1 {
+        font-size: 22px;
+    }
+
+    #${APP_NAME}-config-container .settings-sidebar {
+        padding: 12px 12px 8px;
+        max-height: min(24vh, 180px);
+    }
+
+    #${APP_NAME}-config-container .settings-search-container {
+        padding: 12px 12px 8px;
+    }
+
+    #${APP_NAME}-config-container .settings-main-panel {
+        margin: 0 12px 12px;
+        border-radius: 16px;
+    }
+
+    #${APP_NAME}-config-container .settings-content {
+        padding: 16px 16px 28px;
+    }
+
+    #${APP_NAME}-config-container .settings-panel-hero {
+        flex-direction: column;
+        gap: 8px;
+        padding: 0 0 14px;
+    }
+
+    #${APP_NAME}-config-container .settings-panel-copy h2 {
+        font-size: 18px;
+    }
+
+    #${APP_NAME}-config-container .settings-panel-copy p {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    #${APP_NAME}-config-container .settings-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #${APP_NAME}-config-container .settings-theme-btn,
+    #${APP_NAME}-config-container .settings-github-btn,
+    #${APP_NAME}-config-container .settings-discord-btn,
+    #${APP_NAME}-config-container .settings-coffee-btn,
+    #${APP_NAME}-config-container .settings-close-btn {
+        min-height: 34px;
+        padding: 0 10px;
+        font-size: 12px;
+        border-radius: 8px;
+    }
+
+    #${APP_NAME}-config-container .settings-close-btn {
+        width: 34px;
+        padding: 0;
     }
 }
 `,
