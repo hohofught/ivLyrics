@@ -26,6 +26,51 @@ window.LANG_PT = {
     "clear": "Limpar",
     "inSection": "Em {section}"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "Espaço de trabalho",
+      "display": "Exibição",
+      "text": "Camadas de texto",
+      "playback": "Reprodução e sincronização",
+      "surfaces": "Telas",
+      "providers": "Provedores",
+      "fullscreen": "Tela cheia",
+      "panel": "Letras do painel",
+      "system": "Sistema"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "Base",
+        "typography": "Texto",
+        "behavior": "Fluxo",
+        "surface": "Visão",
+        "providers": "Fonte",
+        "system": "Sistema"
+      },
+      "generalDesc": "Idioma, sobreposição da área de trabalho e ajustes principais.",
+      "appearanceDesc": "Fundos, tipografia, animações e composição da tela.",
+      "lyricsDesc": "Sincronização, tradução, karaokê e processamento das letras.",
+      "fullscreenDesc": "Layout de reprodução em tela cheia e elementos exibidos.",
+      "nowplayingDesc": "Layout, tamanho e fundo das letras do painel.",
+      "lyricsProvidersDesc": "Prioridades das fontes, tokens e controles dos provedores de letras.",
+      "aiProvidersDesc": "Configuração de provedores de IA para tradução e processamento.",
+      "advancedDesc": "Detecção, cache, aplicativos auxiliares e controles avançados.",
+      "debugDesc": "Diagnóstico, utilitários de recuperação e solução de problemas.",
+      "aboutDesc": "Versão, verificação de atualizações, créditos e notas da versão."
+    },
+    "background": {
+      "none": "Minimal",
+      "noneDesc": "Mantém a área das letras limpa, sem efeito de fundo extra.",
+      "layout": "Layout e animação",
+      "finetune": "Detalhes do fundo"
+    },
+    "theme": {
+      "light": "Alternar para o modo claro",
+      "dark": "Alternar para o modo escuro",
+      "lightShort": "Claro",
+      "darkShort": "Escuro"
+    }
+  },
   "sections": {
     "language": "Idioma",
     "visualEffects": "Efeitos Visuais",
@@ -87,6 +132,13 @@ window.LANG_PT = {
     "language": {
       "label": "Idioma",
       "desc": "Selecione o idioma da extensão"
+    },
+    "translationTargetLanguage": {
+      "label": "Idioma de destino da tradução",
+      "desc": "Escolha o idioma usado na tradução automática",
+      "options": {
+        "auto": "Automático"
+      }
     },
     "alignment": {
       "label": "Alinhamento",
@@ -419,7 +471,8 @@ window.LANG_PT = {
     "openSettings": "Abrir Configurações",
     "translationSettings": "Configurações de Conversão",
     "regenerateTranslation": "Regenerar Tradução",
-    "fullscreen": "Tela Cheia"
+    "fullscreen": "Tela Cheia",
+    "exitFullscreen": "Sair da tela cheia"
   },
   "messages": {
     "noLyrics": "Nenhuma letra disponível",

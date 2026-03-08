@@ -5878,7 +5878,7 @@ class LyricsContainer extends react.Component {
             isEnabled: canRegenerateTranslation,
             isLoading: this.state.isTranslationLoading,
           }),
-          react.createElement(SyncAdjustButton, {
+          react.createElement(SyncAdjustButtonFluent, {
             trackUri: this.currentTrackUri,
             provider: this.state.provider, // Pass provider
             onOffsetChange: (offset) => {

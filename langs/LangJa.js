@@ -26,6 +26,51 @@ window.LANG_JA = {
     "clear": "クリア",
     "inSection": "{section} 内"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "基本",
+      "display": "画面構成",
+      "text": "テキストレイヤー",
+      "playback": "再生と同期",
+      "surfaces": "表示画面",
+      "providers": "プロバイダー",
+      "fullscreen": "フルスクリーン",
+      "panel": "パネル歌詞",
+      "system": "システム"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "基本",
+        "typography": "文字",
+        "behavior": "動作",
+        "surface": "表示",
+        "providers": "ソース",
+        "system": "管理"
+      },
+      "generalDesc": "言語、デスクトップオーバーレイ、基本動作をまとめます。",
+      "appearanceDesc": "背景、タイポグラフィ、モーション、画面構成を調整します。",
+      "lyricsDesc": "同期、翻訳、カラオケ、歌詞処理を設定します。",
+      "fullscreenDesc": "フルスクリーン再生時のレイアウトと表示内容を管理します。",
+      "nowplayingDesc": "パネル歌詞の配置、サイズ、背景表現を設定します。",
+      "lyricsProvidersDesc": "歌詞ソースの優先順位、トークン、プロバイダー設定を管理します。",
+      "aiProvidersDesc": "AI翻訳および処理プロバイダーを設定します。",
+      "advancedDesc": "検出、キャッシュ、補助アプリ連携などの詳細機能です。",
+      "debugDesc": "診断、復旧、トラブルシューティングツールを提供します。",
+      "aboutDesc": "バージョン情報、更新確認、クレジット、パッチノートを表示します。"
+    },
+    "background": {
+      "none": "ミニマル",
+      "noneDesc": "追加の背景効果を使わず、歌詞表示をすっきり保ちます。",
+      "layout": "レイアウトとモーション",
+      "finetune": "背景の詳細設定"
+    },
+    "theme": {
+      "light": "ライトモードに切り替え",
+      "dark": "ダークモードに切り替え",
+      "lightShort": "ライト",
+      "darkShort": "ダーク"
+    }
+  },
   "sections": {
     "language": "言語",
     "visualEffects": "視覚効果",
@@ -87,6 +132,13 @@ window.LANG_JA = {
     "language": {
       "label": "言語",
       "desc": "拡張機能の言語を選択します"
+    },
+    "translationTargetLanguage": {
+      "label": "翻訳先の言語",
+      "desc": "自動翻訳に使用する言語を選択します",
+      "options": {
+        "auto": "自動"
+      }
     },
     "alignment": {
       "label": "配置",
@@ -419,7 +471,8 @@ window.LANG_JA = {
     "openSettings": "設定を開く",
     "translationSettings": "変換設定",
     "regenerateTranslation": "翻訳を再生成",
-    "fullscreen": "フルスクリーン"
+    "fullscreen": "フルスクリーン",
+    "exitFullscreen": "フルスクリーンを終了"
   },
   "messages": {
     "noLyrics": "利用可能な歌詞がありません",

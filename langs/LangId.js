@@ -26,6 +26,51 @@ window.LANG_ID = {
     "clear": "Hapus",
     "inSection": "Di {section}"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "Inti",
+      "display": "Tampilan",
+      "text": "Lapisan Teks",
+      "playback": "Pemutaran & Sinkronisasi",
+      "surfaces": "Layar",
+      "providers": "Penyedia",
+      "fullscreen": "Layar Penuh",
+      "panel": "Lirik Panel",
+      "system": "Sistem"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "Inti",
+        "typography": "Teks",
+        "behavior": "Alur",
+        "surface": "Tampilan",
+        "providers": "Sumber",
+        "system": "Sistem"
+      },
+      "generalDesc": "Bahasa, overlay desktop, dan pengaturan inti.",
+      "appearanceDesc": "Latar belakang, tipografi, animasi, dan komposisi layar.",
+      "lyricsDesc": "Sinkronisasi, terjemahan, karaoke, dan pemrosesan lirik.",
+      "fullscreenDesc": "Tata letak pemutaran layar penuh dan elemen yang ditampilkan.",
+      "nowplayingDesc": "Tata letak, ukuran, dan latar lirik panel.",
+      "lyricsProvidersDesc": "Prioritas sumber, token, dan kontrol penyedia lirik.",
+      "aiProvidersDesc": "Konfigurasi penyedia AI untuk terjemahan dan pemrosesan.",
+      "advancedDesc": "Deteksi, cache, aplikasi pendukung, dan kontrol lanjutan.",
+      "debugDesc": "Diagnostik, utilitas pemulihan, dan pemecahan masalah.",
+      "aboutDesc": "Detail versi, pemeriksaan pembaruan, kredit, dan catatan rilis."
+    },
+    "background": {
+      "none": "Minimal",
+      "noneDesc": "Menjaga area lirik tetap bersih tanpa efek latar tambahan.",
+      "layout": "Tata letak & gerakan",
+      "finetune": "Detail latar belakang"
+    },
+    "theme": {
+      "light": "Beralih ke mode terang",
+      "dark": "Beralih ke mode gelap",
+      "lightShort": "Terang",
+      "darkShort": "Gelap"
+    }
+  },
   "sections": {
     "language": "Bahasa",
     "visualEffects": "Efek Visual",
@@ -87,6 +132,13 @@ window.LANG_ID = {
     "language": {
       "label": "Bahasa",
       "desc": "Pilih bahasa ekstensi"
+    },
+    "translationTargetLanguage": {
+      "label": "Bahasa target terjemahan",
+      "desc": "Pilih bahasa yang digunakan untuk terjemahan otomatis",
+      "options": {
+        "auto": "Otomatis"
+      }
     },
     "alignment": {
       "label": "Perataan",
@@ -419,7 +471,8 @@ window.LANG_ID = {
     "openSettings": "Buka Pengaturan",
     "translationSettings": "Pengaturan Konversi",
     "regenerateTranslation": "Buat Ulang Terjemahan",
-    "fullscreen": "Layar Penuh"
+    "fullscreen": "Layar Penuh",
+    "exitFullscreen": "Keluar dari layar penuh"
   },
   "messages": {
     "noLyrics": "Lirik tidak tersedia",

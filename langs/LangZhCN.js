@@ -26,6 +26,51 @@ window.LANG_ZH_CN = {
     "clear": "清除",
     "inSection": "在 {section} 中"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "工作区",
+      "display": "显示",
+      "text": "文本层",
+      "playback": "播放与同步",
+      "surfaces": "显示界面",
+      "providers": "提供商",
+      "fullscreen": "全屏",
+      "panel": "面板歌词",
+      "system": "系统"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "核心",
+        "typography": "文本",
+        "behavior": "流程",
+        "surface": "视图",
+        "providers": "来源",
+        "system": "系统"
+      },
+      "generalDesc": "语言、桌面悬浮窗与核心默认设置。",
+      "appearanceDesc": "背景、字体、动效与画面布局。",
+      "lyricsDesc": "同步、翻译、卡拉 OK 与歌词处理。",
+      "fullscreenDesc": "全屏播放布局与展示内容设置。",
+      "nowplayingDesc": "面板歌词的布局、大小与背景效果。",
+      "lyricsProvidersDesc": "歌词来源优先级、令牌与提供商控制。",
+      "aiProvidersDesc": "AI 翻译与处理提供商配置。",
+      "advancedDesc": "检测、缓存、辅助程序与高级控制。",
+      "debugDesc": "诊断、恢复工具与问题排查。",
+      "aboutDesc": "版本信息、更新检查、致谢与更新日志。"
+    },
+    "background": {
+      "none": "极简",
+      "noneDesc": "不添加额外背景效果，保持歌词界面干净清晰。",
+      "layout": "布局与动效",
+      "finetune": "背景细节"
+    },
+    "theme": {
+      "light": "切换到浅色模式",
+      "dark": "切换到深色模式",
+      "lightShort": "浅色",
+      "darkShort": "深色"
+    }
+  },
   "sections": {
     "language": "语言",
     "visualEffects": "视觉效果",
@@ -87,6 +132,13 @@ window.LANG_ZH_CN = {
     "language": {
       "label": "语言",
       "desc": "选择扩展程序的语言"
+    },
+    "translationTargetLanguage": {
+      "label": "翻译目标语言",
+      "desc": "选择自动翻译使用的目标语言",
+      "options": {
+        "auto": "自动"
+      }
     },
     "alignment": {
       "label": "对齐方式",
@@ -419,7 +471,8 @@ window.LANG_ZH_CN = {
     "openSettings": "打开设置",
     "translationSettings": "转换设置",
     "regenerateTranslation": "重新生成翻译",
-    "fullscreen": "全屏"
+    "fullscreen": "全屏",
+    "exitFullscreen": "退出全屏"
   },
   "messages": {
     "noLyrics": "暂无可用歌词",

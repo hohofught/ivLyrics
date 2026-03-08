@@ -26,6 +26,51 @@ window.LANG_ZH_TW = {
     "clear": "清除",
     "inSection": "在 {section} 中"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "工作區",
+      "display": "顯示",
+      "text": "文字層",
+      "playback": "播放與同步",
+      "surfaces": "顯示介面",
+      "providers": "提供者",
+      "fullscreen": "全螢幕",
+      "panel": "面板歌詞",
+      "system": "系統"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "核心",
+        "typography": "文字",
+        "behavior": "流程",
+        "surface": "視圖",
+        "providers": "來源",
+        "system": "系統"
+      },
+      "generalDesc": "語言、桌面浮窗與核心預設設定。",
+      "appearanceDesc": "背景、字體、動效與畫面配置。",
+      "lyricsDesc": "同步、翻譯、卡拉 OK 與歌詞處理。",
+      "fullscreenDesc": "全螢幕播放版面與顯示內容設定。",
+      "nowplayingDesc": "面板歌詞的版面、大小與背景效果。",
+      "lyricsProvidersDesc": "歌詞來源優先順序、權杖與提供者控制。",
+      "aiProvidersDesc": "AI 翻譯與處理提供者設定。",
+      "advancedDesc": "偵測、快取、輔助程式與進階控制。",
+      "debugDesc": "診斷、復原工具與疑難排解。",
+      "aboutDesc": "版本資訊、更新檢查、致謝與更新日誌。"
+    },
+    "background": {
+      "none": "極簡",
+      "noneDesc": "不加入額外背景效果，讓歌詞畫面保持乾淨。",
+      "layout": "版面與動效",
+      "finetune": "背景細節"
+    },
+    "theme": {
+      "light": "切換到淺色模式",
+      "dark": "切換到深色模式",
+      "lightShort": "淺色",
+      "darkShort": "深色"
+    }
+  },
   "sections": {
     "language": "語言",
     "visualEffects": "視覺效果",
@@ -87,6 +132,13 @@ window.LANG_ZH_TW = {
     "language": {
       "label": "語言",
       "desc": "選擇擴充功能的顯示語言"
+    },
+    "translationTargetLanguage": {
+      "label": "翻譯目標語言",
+      "desc": "選擇自動翻譯使用的目標語言",
+      "options": {
+        "auto": "自動"
+      }
     },
     "alignment": {
       "label": "對齊方式",
@@ -419,7 +471,8 @@ window.LANG_ZH_TW = {
     "openSettings": "開啟設定",
     "translationSettings": "轉換設定",
     "regenerateTranslation": "重新產生翻譯",
-    "fullscreen": "全螢幕"
+    "fullscreen": "全螢幕",
+    "exitFullscreen": "退出全螢幕"
   },
   "messages": {
     "noLyrics": "無可用歌詞",

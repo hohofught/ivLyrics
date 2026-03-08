@@ -26,6 +26,51 @@ window.LANG_FA = {
     "clear": "پاک کردن",
     "inSection": "در {section}"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "اصلی",
+      "display": "نمایش",
+      "text": "لایه‌های متن",
+      "playback": "پخش و همگام‌سازی",
+      "surfaces": "صفحه‌ها",
+      "providers": "ارائه‌دهنده‌ها",
+      "fullscreen": "تمام‌صفحه",
+      "panel": "متن پنل",
+      "system": "سیستم"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "اصلی",
+        "typography": "متن",
+        "behavior": "جریان",
+        "surface": "نما",
+        "providers": "منبع",
+        "system": "سیستم"
+      },
+      "generalDesc": "زبان، پوشش دسکتاپ و تنظیمات اصلی.",
+      "appearanceDesc": "پس‌زمینه‌ها، تایپوگرافی، حرکت و چیدمان صفحه.",
+      "lyricsDesc": "همگام‌سازی، ترجمه، کارائوکه و پردازش متن ترانه.",
+      "fullscreenDesc": "چیدمان پخش تمام‌صفحه و عناصر نمایشی.",
+      "nowplayingDesc": "چیدمان، اندازه و پس‌زمینهٔ متن پنل.",
+      "lyricsProvidersDesc": "اولویت منابع، توکن‌ها و کنترل ارائه‌دهندگان متن ترانه.",
+      "aiProvidersDesc": "پیکربندی ارائه‌دهندگان هوش مصنوعی برای ترجمه و پردازش.",
+      "advancedDesc": "شناسایی، کش، برنامه‌های کمکی و کنترل‌های پیشرفته.",
+      "debugDesc": "ابزارهای عیب‌یابی، بازیابی و رفع مشکل.",
+      "aboutDesc": "جزئیات نسخه، بررسی به‌روزرسانی، قدردانی و یادداشت‌های انتشار."
+    },
+    "background": {
+      "none": "مینیمال",
+      "noneDesc": "بدون افکت پس‌زمینهٔ اضافی، سطح ترانه را تمیز نگه می‌دارد.",
+      "layout": "چیدمان و حرکت",
+      "finetune": "جزئیات پس‌زمینه"
+    },
+    "theme": {
+      "light": "تغییر به حالت روشن",
+      "dark": "تغییر به حالت تیره",
+      "lightShort": "روشن",
+      "darkShort": "تیره"
+    }
+  },
   "sections": {
     "language": "زبان",
     "visualEffects": "جلوه‌های بصری",
@@ -87,6 +132,13 @@ window.LANG_FA = {
     "language": {
       "label": "زبان",
       "desc": "زبان افزونه را انتخاب کنید"
+    },
+    "translationTargetLanguage": {
+      "label": "زبان مقصد ترجمه",
+      "desc": "زبان مورد استفاده برای ترجمهٔ خودکار را انتخاب کنید",
+      "options": {
+        "auto": "خودکار"
+      }
     },
     "alignment": {
       "label": "تراز بندی",
@@ -419,7 +471,8 @@ window.LANG_FA = {
     "openSettings": "باز کردن تنظیمات",
     "translationSettings": "تنظیمات تبدیل",
     "regenerateTranslation": "تولید مجدد ترجمه",
-    "fullscreen": "تمام صفحه"
+    "fullscreen": "تمام صفحه",
+    "exitFullscreen": "خروج از تمام‌صفحه"
   },
   "messages": {
     "noLyrics": "متن آهنگی موجود نیست",

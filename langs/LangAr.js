@@ -26,6 +26,51 @@ window.LANG_AR = {
     "clear": "مسح",
     "inSection": "في {section}"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "الأساس",
+      "display": "العرض",
+      "text": "طبقات النص",
+      "playback": "التشغيل والمزامنة",
+      "surfaces": "الشاشات",
+      "providers": "المزوّدون",
+      "fullscreen": "ملء الشاشة",
+      "panel": "كلمات لوحة التشغيل",
+      "system": "النظام"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "أساسي",
+        "typography": "نص",
+        "behavior": "تدفق",
+        "surface": "عرض",
+        "providers": "مصدر",
+        "system": "نظام"
+      },
+      "generalDesc": "اللغة وتراكب سطح المكتب والإعدادات الأساسية.",
+      "appearanceDesc": "الخلفيات والخطوط والحركة وتكوين الشاشة.",
+      "lyricsDesc": "المزامنة والترجمة والكاريوكي ومعالجة الكلمات.",
+      "fullscreenDesc": "تخطيط التشغيل بملء الشاشة والعناصر المعروضة.",
+      "nowplayingDesc": "تخطيط كلمات اللوحة وحجمها وخلفيتها.",
+      "lyricsProvidersDesc": "أولوية المصادر والرموز وإعدادات مزوّدي الكلمات.",
+      "aiProvidersDesc": "إعداد مزوّدي الذكاء الاصطناعي للترجمة والمعالجة.",
+      "advancedDesc": "الاكتشاف والذاكرة المؤقتة والتطبيقات المساعدة والخيارات المتقدمة.",
+      "debugDesc": "أدوات التشخيص والاستعادة واستكشاف الأخطاء.",
+      "aboutDesc": "معلومات الإصدار وفحص التحديثات والشكر وملاحظات الإصدار."
+    },
+    "background": {
+      "none": "بسيط",
+      "noneDesc": "يحافظ على مساحة الكلمات نظيفة من دون تأثيرات خلفية إضافية.",
+      "layout": "التخطيط والحركة",
+      "finetune": "تفاصيل الخلفية"
+    },
+    "theme": {
+      "light": "التبديل إلى الوضع الفاتح",
+      "dark": "التبديل إلى الوضع الداكن",
+      "lightShort": "فاتح",
+      "darkShort": "داكن"
+    }
+  },
   "sections": {
     "language": "اللغة",
     "visualEffects": "تأثيرات بصرية",
@@ -87,6 +132,13 @@ window.LANG_AR = {
     "language": {
       "label": "اللغة",
       "desc": "اختر لغة الإضافة"
+    },
+    "translationTargetLanguage": {
+      "label": "لغة الترجمة المستهدفة",
+      "desc": "اختر اللغة المستخدمة في الترجمة التلقائية",
+      "options": {
+        "auto": "تلقائي"
+      }
     },
     "alignment": {
       "label": "المحاذاة",
@@ -419,7 +471,8 @@ window.LANG_AR = {
     "openSettings": "فتح الإعدادات",
     "translationSettings": "إعدادات التحويل",
     "regenerateTranslation": "إعادة إنشاء الترجمة",
-    "fullscreen": "ملء الشاشة"
+    "fullscreen": "ملء الشاشة",
+    "exitFullscreen": "الخروج من ملء الشاشة"
   },
   "messages": {
     "noLyrics": "لا توجد كلمات متاحة",

@@ -11,6 +11,1332 @@ const OptionsMenuItemIcon = react.createElement(
   })
 );
 
+function getSettingsSurfaceTheme() {
+  return localStorage.getItem("ivLyrics:settings-ui-theme") === "light"
+    ? "light"
+    : "dark";
+}
+
+function resolveOptionsReactDom() {
+  return window.Spicetify?.ReactDOM ?? window.ReactDOM ?? null;
+}
+
+function createFluentModalHost({
+  overlayId,
+  overlayClassName = "",
+  shellClassName = "",
+  shellStyle = "",
+  removeExisting = true,
+  onBeforeClose = null,
+}) {
+  if (removeExisting && overlayId) {
+    const existingOverlay = document.getElementById(overlayId);
+    if (existingOverlay) {
+      existingOverlay.remove();
+    }
+  }
+
+  ensureFluentModalStyles();
+
+  const uiTheme = getSettingsSurfaceTheme();
+  const previouslyFocused =
+    document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const overlay = document.createElement("div");
+  overlay.id = overlayId;
+  overlay.className = ["ivlyrics-fluent-overlay", overlayClassName]
+    .filter(Boolean)
+    .join(" ");
+  overlay.dataset.uiTheme = uiTheme;
+
+  const shell = document.createElement("div");
+  shell.className = ["ivlyrics-fluent-shell", shellClassName]
+    .filter(Boolean)
+    .join(" ");
+  shell.dataset.uiTheme = uiTheme;
+  shell.setAttribute("role", "dialog");
+  shell.setAttribute("aria-modal", "true");
+  if (shellStyle) {
+    shell.style.cssText = shellStyle;
+  }
+
+  let isClosed = false;
+
+  const closeModal = () => {
+    if (isClosed) return;
+    isClosed = true;
+
+    document.removeEventListener("keydown", handleEscape);
+    onBeforeClose?.();
+
+    if (overlay.parentNode) {
+      overlay.remove();
+    }
+
+    if (previouslyFocused && document.contains(previouslyFocused)) {
+      previouslyFocused.focus();
+    }
+  };
+
+  const handleEscape = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeModal();
+    }
+  };
+
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      closeModal();
+    }
+  });
+  document.addEventListener("keydown", handleEscape);
+
+  overlay.appendChild(shell);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    const focusTarget = shell.querySelector(
+      ".ivlyrics-fluent-close, button, input, select, textarea, [tabindex]:not([tabindex='-1'])"
+    );
+    focusTarget?.focus?.();
+  });
+
+  return { overlay, shell, closeModal };
+}
+
+function openFluentReactModal({
+  overlayId,
+  overlayClassName = "",
+  shellClassName = "",
+  shellStyle = "",
+  removeExisting = true,
+  render,
+}) {
+  const reactDom = resolveOptionsReactDom();
+  if (!reactDom?.render) {
+    return null;
+  }
+
+  let shell = null;
+  const host = createFluentModalHost({
+    overlayId,
+    overlayClassName,
+    shellClassName,
+    shellStyle,
+    removeExisting,
+    onBeforeClose: () => {
+      if (shell && reactDom.unmountComponentAtNode) {
+        reactDom.unmountComponentAtNode(shell);
+      }
+    },
+  });
+  shell = host.shell;
+  reactDom.render(render(host.closeModal), shell);
+  return host.closeModal;
+}
+
+function ensureFluentModalStyles() {
+  if (document.getElementById("ivLyrics-fluent-modal-styles")) return;
+
+  const style = document.createElement("style");
+  style.id = "ivLyrics-fluent-modal-styles";
+  style.textContent = `
+.ivlyrics-fluent-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 9999;
+}
+
+.ivlyrics-fluent-overlay[data-ui-theme="light"] {
+  background: rgba(248, 250, 252, 0.82);
+}
+
+.ivlyrics-fluent-shell {
+  width: min(92vw, 720px);
+  max-height: min(88vh, 920px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(12, 12, 12, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.48);
+  border-radius: 0 !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 28px 72px rgba(15, 23, 42, 0.16);
+}
+
+.ivlyrics-fluent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-header {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.ivlyrics-fluent-title-wrap {
+  min-width: 0;
+}
+
+.ivlyrics-fluent-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.03em;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-title {
+  color: #0f172a;
+}
+
+.ivlyrics-fluent-subtitle {
+  margin: 8px 0 0;
+  color: rgba(248, 250, 252, 0.62);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-subtitle {
+  color: rgba(15, 23, 42, 0.62);
+}
+
+.ivlyrics-fluent-close {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+  cursor: pointer;
+  border-radius: 0 !important;
+  flex: 0 0 auto;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-close {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+}
+
+.ivlyrics-fluent-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-close:hover {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.ivlyrics-fluent-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 24px 24px;
+}
+
+.ivlyrics-fluent-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-footer {
+  border-top-color: rgba(15, 23, 42, 0.08);
+}
+
+.ivlyrics-fluent-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0 !important;
+}
+
+.ivlyrics-fluent-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ivlyrics-fluent-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-btn {
+  border-color: rgba(15, 23, 42, 0.14);
+  background: rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+}
+
+.ivlyrics-fluent-btn.primary {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-fluent-btn.primary {
+  color: #0f172a;
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+.ivlyrics-adjust-btn {
+  min-width: 52px;
+  padding-inline: 10px;
+}
+
+.ivlyrics-options-root {
+  width: 100%;
+  color: #f8fafc;
+  font-family: "Segoe UI Variable Text", "Segoe UI", "Pretendard Variable", Pretendard, sans-serif;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root {
+  color: #0f172a;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-title {
+  margin: 20px 0 0;
+  padding: 0 0 10px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-section-title {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-title:first-child {
+  margin-top: 0;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-title h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-title p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(248, 250, 252, 0.58);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-section-title p {
+  color: rgba(15, 23, 42, 0.58);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: none;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-setting-row {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 16px;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row.no-control .ivlyrics-popup-setting-row-content {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row.no-control {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-setting-row.no-control {
+  background: rgba(15, 23, 42, 0.025);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row-right:empty {
+  display: none;
+}
+
+.ivlyrics-options-modal-shell {
+  width: min(92vw, 860px);
+}
+
+.ivlyrics-options-modal-body {
+  padding-top: 18px;
+}
+
+.ivlyrics-options-root {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-list {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-section-list {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-name,
+.ivlyrics-options-root .ivlyrics-popup-row-with-icon {
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-row-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-row-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(248, 250, 252, 0.72);
+  flex: 0 0 auto;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-row-icon {
+  border-color: rgba(15, 23, 42, 0.1);
+  background: rgba(15, 23, 42, 0.04);
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-row-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-row-with-icon span {
+  min-width: 0;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row-left,
+.ivlyrics-options-root .ivlyrics-popup-setting-row-right {
+  min-width: 0;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-row-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-setting-description {
+  color: rgba(248, 250, 252, 0.56);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-setting-description,
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-row-with-icon svg {
+  color: rgba(15, 23, 42, 0.58);
+}
+
+.ivlyrics-popup-switch {
+  width: 44px;
+  min-width: 44px;
+  height: 24px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.ivlyrics-popup-switch.active {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-popup-switch {
+  border-color: rgba(15, 23, 42, 0.14);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-popup-switch.active {
+  border-color: rgba(15, 23, 42, 0.18);
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.ivlyrics-popup-switch-knob {
+  width: 18px;
+  height: 18px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  transform: translateX(0);
+  transition: transform 0.18s ease;
+  border-radius: 0;
+}
+
+.ivlyrics-popup-switch.active .ivlyrics-popup-switch-knob {
+  transform: translateX(18px);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-popup-switch-knob {
+  background: #ffffff;
+}
+
+.ivlyrics-options-root .optionsMenu-dropBox,
+.optionsMenu-dropdown-list {
+  border-radius: 0 !important;
+}
+
+.ivlyrics-options-root .optionsMenu-dropBox {
+  min-width: 120px;
+  min-height: 36px;
+  width: 100%;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 13px;
+  justify-content: space-between;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-list .ivlyrics-popup-setting-row {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .ivlyrics-popup-section-list .ivlyrics-popup-setting-row {
+  border-top-color: rgba(15, 23, 42, 0.08);
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-list .ivlyrics-popup-setting-row:first-child {
+  border-top: none;
+}
+
+.ivlyrics-options-root .ivlyrics-popup-section-list .ivlyrics-popup-setting-row-content {
+  padding-inline: 14px;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .ivlyrics-options-root .optionsMenu-dropBox {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.optionsMenu-dropdown-list {
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+
+.optionsMenu-dropdown-list[data-ui-theme="light"] {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
+}
+
+.optionsMenu-item {
+  color: #f8fafc;
+}
+
+.optionsMenu-dropdown-list[data-ui-theme="light"] .optionsMenu-item {
+  color: #0f172a;
+}
+
+.optionsMenu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.optionsMenu-dropdown-list[data-ui-theme="light"] .optionsMenu-item:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.optionsMenu-item.selected {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.optionsMenu-dropdown-list[data-ui-theme="light"] .optionsMenu-item.selected {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
+.lyrics-sync-adjust-modal-shell {
+  width: min(92vw, 480px);
+  max-height: min(78vh, 760px);
+}
+
+.lyrics-sync-adjust-floating {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.lyrics-sync-adjust-floating > * {
+  pointer-events: auto;
+}
+
+.lyrics-sync-adjust-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lyrics-sync-adjust-info {
+  color: rgba(248, 250, 252, 0.62);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-info {
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.lyrics-sync-adjust-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.lyrics-sync-adjust-side {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lyrics-sync-adjust-fine {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lyrics-sync-adjust-quick {
+  display: flex;
+  gap: 6px;
+}
+
+.lyrics-sync-adjust-modal .lyrics-sync-adjust-slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lyrics-sync-adjust-modal .sync-slider {
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.lyrics-sync-adjust-modal .sync-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(to right, rgba(255,255,255,0.76) var(--progress-percent, 50%), rgba(255,255,255,0.18) var(--progress-percent, 50%));
+}
+
+.lyrics-sync-adjust-modal .sync-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  box-shadow: none;
+}
+
+.lyrics-sync-adjust-modal .sync-slider::-moz-range-track {
+  height: 2px;
+  background: rgba(255,255,255,0.18);
+}
+
+.lyrics-sync-adjust-modal .sync-slider::-moz-range-progress {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.lyrics-sync-adjust-modal .sync-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: #ffffff;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-modal .sync-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, rgba(15,23,42,0.72) var(--progress-percent, 50%), rgba(15,23,42,0.18) var(--progress-percent, 50%));
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-modal .sync-slider::-webkit-slider-thumb {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.28);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-modal .sync-slider::-moz-range-track {
+  background: rgba(15,23,42,0.18);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-modal .sync-slider::-moz-range-progress {
+  background: rgba(15,23,42,0.72);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-modal .sync-slider::-moz-range-thumb {
+  border-color: rgba(15, 23, 42, 0.28);
+}
+
+.lyrics-sync-adjust-slider-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  color: rgba(248, 250, 252, 0.52);
+  font-size: 11px;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-slider-summary {
+  color: rgba(15, 23, 42, 0.56);
+}
+
+.lyrics-sync-adjust-current {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-current {
+  color: #0f172a;
+}
+
+.lyrics-sync-adjust-reset {
+  flex: 0 0 auto;
+}
+
+.lyrics-sync-adjust-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lyrics-sync-adjust-modal .lyrics-sync-adjust-community-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-modal .lyrics-sync-adjust-community-section {
+  border-top-color: rgba(15, 23, 42, 0.08);
+}
+
+.lyrics-sync-adjust-community-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-community-header {
+  color: #0f172a;
+}
+
+.lyrics-sync-adjust-community-header svg {
+  opacity: 0.72;
+}
+
+.lyrics-sync-adjust-loading,
+.lyrics-sync-adjust-empty {
+  color: rgba(248, 250, 252, 0.58);
+  font-size: 12px;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-loading,
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-empty {
+  color: rgba(15, 23, 42, 0.58);
+}
+
+.lyrics-sync-adjust-empty-row,
+.lyrics-sync-adjust-community-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.lyrics-sync-adjust-community-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  flex: 1 1 auto;
+}
+
+.lyrics-sync-adjust-stat {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-stat {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.lyrics-sync-adjust-stat-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-stat-value {
+  color: #0f172a;
+}
+
+.lyrics-sync-adjust-stat-label {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.52);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .lyrics-sync-adjust-stat-label {
+  color: rgba(15, 23, 42, 0.52);
+}
+
+.lyrics-sync-adjust-community-actions,
+.lyrics-sync-adjust-community-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.lyrics-sync-adjust-community-footer {
+  justify-content: flex-end;
+}
+
+.lyrics-sync-adjust-feedback-btn,
+.lyrics-sync-adjust-action-btn {
+  min-height: 36px;
+}
+
+.lyrics-sync-adjust-feedback-btn.active-positive {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.lyrics-sync-adjust-feedback-btn.active-negative {
+  border-color: rgba(239, 68, 68, 0.38);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+
+.lyrics-sync-adjust-auto-submit {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(248, 250, 252, 0.72);
+  font-size: 12px;
+  text-align: center;
+}
+
+.share-image-modal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 84vh;
+  color: #f8fafc;
+  font-family: "Segoe UI Variable Text", "Segoe UI", "Pretendard Variable", Pretendard, sans-serif;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal {
+  color: #0f172a;
+}
+
+.share-image-modal-header {
+  padding-bottom: 18px;
+}
+
+.share-image-modal-content {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.46fr) minmax(0, 0.54fr);
+  overflow: hidden;
+}
+
+.share-image-modal-selection-pane {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 0;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-selection-pane {
+  border-right-color: rgba(15, 23, 42, 0.08);
+}
+
+.share-image-modal-selection-label {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.58);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-selection-label {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+  color: rgba(15, 23, 42, 0.58);
+}
+
+.share-image-modal-selection-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.share-image-modal-lyric-line {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  border-radius: 0 !important;
+}
+
+.share-image-modal-lyric-line[data-selected="true"] {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-lyric-line {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-lyric-line[data-selected="true"] {
+  border-color: rgba(15, 23, 42, 0.18);
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.share-image-modal-lyric-line > div:first-child {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: inherit !important;
+}
+
+.share-image-modal-lyric-line > div:nth-child(2) {
+  color: rgba(248, 250, 252, 0.52) !important;
+}
+
+.share-image-modal-lyric-line > div:nth-child(3) {
+  color: rgba(248, 250, 252, 0.72) !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-lyric-line > div:nth-child(2) {
+  color: rgba(15, 23, 42, 0.52) !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-lyric-line > div:nth-child(3) {
+  color: rgba(15, 23, 42, 0.72) !important;
+}
+
+.share-image-modal-config-pane {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.share-image-control-group > label,
+.share-image-advanced-panel label {
+  color: rgba(248, 250, 252, 0.62) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-control-group > label,
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-advanced-panel label {
+  color: rgba(15, 23, 42, 0.62) !important;
+}
+
+.share-image-segment-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.share-image-chip,
+.share-image-segment-btn,
+.share-image-advanced-toggle,
+.share-image-modal button:not(.ivlyrics-fluent-close):not(.ivlyrics-fluent-btn) {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: inherit !important;
+  border-radius: 0 !important;
+  cursor: pointer;
+}
+
+.share-image-chip[data-active="true"],
+.share-image-segment-btn[data-active="true"] {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-chip,
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-segment-btn,
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-advanced-toggle,
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal button:not(.ivlyrics-fluent-close):not(.ivlyrics-fluent-btn) {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+  color: #0f172a !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-chip[data-active="true"],
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-segment-btn[data-active="true"] {
+  color: #0f172a !important;
+}
+
+.share-image-advanced-toggle {
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.share-image-advanced-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 0 !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-advanced-panel {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+  background: rgba(15, 23, 42, 0.03) !important;
+}
+
+.share-image-panel-section {
+  grid-column: span 2;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(248, 250, 252, 0.72) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-panel-section {
+  border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+  color: rgba(15, 23, 42, 0.72) !important;
+}
+
+.share-image-advanced-panel input[type="range"],
+.share-image-modal input[type="range"] {
+  width: 100%;
+  accent-color: #e5e7eb;
+}
+
+.share-image-advanced-panel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #e5e7eb;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-advanced-panel input[type="range"],
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal input[type="range"],
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-advanced-panel input[type="checkbox"] {
+  accent-color: #334155;
+}
+
+.share-image-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-image-preview-panel {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  border-radius: 0 !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-preview-panel {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.share-image-preview-panel img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0 !important;
+}
+
+.share-image-placeholder {
+  color: rgba(248, 250, 252, 0.52);
+  font-size: 13px;
+  text-align: center;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-placeholder {
+  color: rgba(15, 23, 42, 0.52);
+}
+
+.share-image-modal-footer {
+  justify-content: space-between;
+}
+
+.share-image-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.share-image-modal-footer .ivlyrics-fluent-btn {
+  border-radius: 0 !important;
+}
+
+.share-image-modal-footer .ivlyrics-fluent-btn:not(.primary) {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #f8fafc !important;
+}
+
+.share-image-modal-footer .ivlyrics-fluent-btn.primary {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-footer .ivlyrics-fluent-btn:not(.primary) {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+  color: #0f172a !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-footer .ivlyrics-fluent-btn.primary {
+  border-color: rgba(15, 23, 42, 0.18) !important;
+  background: rgba(15, 23, 42, 0.08) !important;
+  color: #0f172a !important;
+}
+
+.share-image-copyright-shell {
+  width: min(92vw, 460px);
+  background: rgba(12, 12, 12, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.42) !important;
+}
+
+.share-image-copyright-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.share-image-copyright-icon {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.share-image-copyright-points {
+  margin: 0;
+  padding-left: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-right: 12px;
+  line-height: 1.7;
+  color: rgba(248, 250, 252, 0.68);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-copyright-points {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.03);
+  color: rgba(15, 23, 42, 0.68);
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-copyright-shell {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 28px 72px rgba(15, 23, 42, 0.16) !important;
+}
+
+.share-image-copyright-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.share-image-copyright-actions .ivlyrics-fluent-btn {
+  flex: 1 1 0;
+}
+
+.share-image-copyright-confirm {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+.ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-copyright-confirm {
+  border-color: rgba(15, 23, 42, 0.18) !important;
+  background: rgba(15, 23, 42, 0.08) !important;
+  color: #0f172a !important;
+}
+
+@media (max-width: 960px) {
+  .share-image-modal-content {
+    grid-template-columns: 1fr;
+  }
+
+  .share-image-modal-selection-pane {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: 240px;
+  }
+
+  .ivlyrics-fluent-shell[data-ui-theme="light"] .share-image-modal-selection-pane {
+    border-bottom-color: rgba(15, 23, 42, 0.08);
+  }
+}
+
+@media (max-width: 840px) {
+  .ivlyrics-options-root .ivlyrics-popup-setting-row-content {
+    grid-template-columns: 1fr;
+  }
+
+  .ivlyrics-options-root .ivlyrics-popup-setting-row-right {
+    justify-content: flex-start;
+  }
+
+  .lyrics-sync-adjust-floating {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+  }
+
+  .lyrics-sync-adjust-modal-shell {
+    width: auto;
+    max-height: min(72vh, 760px);
+  }
+
+  .lyrics-sync-adjust-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lyrics-sync-adjust-side,
+  .lyrics-sync-adjust-track,
+  .lyrics-sync-adjust-community-row,
+  .lyrics-sync-adjust-empty-row {
+    width: 100%;
+  }
+
+  .lyrics-sync-adjust-track,
+  .lyrics-sync-adjust-community-row,
+  .lyrics-sync-adjust-empty-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lyrics-sync-adjust-community-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .lyrics-sync-adjust-quick {
+    flex-wrap: wrap;
+  }
+}
+`;
+  document.head.appendChild(style);
+}
+
 // Optimized OptionsMenuItem with better performance
 const OptionsMenuItem = react.memo(({ onSelect, value, isSelected }) => {
   // React 130 방지: Hook 순서 일관성 유지
@@ -125,12 +1451,14 @@ const OptionsMenu = react.memo(
     }, [isOpen]);
 
     // Render Dropdown via Portal
+    const surfaceTheme = getSettingsSurfaceTheme();
     const dropdownMenu = isOpen && Spicetify.ReactDOM.createPortal(
       react.createElement(
         "div",
         {
           ref: dropdownRef,
           className: "optionsMenu-dropdown-list",
+          "data-ui-theme": surfaceTheme,
           style: {
             position: 'fixed',
             top: `${dropdownPosition.top}px`,
@@ -232,66 +1560,43 @@ const OptionsMenu = react.memo(
 );
 
 const ICONS = {
-  provider: `<path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zM8 10.93a2.93 2.93 0 1 1 0-5.86 2.93 2.93 0 0 1 0 5.86z"/>`,
-  display: `<path d="M1 1h5v5H1V1zm6 0h8v5H7V1zm-6 6h5v8H1V7zm6 0h8v8H7V7z"/>`,
-  mode: `<path d="M10.5 1a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 .5-.5zm-4 0a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 .5-.5zm-4 0a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-1 0v-12a.5.5 0 0 1 .5-.5z"/>`,
-  language: `<path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM1.026 7.5h1.332c.05.586.13 1.15.24 1.696-1.012-.34-1.782-.93-2.13-1.696zM14.974 7.5h-1.332a10.034 10.034 0 0 1-.24 1.696c1.012-.34 1.782-.93 2.13-1.696zM8 15c-1.07 0-2.096-.21-3.034-.604a.5.5 0 0 0-.416.924C5.59 15.8 6.758 16 8 16s2.41-.2 3.45-.68a.5.5 0 0 0-.416-.924C10.096 14.79 9.07 15 8 15zm0-1.5c.983 0 1.912-.18 2.76-.502.848-.323 1.543-.8 2.062-1.405.519-.604.85-1.353.972-2.155H2.206c.122.802.453 1.551.972 2.155.519.605 1.214 1.082 2.062 1.405C6.088 13.32 7.017 13.5 8 13.5z"/>`,
-};
-
-// 최적화 #5 - 공통 버튼 스타일 추출
-const BUTTON_STYLES = {
-  adjustBase: {
-    background: "rgba(255, 255, 255, 0.08)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
-    borderRadius: "8px",
-    color: "#ffffff",
-    cursor: "pointer",
-    padding: "6px 10px",
-    fontSize: "12px",
-    fontWeight: "600",
-    minWidth: "52px",
-    letterSpacing: "-0.01em",
-    transition: "all 0.2s ease",
-  },
-  adjustHover: {
-    background: "rgba(255, 255, 255, 0.12)",
-    transform: "translateY(-1px)",
-  },
-  adjustNormal: {
-    background: "rgba(255, 255, 255, 0.08)",
-    transform: "translateY(0)",
-  }
+  provider: `<path d="M8 1.5a1 1 0 0 1 1 1v.56a4.97 4.97 0 0 1 1.4.58l.4-.4a1 1 0 0 1 1.42 0l.78.78a1 1 0 0 1 0 1.42l-.4.4c.27.44.47.91.58 1.4H14.5a1 1 0 0 1 1 1v1.1a1 1 0 0 1-1 1h-.56a4.97 4.97 0 0 1-.58 1.4l.4.4a1 1 0 0 1 0 1.42l-.78.78a1 1 0 0 1-1.42 0l-.4-.4a4.97 4.97 0 0 1-1.4.58v.56a1 1 0 0 1-1 1H7.4a1 1 0 0 1-1-1v-.56a4.97 4.97 0 0 1-1.4-.58l-.4.4a1 1 0 0 1-1.42 0l-.78-.78a1 1 0 0 1 0-1.42l.4-.4a4.97 4.97 0 0 1-.58-1.4H1.5a1 1 0 0 1-1-1V7.4a1 1 0 0 1 1-1h.56c.11-.49.31-.96.58-1.4l-.4-.4a1 1 0 0 1 0-1.42l.78-.78a1 1 0 0 1 1.42 0l.4.4c.44-.27.91-.47 1.4-.58V2.5a1 1 0 0 1 1-1H8Zm-.05 4.1a2.45 2.45 0 1 0 0 4.9 2.45 2.45 0 0 0 0-4.9Z"/>`,
+  display: `<path d="M1.5 2.5h13v11h-13v-11Zm1 1v9h11v-9h-11Zm1.5 1.5h3v3h-3v-3Zm4 0h4v1h-4v-1Zm0 2h4v1h-4V7Zm-4 2h8v1h-8V9Zm0 2h6v1h-6v-1Z"/>`,
+  mode: `<path d="M2 4.5h7v1H2v-1Zm0 6h12v1H2v-1Zm9-7h3v3h-3v-3Zm-4 5h3v3H7v-3Z"/>`,
+  language: `<path d="M8 1.25a6.75 6.75 0 1 1 0 13.5 6.75 6.75 0 0 1 0-13.5Zm0 1a5.75 5.75 0 0 0-4.61 9.18h1.44c-.2-.6-.33-1.27-.38-1.97H2.83v-1h1.6c.06-.98.29-1.9.65-2.7H3.86v-1h1.8A5.73 5.73 0 0 1 8 2.25Zm1.34 2.5H6.66c-.42.8-.69 1.72-.76 2.7h4.2c-.07-.98-.34-1.9-.76-2.7Zm.99 3.7H5.67c.06.7.2 1.37.42 1.97h3.82c.22-.6.36-1.27.42-1.97Zm-.58 2.97H6.25c.49.88 1.12 1.33 1.75 1.33s1.26-.45 1.75-1.33Zm2.86-1.97h-1.62c-.05.7-.18 1.37-.38 1.97h1.44a5.72 5.72 0 0 0 .56-1.97Zm-.02-1c-.07-.98-.3-1.9-.66-2.7h1.22a5.72 5.72 0 0 1 .68 2.7H12.6Zm-1.66-3.7c-.5-.98-1.16-1.5-1.93-1.5s-1.43.52-1.93 1.5h3.86Z"/>`,
 };
 
 // 최적화 #5 - 재사용 가능한 Adjust 버튼 컴포넌트
 const AdjustButton = ({ value, onClick }) => {
-  return react.createElement("button", {
-    onClick,
-    style: BUTTON_STYLES.adjustBase,
-    onMouseEnter: (e) => {
-      Object.assign(e.target.style, BUTTON_STYLES.adjustHover);
+  return react.createElement(
+    "button",
+    {
+      className: "ivlyrics-fluent-btn ivlyrics-adjust-btn",
+      onClick,
     },
-    onMouseLeave: (e) => {
-      Object.assign(e.target.style, BUTTON_STYLES.adjustNormal);
-    },
-  }, value);
+    value
+  );
 };
 
 const SettingRowDescription = ({ icon, text }) => {
   return react.createElement(
     "div",
-    { className: "setting-row-with-icon" },
+    { className: "ivlyrics-popup-row-with-icon" },
     // React 310 방지: icon이 문자열이고 비어있지 않을 때만 렌더링
     icon &&
     typeof icon === "string" &&
     icon &&
-    react.createElement("svg", {
-      width: 16,
-      height: 16,
-      viewBox: "0 0 16 16",
-      fill: "currentColor",
-      dangerouslySetInnerHTML: { __html: icon },
-    }),
+    react.createElement(
+      "span",
+      { className: "ivlyrics-popup-row-icon" },
+      react.createElement("svg", {
+        width: 16,
+        height: 16,
+        viewBox: "0 0 16 16",
+        fill: "currentColor",
+        dangerouslySetInnerHTML: { __html: icon },
+      })
+    ),
     react.createElement("span", null, text || "")
   );
 };
@@ -309,10 +1614,10 @@ const IvConfigSlider = react.memo(({ defaultValue, onToggle }) => {
   return react.createElement(
     "button",
     {
-      className: `switch-checkbox ${isActive ? "active" : ""}`,
+      className: `ivlyrics-popup-switch ${isActive ? "active" : ""}`,
       onClick: handleClick,
     },
-    react.createElement("div", { className: "switch-knob" })
+    react.createElement("div", { className: "ivlyrics-popup-switch-knob" })
   );
 });
 
@@ -321,7 +1626,7 @@ const IvConfigButton = react.memo(({ text, onClick }) => {
   return react.createElement(
     "button",
     {
-      className: "btn",
+      className: "ivlyrics-fluent-btn",
       onClick: onClick,
     },
     text
@@ -332,7 +1637,7 @@ const IvConfigButton = react.memo(({ text, onClick }) => {
 const IvOptionList = react.memo(({ items, onChange }) => {
   return react.createElement(
     "div",
-    {},
+    { className: "ivlyrics-popup-section-list" },
     items.map((item) => {
       const { key, type, desc, info, ...props } = item;
 
@@ -359,19 +1664,19 @@ const IvOptionList = react.memo(({ items, onChange }) => {
 
       return react.createElement(
         "div",
-        { key: key, className: "setting-row" },
+        { key: key, className: `ivlyrics-popup-setting-row${control ? "" : " no-control"}` },
         react.createElement(
           "div",
-          { className: "setting-row-content" },
+          { className: "ivlyrics-popup-setting-row-content" },
           react.createElement(
             "div",
-            { className: "setting-row-left" },
-            react.createElement("div", { className: "setting-name" }, desc),
-            info && react.createElement("div", { className: "setting-description" }, info)
+            { className: "ivlyrics-popup-setting-row-left" },
+            react.createElement("div", { className: "ivlyrics-popup-setting-name" }, desc),
+            info && react.createElement("div", { className: "ivlyrics-popup-setting-description" }, info)
           ),
           react.createElement(
             "div",
-            { className: "setting-row-right" },
+            { className: "ivlyrics-popup-setting-row-right" },
             control
           )
         )
@@ -380,437 +1685,27 @@ const IvOptionList = react.memo(({ items, onChange }) => {
   );
 });
 
-// Helper: open a compact options modal using existing settings styles
+// Helper: open a compact options modal using Fluent shell styles
 function openOptionsModal(title, items, onChange, eventType = null) {
+  const reactDom = resolveOptionsReactDom();
+  if (!reactDom?.render) {
+    return;
+  }
+
   const container = react.createElement(
     "div",
-    { id: `${APP_NAME}-config-container` },
-    react.createElement("style", {
-      dangerouslySetInnerHTML: {
-        __html: `
-/* iOS 18 Design - 변환 설정 모달 */
-#${APP_NAME}-config-container {
-	padding: 0;
-	background: transparent;
-	color: #ffffff;
-	font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-	width: 100%;
-}
-
-/* 섹션 타이틀 - 카드 헤더 스타일 */
-#${APP_NAME}-config-container .section-title {
-	background: rgba(255, 255, 255, 0.03);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-top-left-radius: 12px;
-	border-top-right-radius: 12px;
-	border-bottom: none;
-	backdrop-filter: blur(30px) saturate(150%);
-	-webkit-backdrop-filter: blur(30px) saturate(150%);
-	padding: 16px 16px 12px 16px;
-	margin-top: 24px;
-	margin-bottom: 0;
-}
-
-#${APP_NAME}-config-container .section-title:first-child {
-	margin-top: 0;
-}
-
-#${APP_NAME}-config-container .section-title h3 {
-	margin: 0 0 4px;
-	font-size: 17px;
-	font-weight: 600;
-	color: #ffffff;
-	letter-spacing: -0.02em;
-}
-
-#${APP_NAME}-config-container .section-title p {
-	margin: 0;
-	font-size: 13px;
-	color: #8e8e93;
-	line-height: 1.4;
-	letter-spacing: -0.01em;
-}
-
-/* Setting Row */
-#${APP_NAME}-config-container .setting-row {
-	padding: 0;
-	margin: 0;
-	background: rgba(28, 28, 30, 0.5);
-	backdrop-filter: blur(30px) saturate(150%);
-	-webkit-backdrop-filter: blur(30px) saturate(150%);
-	border-left: 1px solid rgba(255, 255, 255, 0.08);
-	border-right: 1px solid rgba(255, 255, 255, 0.08);
-	border-top: none;
-	border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
-	transition: background 0.15s ease;
-}
-
-#${APP_NAME}-config-container .section-title + .setting-row:first-of-type {
-	border-top: none;
-}
-
-#${APP_NAME}-config-container .setting-row:last-of-type {
-	border-bottom-left-radius: 12px;
-	border-bottom-right-radius: 12px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-#${APP_NAME}-config-container .setting-row:hover {
-	background: rgba(44, 44, 46, 0.6);
-}
-
-#${APP_NAME}-config-container .setting-row:active {
-	background: rgba(58, 58, 60, 0.7);
-}
-
-#${APP_NAME}-config-container .setting-row-content {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 24px;
-	padding: 12px 16px;
-	min-height: 44px;
-}
-
-#${APP_NAME}-config-container .setting-row-left {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-}
-
-#${APP_NAME}-config-container .setting-row-right {
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-}
-
-#${APP_NAME}-config-container .setting-name {
-	font-weight: 400;
-	font-size: 15px;
-	color: #ffffff;
-	line-height: 1.3;
-	letter-spacing: -0.01em;
-}
-
-#${APP_NAME}-config-container .setting-description {
-	font-size: 13px;
-	color: #8e8e93;
-	line-height: 1.35;
-	letter-spacing: -0.01em;
-}
-
-#${APP_NAME}-config-container .setting-row-with-icon {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	color: #ffffff;
-	font-weight: 400;
-	font-size: 15px;
-	letter-spacing: -0.01em;
-}
-
-#${APP_NAME}-config-container .setting-row-with-icon svg {
-	flex-shrink: 0;
-	opacity: 0.8;
-	color: #8e8e93;
-}
-
-/* Button - iOS 스타일 */
-#${APP_NAME}-config-container .btn {
-	background: #007aff;
-	border: none;
-	border-radius: 10px;
-	color: #ffffff;
-	font-weight: 600;
-	padding: 0 16px;
-	min-height: 36px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	font-size: 15px;
-	letter-spacing: -0.01em;
-}
-
-#${APP_NAME}-config-container .btn:hover:not(:disabled) {
-	background: #0066cc;
-	transform: scale(1.02);
-}
-
-#${APP_NAME}-config-container .btn:active:not(:disabled) {
-	background: #0055b3;
-	transform: scale(0.98);
-}
-
-#${APP_NAME}-config-container .btn:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-	transform: none;
-}
-
-/* iOS 토글 스위치 - 완전히 새로 작성 */
-#${APP_NAME}-config-container .switch-checkbox {
-	width: 51px;
-	height: 31px;
-	border-radius: 15.5px;
-	background-color: #3a3a3c;
-	border: none;
-	cursor: pointer;
-	position: relative;
-	flex-shrink: 0;
-	transition: background-color 0.2s ease;
-	-webkit-tap-highlight-color: transparent;
-}
-
-#${APP_NAME}-config-container .switch-checkbox::after {
-	content: "";
-	position: absolute;
-	top: 2px;
-	left: 2px;
-	width: 27px;
-	height: 27px;
-	border-radius: 50%;
-	background-color: #ffffff;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
-#${APP_NAME}-config-container .switch-checkbox.active {
-	background-color: #34c759;
-}
-
-#${APP_NAME}-config-container .switch-checkbox.active::after {
-	transform: translateX(20px);
-}
-
-#${APP_NAME}-config-container .switch-checkbox svg {
-	display: none;
-	visibility: hidden;
-}
-
-/* Custom Modal Overlay - 커뮤니티 영상 모달과 동일한 스타일 */
-#ivLyrics-translation-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.5);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
-	z-index: 9999;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
-#ivLyrics-translation-modal {
-	background: rgba(24, 24, 24, 0);
-	backdrop-filter: blur(40px) saturate(180%);
-	-webkit-backdrop-filter: blur(40px) saturate(180%);
-	border-radius: 16px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-	max-width: 520px;
-	width: 90%;
-	max-height: 80vh;
-	overflow-y: auto;
-	animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideIn {
-	from {
-		opacity: 0;
-		transform: scale(0.95) translateY(20px);
-	}
-	to {
-		opacity: 1;
-		transform: scale(1) translateY(0);
-	}
-}
-
-/* 모달 헤더 */
-#ivLyrics-translation-modal .modal-header {
-	padding: 24px 24px 16px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-}
-
-/* Options Dropdown Button Style Fix */
-#${APP_NAME}-config-container .optionsMenu-dropBox {
-	background: rgba(255, 255, 255, 0.1);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	border-radius: 8px;
-	color: #ffffff;
-	padding: 6px 12px;
-	font-size: 13px;
-	font-weight: 500;
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	transition: all 0.2s ease;
-	min-width: 100px;
-	justify-content: space-between;
-}
-
-#${APP_NAME}-config-container .optionsMenu-dropBox:hover {
-	background: rgba(255, 255, 255, 0.15);
-	border-color: rgba(255, 255, 255, 0.2);
-}
-
-#${APP_NAME}-config-container .optionsMenu-dropBox svg {
-	fill: currentColor;
-	opacity: 0.7;
-}
-
-/* Custom Dropdown Styles - Global (Portal로 이동되므로 컨테이너 ID 제거) */
-.optionsMenu-dropdown-list {
-	position: absolute;
-	top: 100%;
-	right: 0;
-	min-width: 160px;
-	width: max-content;
-	max-width: 300px;
-	margin-top: 6px;
-	background: #2a2a2a;
-	border: 1px solid rgba(255, 255, 255, 0.15);
-	border-radius: 8px;
-	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-	z-index: 10000;
-	overflow: hidden;
-	max-height: 250px;
-	overflow-y: auto;
-	pointer-events: auto;
-}
-
-.optionsMenu-item {
-	padding: 10px 14px;
-	font-size: 13px;
-	color: rgba(255, 255, 255, 0.9);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	transition: background 0.1s;
-	white-space: nowrap;
-}
-
-.optionsMenu-item:hover {
-	background: rgba(255, 255, 255, 0.1);
-}
-
-.optionsMenu-item.selected {
-	color: #34c759;
-	font-weight: 600;
-	background: rgba(52, 199, 89, 0.1);
-}
-
-.optionsMenu-item svg {
-	fill: currentColor;
-	margin-left: 12px;
-	flex-shrink: 0;
-}
-
-/* Scrollbar for dropdown */
-.optionsMenu-dropdown-list::-webkit-scrollbar {
-	width: 6px;
-}
-.optionsMenu-dropdown-list::-webkit-scrollbar-thumb {
-	background: rgba(255, 255, 255, 0.3);
-	border-radius: 3px;
-}
-
-#ivLyrics-translation-modal .modal-header h2 {
-	margin: 0;
-	font-size: 22px;
-	font-weight: 700;
-	background: linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #a855f7 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-	letter-spacing: -0.02em;
-}
-
-#ivLyrics-translation-modal .modal-close {
-	background: rgba(255, 255, 255, 0.1);
-	border: none;
-	border-radius: 50%;
-	width: 32px;
-	height: 32px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	color: #ffffff;
-}
-
-#ivLyrics-translation-modal .modal-close:hover {
-	background: rgba(255, 255, 255, 0.15);
-	transform: scale(1.05);
-}
-
-#ivLyrics-translation-modal .modal-close:active {
-	transform: scale(0.95);
-}
-
-#ivLyrics-translation-modal .modal-close svg {
-	width: 20px;
-	height: 20px;
-}
-
-/* 모달 바디 */
-#ivLyrics-translation-modal .modal-body {
-	padding: 24px;
-}
-
-/* 스크롤바 스타일 */
-#ivLyrics-translation-modal::-webkit-scrollbar {
-	width: 8px;
-}
-
-#ivLyrics-translation-modal::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-#ivLyrics-translation-modal::-webkit-scrollbar-thumb {
-	background: rgba(255, 255, 255, 0.2);
-	border-radius: 4px;
-}
-
-#ivLyrics-translation-modal::-webkit-scrollbar-thumb:hover {
-	background: rgba(255, 255, 255, 0.3);
-}
-`,
-      },
-    }),
-    // Render sections
+    { className: "ivlyrics-options-root" },
     items.map((section, sectionIndex) =>
       react.createElement(
         react.Fragment,
         { key: sectionIndex },
-        // Section Title
         section.section &&
-        react.createElement(
-          "div",
-          { className: "section-title" },
-          react.createElement("h3", null, section.section),
-          section.subtitle && react.createElement("p", null, section.subtitle)
-        ),
-        // Section Items
+          react.createElement(
+            "div",
+            { className: "ivlyrics-popup-section-title" },
+            react.createElement("h3", null, section.section),
+            section.subtitle && react.createElement("p", null, section.subtitle)
+          ),
         react.createElement(
           IvOptionList,
           Object.assign(
@@ -825,58 +1720,44 @@ function openOptionsModal(title, items, onChange, eventType = null) {
     )
   );
 
-  // Create custom modal instead of using Spicetify.PopupModal
-  const overlay = document.createElement("div");
-  overlay.id = "ivLyrics-translation-overlay";
+  let body = null;
+  const host = createFluentModalHost({
+    overlayId: "ivLyrics-translation-overlay",
+    shellClassName: "ivlyrics-options-modal-shell",
+    onBeforeClose: () => {
+      if (body && reactDom.unmountComponentAtNode) {
+        reactDom.unmountComponentAtNode(body);
+      }
+    },
+  });
 
-  const modal = document.createElement("div");
-  modal.id = "ivLyrics-translation-modal";
-
-  // Modal header
   const header = document.createElement("div");
-  header.className = "modal-header";
+  header.className = "ivlyrics-fluent-header";
+
+  const headerText = document.createElement("div");
+  headerText.className = "ivlyrics-fluent-title-wrap";
 
   const headerTitle = document.createElement("h2");
+  headerTitle.className = "ivlyrics-fluent-title";
   headerTitle.textContent = title;
 
   const closeBtn = document.createElement("button");
-  closeBtn.className = "modal-close";
+  closeBtn.className = "ivlyrics-fluent-close";
   closeBtn.innerHTML =
     '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/></svg>';
-  closeBtn.onclick = () => overlay.remove();
-
-  header.appendChild(headerTitle);
+  closeBtn.onclick = host.closeModal;
+  headerText.appendChild(headerTitle);
+  header.appendChild(headerText);
   header.appendChild(closeBtn);
 
-  // Modal body
-  const body = document.createElement("div");
-  body.className = "modal-body";
+  body = document.createElement("div");
+  body.className = "ivlyrics-fluent-body ivlyrics-options-modal-body";
 
-  modal.appendChild(header);
-  modal.appendChild(body);
-  overlay.appendChild(modal);
+  host.shell.id = "ivLyrics-translation-modal";
+  host.shell.appendChild(header);
+  host.shell.appendChild(body);
 
-  // Render React content in body
-  Spicetify.ReactDOM.render(container, body);
-
-  // Close on overlay click
-  overlay.onclick = (e) => {
-    if (e.target === overlay) {
-      overlay.remove();
-    }
-  };
-
-  // Close on ESC key
-  const handleEsc = (e) => {
-    if (e.key === "Escape") {
-      overlay.remove();
-      document.removeEventListener("keydown", handleEsc);
-    }
-  };
-  document.addEventListener("keydown", handleEsc);
-
-  // Add to DOM
-  document.body.appendChild(overlay);
+  reactDom.render(container, body);
 }
 
 // Debounce handle for adjustments modal
@@ -1277,861 +2158,396 @@ const RegenerateTranslationButton = react.memo(
   }
 );
 
-const SyncAdjustButton = react.memo(
-  ({ trackUri, provider, onOffsetChange }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [offset, setOffset] = useState(0);
-    const [communityData, setCommunityData] = useState(null);
-    const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
-    const [feedbackStatus, setFeedbackStatus] = useState(null); // 'positive', 'negative', null
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const buttonRef = useRef(null);
-    const submitTimeoutRef = useRef(null);
+const SyncAdjustButtonFluent = react.memo(({ trackUri, provider, onOffsetChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [communityData, setCommunityData] = useState(null);
+  const [isLoadingCommunity, setIsLoadingCommunity] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitTimeoutRef = useRef(null);
+  const triggerRef = useRef(null);
+  const panelRef = useRef(null);
+  const reactDom = window.Spicetify?.ReactDOM ?? window.ReactDOM ?? null;
 
-    // Load offset when trackUri changes
-    useEffect(() => {
-      const loadOffset = async () => {
-        const savedOffset = (await Utils.getTrackSyncOffset(trackUri)) || 0;
-        setOffset(savedOffset);
-      };
-      loadOffset();
-    }, [trackUri]);
+  useEffect(() => {
+    ensureFluentModalStyles();
+  }, []);
 
-    // Load community data when modal opens
-    useEffect(() => {
-      if (isOpen && CONFIG.visual["community-sync-enabled"]) {
-        loadCommunityData();
-      }
-    }, [isOpen, trackUri, provider]);
-
-    const loadCommunityData = async () => {
-      setIsLoadingCommunity(true);
-      try {
-        const data = await Utils.getCommunityOffset(trackUri, provider);
-        setCommunityData(data);
-        // 사용자의 기존 피드백 상태 복원
-        if (data?.user?.userFeedback !== null && data?.user?.userFeedback !== undefined) {
-          setFeedbackStatus(data.user.userFeedback ? 'positive' : 'negative');
-        }
-      } catch (error) {
-        console.error("[ivLyrics] Failed to load community data:", error);
-      } finally {
-        setIsLoadingCommunity(false);
-      }
+  useEffect(() => {
+    const loadOffset = async () => {
+      const savedOffset = (await Utils.getTrackSyncOffset(trackUri)) || 0;
+      setOffset(savedOffset);
     };
+    loadOffset();
+  }, [trackUri]);
 
-    // Listen for community offset changes
-    useEffect(() => {
-      const handleCommunityOffsetChange = (event) => {
-        if (event.detail?.trackUri === trackUri) {
-          setOffset(event.detail.offset);
-        }
-      };
-      window.addEventListener('ivLyrics:offset-changed', handleCommunityOffsetChange);
-      return () => {
-        window.removeEventListener('ivLyrics:offset-changed', handleCommunityOffsetChange);
-      };
-    }, [trackUri]);
-
-    // Cleanup timeout on unmount
-    useEffect(() => {
-      return () => {
-        if (submitTimeoutRef.current) {
-          clearTimeout(submitTimeoutRef.current);
-        }
-      };
-    }, []);
-
-    const handleOffsetChange = async (newOffset) => {
-      setOffset(newOffset);
-      await Utils.setTrackSyncOffset(trackUri, newOffset);
-      if (onOffsetChange) {
-        onOffsetChange(newOffset);
+  const loadCommunityData = async () => {
+    setIsLoadingCommunity(true);
+    try {
+      const data = await Utils.getCommunityOffset(trackUri, provider);
+      setCommunityData(data);
+      if (data?.user?.userFeedback !== null && data?.user?.userFeedback !== undefined) {
+        setFeedbackStatus(data.user.userFeedback ? "positive" : "negative");
       }
+    } catch (error) {
+      console.error("[ivLyrics] Failed to load community data:", error);
+    } finally {
+      setIsLoadingCommunity(false);
+    }
+  };
 
-      // 커뮤니티 싱크 자동 제출 (디바운스 적용)
-      if (CONFIG.visual["community-sync-enabled"] && CONFIG.visual["community-sync-auto-submit"]) {
-        // 이전 타이머 취소
-        if (submitTimeoutRef.current) {
-          clearTimeout(submitTimeoutRef.current);
-        }
+  useEffect(() => {
+    if (isOpen && CONFIG.visual["community-sync-enabled"]) {
+      loadCommunityData();
+    }
+  }, [isOpen, trackUri, provider]);
 
-        // 1초 후에 제출 (사용자가 조정을 멈추면)
-        submitTimeoutRef.current = setTimeout(async () => {
-          try {
-            await Utils.submitCommunityOffset(trackUri, newOffset, provider);
-            loadCommunityData(); // 제출 후 커뮤니티 데이터 새로고침
-          } catch (error) {
-            console.error("[ivLyrics] Failed to auto-submit offset:", error);
-          }
-        }, 1000);
+  useEffect(() => {
+    const handleCommunityOffsetChange = (event) => {
+      if (event.detail?.trackUri === trackUri) {
+        setOffset(event.detail.offset);
       }
     };
-
-    const adjustOffset = (delta) => {
-      const newOffset = Math.max(-10000, Math.min(10000, offset + delta));
-      handleOffsetChange(newOffset);
+    window.addEventListener("ivLyrics:offset-changed", handleCommunityOffsetChange);
+    return () => {
+      window.removeEventListener("ivLyrics:offset-changed", handleCommunityOffsetChange);
     };
+  }, [trackUri]);
 
-    const handleSliderChange = (event) => {
-      const newOffset = Number(event.target.value);
-      handleOffsetChange(newOffset);
-    };
-
-    const resetOffset = () => {
-      handleOffsetChange(0);
-    };
-
-    const toggleModal = () => {
-      setIsOpen(!isOpen);
-      if (!isOpen) {
-        setFeedbackStatus(null);
+  useEffect(() => {
+    return () => {
+      if (submitTimeoutRef.current) {
+        clearTimeout(submitTimeoutRef.current);
       }
     };
+  }, []);
 
-    // 커뮤니티 오프셋 적용
-    const applyCommunityOffset = async () => {
-      if (!communityData) return;
-      const communityOffset = communityData.medianOffsetMs ?? communityData.offsetMs ?? 0;
-      handleOffsetChange(communityOffset);
-    };
+  useEffect(() => {
+    if (!isOpen) return undefined;
 
-    // 수동 제출
-    const submitOffset = async () => {
-      if (!CONFIG.visual["community-sync-enabled"]) return;
-      setIsSubmitting(true);
-      try {
-        await Utils.submitCommunityOffset(trackUri, offset, provider);
-        // 로컬 캐시 삭제하여 새 데이터 반영
-        const trackId = Utils.extractTrackId(trackUri);
-        if (trackId) {
-          await LyricsCache.deleteSync(trackId);
-        }
-        Toast.success(I18n.t("syncAdjust.submitSuccess"));
-        loadCommunityData();
-      } catch (error) {
-        Toast.error(I18n.t("syncAdjust.submitFailed"));
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-
-    // 피드백 제출
-    const submitFeedback = async (isPositive) => {
-      if (!CONFIG.visual["community-sync-enabled"]) return;
-      // 자신이 제출한 오프셋에는 피드백 불가
-      if (communityData?.user?.hasSubmitted) {
-        Toast.error(I18n.t("syncAdjust.cannotFeedbackOwnSubmission"));
+    const handlePointerDown = (event) => {
+      const target = event.target;
+      if (panelRef.current?.contains(target) || triggerRef.current?.contains(target)) {
         return;
       }
-      try {
-        await Utils.submitCommunityFeedback(trackUri, isPositive, provider);
-        setFeedbackStatus(isPositive ? 'positive' : 'negative');
-        Toast.success(
-          isPositive ? I18n.t("syncAdjust.feedbackPositiveSuccess") : I18n.t("syncAdjust.feedbackNegativeSuccess")
-        );
-      } catch (error) {
-        console.error("[ivLyrics] Failed to submit feedback:", error);
-        Toast.error(I18n.t("syncAdjust.feedbackFailed"));
+      setIsOpen(false);
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
       }
     };
 
-    // 신뢰도 표시 색상
-    const getConfidenceColor = (confidence) => {
-      if (confidence >= 0.8) return "#34c759"; // 녹색
-      if (confidence >= 0.5) return "#ff9500"; // 주황
-      return "#ff3b30"; // 빨강
+    document.addEventListener("mousedown", handlePointerDown, true);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown, true);
+      document.removeEventListener("keydown", handleEscape);
     };
+  }, [isOpen]);
 
-    // 신뢰도 레벨 텍스트
-    const getConfidenceLevel = (confidence) => {
-      if (confidence >= 0.8) return I18n.t("syncAdjust.confidenceHigh");
-      if (confidence >= 0.5) return I18n.t("syncAdjust.confidenceMedium");
-      return I18n.t("syncAdjust.confidenceLow");
-    };
+  const handleOffsetChange = async (newOffset) => {
+    setOffset(newOffset);
+    await Utils.setTrackSyncOffset(trackUri, newOffset);
+    onOffsetChange?.(newOffset);
 
-    // 버튼 위치 기반으로 모달 위치 계산
-    const getModalStyle = () => {
-      // 전체화면 모드인지 확인
-      const isFullscreen = document.querySelector('.lyrics-lyricsContainer-LyricsContainer.fullscreen-active');
-
-      if (buttonRef.current) {
-        // 버튼 기준으로 위치 계산
-        const rect = buttonRef.current.getBoundingClientRect();
-        const containerRect = buttonRef.current.closest('.lyrics-config-button-container')?.getBoundingClientRect();
-
-        if (containerRect) {
-          return {
-            bottom: `${window.innerHeight - containerRect.top + 12}px`,
-            right: `${window.innerWidth - containerRect.left + 12}px`
-          };
+    if (CONFIG.visual["community-sync-enabled"] && CONFIG.visual["community-sync-auto-submit"]) {
+      if (submitTimeoutRef.current) {
+        clearTimeout(submitTimeoutRef.current);
+      }
+      submitTimeoutRef.current = setTimeout(async () => {
+        try {
+          await Utils.submitCommunityOffset(trackUri, newOffset, provider);
+          loadCommunityData();
+        } catch (error) {
+          console.error("[ivLyrics] Failed to auto-submit offset:", error);
         }
+      }, 1000);
+    }
+  };
 
-        return {
-          bottom: `${window.innerHeight - rect.top + 12}px`,
-          right: `${window.innerWidth - rect.right + 60}px`
-        };
+  const submitOffset = async () => {
+    if (!CONFIG.visual["community-sync-enabled"]) return;
+    setIsSubmitting(true);
+    try {
+      await Utils.submitCommunityOffset(trackUri, offset, provider);
+      const trackId = Utils.extractTrackId(trackUri);
+      if (trackId) {
+        await LyricsCache.deleteSync(trackId);
       }
+      Toast.success(I18n.t("syncAdjust.submitSuccess"));
+      loadCommunityData();
+    } catch (error) {
+      Toast.error(I18n.t("syncAdjust.submitFailed"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-      // fallback
-      return {
-        bottom: isFullscreen ? "50px" : "110px",
-        right: "90px"
-      };
-    };
+  const submitFeedback = async (isPositive) => {
+    if (!CONFIG.visual["community-sync-enabled"]) return;
+    if (communityData?.user?.hasSubmitted) {
+      Toast.error(I18n.t("syncAdjust.cannotFeedbackOwnSubmission"));
+      return;
+    }
+    try {
+      await Utils.submitCommunityFeedback(trackUri, isPositive, provider);
+      setFeedbackStatus(isPositive ? "positive" : "negative");
+      Toast.success(
+        isPositive
+          ? I18n.t("syncAdjust.feedbackPositiveSuccess")
+          : I18n.t("syncAdjust.feedbackNegativeSuccess")
+      );
+    } catch (error) {
+      console.error("[ivLyrics] Failed to submit feedback:", error);
+      Toast.error(I18n.t("syncAdjust.feedbackFailed"));
+    }
+  };
 
-    const isCommunityEnabled = CONFIG.visual["community-sync-enabled"];
+  const getConfidenceColor = (confidence) => {
+    if (confidence >= 0.8) return "#86efac";
+    if (confidence >= 0.5) return "#fde68a";
+    return "#fca5a5";
+  };
 
-    return react.createElement(
-      react.Fragment,
-      null,
-      react.createElement(
-        Spicetify.ReactComponent.TooltipWrapper,
-        { label: I18n.t("menu.syncAdjust") },
+  const communityOffset = communityData?.medianOffsetMs ?? communityData?.offsetMs ?? 0;
+  const confidence = communityData?.confidence ?? 0;
+  const isCommunityEnabled = CONFIG.visual["community-sync-enabled"];
+
+  const modalOverlay = isOpen
+    ? react.createElement(
+        "div",
+        {
+          className: "lyrics-sync-adjust-floating",
+        },
         react.createElement(
-          "button",
-          {
-            ref: buttonRef,
-            className: "lyrics-config-button",
-            onClick: toggleModal,
-          },
-          react.createElement(
-            "svg",
-            {
-              width: 20,
-              height: 20,
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: 2,
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-            },
-            react.createElement("circle", { cx: 12, cy: 12, r: 10 }),
-            react.createElement("polyline", { points: "12,6 12,12 16,14" })
-          )
-        )
-      ),
-      isOpen &&
-      (() => {
-        const modalStyle = getModalStyle();
-        return react.createElement(
           "div",
           {
-            className: "lyrics-sync-adjust-modal",
-            style: {
-              position: "fixed",
-              bottom: "100px",
-              right: "100px",
-              background: "rgba(24, 24, 24, 0.6)",
-              backdropFilter: "blur(40px) saturate(180%)",
-              WebkitBackdropFilter: "blur(40px) saturate(180%)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "16px",
-              padding: "20px 24px",
-              zIndex: 99999,
-              minWidth: "520px",
-              boxShadow: "0 24px 64px rgba(0, 0, 0, 0.5)",
-              fontFamily:
-                "Pretendard Variable, -apple-system, BlinkMacSystemFont, sans-serif",
-            },
+            ref: panelRef,
+            className: "ivlyrics-fluent-shell lyrics-sync-adjust-modal-shell",
+            "data-ui-theme": getSettingsSurfaceTheme(),
           },
-          react.createElement("style", {
-            dangerouslySetInnerHTML: {
-              __html: `
-.lyrics-sync-adjust-modal .slider-container {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	padding: 8px 0;
-}
-.lyrics-sync-adjust-modal .sync-slider {
-	width: 100%;
-	height: 28px;
-	background: transparent;
-	outline: none;
-	-webkit-appearance: none;
-	appearance: none;
-	cursor: pointer;
-}
-
-.lyrics-sync-adjust-modal .sync-slider::-webkit-slider-runnable-track {
-	width: 100%;
-	height: 6px;
-	background: linear-gradient(to right, #007aff var(--progress-percent, 50%), #3a3a3c var(--progress-percent, 50%));
-	border-radius: 3px;
-	transition: background 0.1s ease;
-}
-
-.lyrics-sync-adjust-modal .sync-slider::-webkit-slider-thumb {
-	-webkit-appearance: none;
-	appearance: none;
-	width: 28px;
-	height: 28px;
-	background: #ffffff;
-	border-radius: 50%;
-	cursor: pointer;
-	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1);
-	margin-top: -11px;
-	transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.lyrics-sync-adjust-modal .sync-slider:hover::-webkit-slider-thumb {
-	transform: scale(1.05);
-}
-
-.lyrics-sync-adjust-modal .sync-slider:active::-webkit-slider-thumb {
-	transform: scale(0.98);
-	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Firefox Styles */
-.lyrics-sync-adjust-modal .sync-slider::-moz-range-track {
-	width: 100%;
-	height: 6px;
-	background: #3a3a3c;
-	border-radius: 3px;
-	border: none;
-}
-
-.lyrics-sync-adjust-modal .sync-slider::-moz-range-progress {
-	height: 6px;
-	background: #007aff;
-	border-radius: 3px;
-}
-
-.lyrics-sync-adjust-modal .sync-slider::-moz-range-thumb {
-	width: 28px;
-	height: 28px;
-	background: #ffffff;
-	border: none;
-	border-radius: 50%;
-	cursor: pointer;
-	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1);
-}
-
-.lyrics-sync-adjust-modal .community-section {
-	margin-top: 16px;
-	padding-top: 16px;
-	border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.lyrics-sync-adjust-modal .community-info-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
-}
-
-.lyrics-sync-adjust-modal .community-stats {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-}
-
-.lyrics-sync-adjust-modal .stat-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 2px;
-}
-
-.lyrics-sync-adjust-modal .stat-value {
-	font-size: 16px;
-	font-weight: 600;
-	color: #ffffff;
-}
-
-.lyrics-sync-adjust-modal .stat-label {
-	font-size: 10px;
-	color: #8e8e93;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-}
-
-.lyrics-sync-adjust-modal .community-actions {
-	display: flex;
-	gap: 8px;
-}
-
-.lyrics-sync-adjust-modal .feedback-btn {
-	width: 36px;
-	height: 36px;
-	border-radius: 50%;
-	border: 1px solid rgba(255, 255, 255, 0.15);
-	background: rgba(255, 255, 255, 0.05);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.2s ease;
-	font-size: 16px;
-}
-
-.lyrics-sync-adjust-modal .feedback-btn:hover {
-	background: rgba(255, 255, 255, 0.1);
-	transform: scale(1.05);
-}
-
-.lyrics-sync-adjust-modal .feedback-btn.active-positive {
-	background: rgba(52, 199, 89, 0.2);
-	border-color: rgba(52, 199, 89, 0.5);
-}
-
-.lyrics-sync-adjust-modal .feedback-btn.active-negative {
-	background: rgba(255, 59, 48, 0.2);
-	border-color: rgba(255, 59, 48, 0.5);
-}
-
-.lyrics-sync-adjust-modal .feedback-btn:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-	pointer-events: none;
-}
-
-.lyrics-sync-adjust-modal .action-btn {
-	padding: 8px 14px;
-	border-radius: 8px;
-	border: 1px solid rgba(255, 255, 255, 0.15);
-	background: rgba(255, 255, 255, 0.05);
-	color: #ffffff;
-	font-size: 12px;
-	font-weight: 500;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	white-space: nowrap;
-}
-
-.lyrics-sync-adjust-modal .action-btn:hover:not(:disabled) {
-	background: rgba(255, 255, 255, 0.1);
-	transform: translateY(-1px);
-}
-
-.lyrics-sync-adjust-modal .action-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.lyrics-sync-adjust-modal .action-btn.primary {
-	background: rgba(0, 122, 255, 0.2);
-	border-color: rgba(0, 122, 255, 0.4);
-	color: #007aff;
-}
-
-.lyrics-sync-adjust-modal .action-btn.primary:hover:not(:disabled) {
-	background: rgba(0, 122, 255, 0.3);
-}
-`,
-            },
-          }),
-          // Header
           react.createElement(
             "div",
-            {
-              style: {
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "12px",
-              },
-            },
+            { className: "ivlyrics-fluent-header" },
             react.createElement(
               "div",
-              {
-                style: {
-                  fontSize: "20px",
-                  fontWeight: "700",
-                  background: "linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #14b8a6 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  letterSpacing: "-0.02em",
-                },
-              },
-              I18n.t("menu.syncAdjustTitle")
+              { className: "ivlyrics-fluent-title-wrap" },
+              react.createElement("div", { className: "ivlyrics-fluent-title" }, I18n.t("menu.syncAdjustTitle")),
+              react.createElement("p", { className: "ivlyrics-fluent-subtitle" }, I18n.t("syncAdjust.info"))
             ),
             react.createElement(
               "button",
-              {
-                onClick: toggleModal,
-                style: {
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "none",
-                  borderRadius: "50%",
-                  color: "#ffffff",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  padding: "0",
-                  width: "28px",
-                  height: "28px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.2s ease",
-                },
-                onMouseEnter: (e) => {
-                  e.target.style.background = "rgba(255, 255, 255, 0.15)";
-                  e.target.style.transform = "scale(1.05)";
-                },
-                onMouseLeave: (e) => {
-                  e.target.style.background = "rgba(255, 255, 255, 0.1)";
-                  e.target.style.transform = "scale(1)";
-                },
-              },
-              "×"
-            )
-          ),
-          // Info text
-          react.createElement(
-            "div",
-            {
-              style: {
-                fontSize: "13px",
-                color: "#8e8e93",
-                marginBottom: "16px",
-                letterSpacing: "-0.01em",
-              },
-            },
-            I18n.t("syncAdjust.info")
-          ),
-          // Slider section
-          react.createElement(
-            "div",
-            {
-              style: {
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              },
-            },
-            // Slider
-            react.createElement(
-              "div",
-              {
-                className: "slider-container",
-              },
-              react.createElement("input", {
-                type: "range",
-                className: "sync-slider",
-                min: -10000,
-                max: 10000,
-                step: 10,
-                value: offset,
-                onInput: handleSliderChange,
-                style: {
-                  "--progress-percent": `${((offset + 10000) / 20000) * 100}%`,
-                },
-              }),
-              react.createElement(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "11px",
-                    color: "#8e8e93",
-                    fontWeight: "500",
-                    padding: "0 4px",
-                  },
-                },
-                react.createElement("span", null, "-10s"),
-                react.createElement(
-                  "span",
-                  {
-                    style: {
-                      color: "#ffffff",
-                      fontWeight: "600",
-                      fontSize: "14px",
-                      letterSpacing: "-0.01em",
-                    },
-                  },
-                  `${offset}ms`
-                ),
-                react.createElement("span", null, "+10s")
-              )
-            ),
-            // Fine adjustment buttons
-            react.createElement(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                },
-              },
-              react.createElement(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    gap: "6px",
-                  },
-                },
-                react.createElement(AdjustButton, { value: "-1000", onClick: () => adjustOffset(-1000) }),
-                react.createElement(AdjustButton, { value: "-100", onClick: () => adjustOffset(-100) }),
-                react.createElement(AdjustButton, { value: "-10", onClick: () => adjustOffset(-10) })
-              ),
-              react.createElement(
-                "div",
-                {
-                  style: {
-                    display: "flex",
-                    gap: "6px",
-                  },
-                },
-                react.createElement(AdjustButton, { value: "+1000", onClick: () => adjustOffset(1000) }),
-                react.createElement(AdjustButton, { value: "+100", onClick: () => adjustOffset(100) }),
-                react.createElement(AdjustButton, { value: "+10", onClick: () => adjustOffset(10) })
-              )
-            ),
-            // Reset button
-            react.createElement(
-              "button",
-              {
-                onClick: resetOffset,
-                style: {
-                  background: "rgba(255, 59, 48, 0.15)",
-                  border: "1px solid rgba(255, 59, 48, 0.3)",
-                  borderRadius: "10px",
-                  color: "#ff3b30",
-                  cursor: "pointer",
-                  padding: "10px 16px",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  letterSpacing: "-0.01em",
-                  transition: "all 0.2s ease",
-                  whiteSpace: "nowrap",
-                },
-                onMouseEnter: (e) => {
-                  e.target.style.background = "rgba(255, 59, 48, 0.2)";
-                  e.target.style.borderColor = "rgba(255, 59, 48, 0.4)";
-                  e.target.style.transform = "translateY(-1px)";
-                },
-                onMouseLeave: (e) => {
-                  e.target.style.background = "rgba(255, 59, 48, 0.15)";
-                  e.target.style.borderColor = "rgba(255, 59, 48, 0.3)";
-                  e.target.style.transform = "translateY(0)";
-                },
-              },
-              I18n.t("syncAdjust.reset")
-            )
-          ),
-          // Community Sync Section
-          isCommunityEnabled && react.createElement(
-            "div",
-            { className: "community-section" },
-            react.createElement(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "12px",
-                },
-              },
+              { className: "ivlyrics-fluent-close", onClick: () => setIsOpen(false) },
               react.createElement(
                 "svg",
-                { width: 14, height: 14, viewBox: "0 0 16 16", fill: "#8e8e93" },
-                react.createElement("path", {
-                  d: "M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
-                })
-              ),
-              react.createElement(
-                "span",
-                {
-                  style: {
-                    fontSize: "13px",
-                    fontWeight: "600",
-                    color: "#ffffff",
-                  },
-                },
-                I18n.t("syncAdjust.communityTitle")
-              )
-            ),
-            isLoadingCommunity
-              ? react.createElement(
-                "div",
-                {
-                  style: {
-                    color: "#8e8e93",
-                    fontSize: "12px",
-                    textAlign: "center",
-                    padding: "12px 0",
-                  },
-                },
-                I18n.t("syncAdjust.loading")
-              )
-              : communityData
-                ? react.createElement(
-                  "div",
-                  { className: "community-info-row" },
-                  // Stats
-                  react.createElement(
-                    "div",
-                    { className: "community-stats" },
-                    // Offset
-                    react.createElement(
-                      "div",
-                      { className: "stat-item" },
-                      react.createElement(
-                        "span",
-                        { className: "stat-value" },
-                        `${communityData.medianOffsetMs ?? communityData.offsetMs ?? 0}ms`
-                      ),
-                      react.createElement(
-                        "span",
-                        { className: "stat-label" },
-                        I18n.t("syncAdjust.communityOffset")
-                      )
-                    ),
-                    // Submissions
-                    react.createElement(
-                      "div",
-                      { className: "stat-item" },
-                      react.createElement(
-                        "span",
-                        { className: "stat-value" },
-                        communityData.submissionCount ?? 0
-                      ),
-                      react.createElement(
-                        "span",
-                        { className: "stat-label" },
-                        I18n.t("syncAdjust.submissions")
-                      )
-                    ),
-                    // Confidence
-                    react.createElement(
-                      "div",
-                      { className: "stat-item" },
-                      react.createElement(
-                        "span",
-                        {
-                          className: "stat-value",
-                          style: { color: getConfidenceColor(communityData.confidence ?? 0) },
-                        },
-                        `${Math.round((communityData.confidence ?? 0) * 100)}%`
-                      ),
-                      react.createElement(
-                        "span",
-                        { className: "stat-label" },
-                        getConfidenceLevel(communityData.confidence ?? 0)
-                      )
-                    )
-                  ),
-                  // Actions
-                  react.createElement(
-                    "div",
-                    { className: "community-actions" },
-                    // Feedback buttons
-                    react.createElement(
-                      "button",
-                      {
-                        className: `feedback-btn ${feedbackStatus === 'positive' ? 'active-positive' : ''}`,
-                        onClick: () => submitFeedback(true),
-                        title: communityData?.user?.hasSubmitted
-                          ? I18n.t("syncAdjust.cannotFeedbackOwnSubmission")
-                          : I18n.t("syncAdjust.feedbackGood"),
-                        disabled: communityData?.user?.hasSubmitted,
-                      },
-                      "👍"
-                    ),
-                    react.createElement(
-                      "button",
-                      {
-                        className: `feedback-btn ${feedbackStatus === 'negative' ? 'active-negative' : ''}`,
-                        onClick: () => submitFeedback(false),
-                        title: communityData?.user?.hasSubmitted
-                          ? I18n.t("syncAdjust.cannotFeedbackOwnSubmission")
-                          : I18n.t("syncAdjust.feedbackBad"),
-                        disabled: communityData?.user?.hasSubmitted,
-                      },
-                      "👎"
-                    ),
-                    // Apply button
-                    react.createElement(
-                      "button",
-                      {
-                        className: "action-btn primary",
-                        onClick: applyCommunityOffset,
-                      },
-                      I18n.t("syncAdjust.applyCommunity")
-                    )
-                  )
-                )
-                : react.createElement(
-                  "div",
-                  {
-                    style: {
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    },
-                  },
-                  react.createElement(
-                    "span",
-                    {
-                      style: {
-                        color: "#8e8e93",
-                        fontSize: "12px",
-                      },
-                    },
-                    I18n.t("syncAdjust.noData")
-                  ),
-                  react.createElement(
-                    "button",
-                    {
-                      className: "action-btn primary",
-                      onClick: submitOffset,
-                      disabled: isSubmitting || offset === 0,
-                    },
-                    isSubmitting ? I18n.t("syncAdjust.submitting") : I18n.t("syncAdjust.submitMine")
-                  )
-                ),
-            // Auto-submit status indicator
-            CONFIG.visual["community-sync-auto-submit"] && react.createElement(
-              "div",
-              {
-                style: {
-                  marginTop: "12px",
-                  padding: "8px 12px",
-                  background: "rgba(52, 199, 89, 0.1)",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  color: "#34c759",
-                  textAlign: "center",
-                },
-              },
-              I18n.t("syncAdjust.autoSubmitEnabled")
-            ),
-            // Submit button (always show when community data exists)
-            communityData && react.createElement(
-              "div",
-              {
-                style: {
-                  marginTop: "12px",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                },
-              },
-              react.createElement(
-                "button",
-                {
-                  className: "action-btn",
-                  onClick: submitOffset,
-                  disabled: isSubmitting,
-                },
-                isSubmitting ? I18n.t("syncAdjust.submitting") : I18n.t("syncAdjust.submitMine")
+                { width: 16, height: 16, viewBox: "0 0 16 16", fill: "currentColor" },
+                react.createElement("path", { d: "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" })
               )
             )
+          ),
+          react.createElement(
+            "div",
+            { className: "ivlyrics-fluent-body lyrics-sync-adjust-modal" },
+            react.createElement(
+              "div",
+              { className: "lyrics-sync-adjust-layout" },
+              react.createElement(
+                "div",
+                { className: "lyrics-sync-adjust-track" },
+                react.createElement(
+                  "div",
+                  { className: "lyrics-sync-adjust-slider-container" },
+                  react.createElement("input", {
+                    type: "range",
+                    className: "sync-slider",
+                    min: -10000,
+                    max: 10000,
+                    step: 10,
+                    value: offset,
+                    onInput: (event) => handleOffsetChange(Number(event.target.value)),
+                    style: {
+                      "--progress-percent": `${((offset + 10000) / 20000) * 100}%`,
+                    },
+                  }),
+                  react.createElement(
+                    "div",
+                    { className: "lyrics-sync-adjust-slider-summary" },
+                    react.createElement("span", null, "-10s"),
+                    react.createElement("span", { className: "lyrics-sync-adjust-current" }, `${offset}ms`),
+                    react.createElement("span", null, "+10s")
+                  )
+                )
+              ),
+              react.createElement(
+                "div",
+                { className: "lyrics-sync-adjust-side" },
+                react.createElement(
+                  "div",
+                  { className: "lyrics-sync-adjust-fine" },
+                  react.createElement(
+                    "div",
+                    { className: "lyrics-sync-adjust-quick" },
+                    react.createElement(AdjustButton, { value: "-1000", onClick: () => handleOffsetChange(Math.max(-10000, offset - 1000)) }),
+                    react.createElement(AdjustButton, { value: "-100", onClick: () => handleOffsetChange(Math.max(-10000, offset - 100)) }),
+                    react.createElement(AdjustButton, { value: "-10", onClick: () => handleOffsetChange(Math.max(-10000, offset - 10)) })
+                  ),
+                  react.createElement(
+                    "div",
+                    { className: "lyrics-sync-adjust-quick" },
+                    react.createElement(AdjustButton, { value: "+1000", onClick: () => handleOffsetChange(Math.min(10000, offset + 1000)) }),
+                    react.createElement(AdjustButton, { value: "+100", onClick: () => handleOffsetChange(Math.min(10000, offset + 100)) }),
+                    react.createElement(AdjustButton, { value: "+10", onClick: () => handleOffsetChange(Math.min(10000, offset + 10)) })
+                  )
+                ),
+                react.createElement(
+                  "button",
+                  {
+                    className: "ivlyrics-fluent-btn lyrics-sync-adjust-reset",
+                    onClick: () => handleOffsetChange(0),
+                  },
+                  I18n.t("syncAdjust.reset")
+                )
+              )
+            ),
+            isCommunityEnabled &&
+              react.createElement(
+                "div",
+                { className: "lyrics-sync-adjust-community-section" },
+                react.createElement("div", { className: "lyrics-sync-adjust-community-header" }, I18n.t("syncAdjust.communityTitle")),
+                isLoadingCommunity
+                  ? react.createElement("div", { className: "lyrics-sync-adjust-loading" }, I18n.t("syncAdjust.loading"))
+                  : communityData
+                    ? react.createElement(
+                        "div",
+                        { className: "lyrics-sync-adjust-community-row" },
+                        react.createElement(
+                          "div",
+                          { className: "lyrics-sync-adjust-community-stats" },
+                          react.createElement(
+                            "div",
+                            { className: "lyrics-sync-adjust-stat" },
+                            react.createElement("span", { className: "lyrics-sync-adjust-stat-value" }, `${communityOffset}ms`),
+                            react.createElement("span", { className: "lyrics-sync-adjust-stat-label" }, I18n.t("syncAdjust.communityOffset"))
+                          ),
+                          react.createElement(
+                            "div",
+                            { className: "lyrics-sync-adjust-stat" },
+                            react.createElement("span", { className: "lyrics-sync-adjust-stat-value" }, communityData.submissionCount ?? 0),
+                            react.createElement("span", { className: "lyrics-sync-adjust-stat-label" }, I18n.t("syncAdjust.submissions"))
+                          ),
+                          react.createElement(
+                            "div",
+                            { className: "lyrics-sync-adjust-stat" },
+                            react.createElement("span", { className: "lyrics-sync-adjust-stat-value", style: { color: getConfidenceColor(confidence) } }, `${Math.round(confidence * 100)}%`),
+                            react.createElement("span", { className: "lyrics-sync-adjust-stat-label" }, confidence >= 0.8 ? I18n.t("syncAdjust.confidenceHigh") : confidence >= 0.5 ? I18n.t("syncAdjust.confidenceMedium") : I18n.t("syncAdjust.confidenceLow"))
+                          )
+                        ),
+                        react.createElement(
+                          "div",
+                          { className: "lyrics-sync-adjust-community-actions" },
+                          react.createElement(
+                            "button",
+                            {
+                              className: `ivlyrics-fluent-btn lyrics-sync-adjust-feedback-btn${feedbackStatus === "positive" ? " active-positive" : ""}`,
+                              onClick: () => submitFeedback(true),
+                              disabled: communityData?.user?.hasSubmitted,
+                            },
+                            I18n.t("syncAdjust.feedbackGood")
+                          ),
+                          react.createElement(
+                            "button",
+                            {
+                              className: `ivlyrics-fluent-btn lyrics-sync-adjust-feedback-btn${feedbackStatus === "negative" ? " active-negative" : ""}`,
+                              onClick: () => submitFeedback(false),
+                              disabled: communityData?.user?.hasSubmitted,
+                            },
+                            I18n.t("syncAdjust.feedbackBad")
+                          ),
+                          react.createElement(
+                            "button",
+                            {
+                              className: "ivlyrics-fluent-btn primary lyrics-sync-adjust-action-btn",
+                              onClick: () => handleOffsetChange(communityOffset),
+                            },
+                            I18n.t("syncAdjust.applyCommunity")
+                          )
+                        )
+                      )
+                    : react.createElement(
+                        "div",
+                        { className: "lyrics-sync-adjust-empty-row" },
+                        react.createElement("span", { className: "lyrics-sync-adjust-empty" }, I18n.t("syncAdjust.noData")),
+                        react.createElement(
+                          "button",
+                          {
+                            className: "ivlyrics-fluent-btn primary lyrics-sync-adjust-action-btn",
+                            onClick: submitOffset,
+                            disabled: isSubmitting || offset === 0,
+                          },
+                          isSubmitting ? I18n.t("syncAdjust.submitting") : I18n.t("syncAdjust.submitMine")
+                        )
+                      ),
+                CONFIG.visual["community-sync-auto-submit"] &&
+                  react.createElement("div", { className: "lyrics-sync-adjust-auto-submit" }, I18n.t("syncAdjust.autoSubmitEnabled")),
+                communityData &&
+                  react.createElement(
+                    "div",
+                    { className: "lyrics-sync-adjust-community-footer" },
+                    react.createElement(
+                      "button",
+                      {
+                        className: "ivlyrics-fluent-btn lyrics-sync-adjust-action-btn",
+                        onClick: submitOffset,
+                        disabled: isSubmitting,
+                      },
+                      isSubmitting ? I18n.t("syncAdjust.submitting") : I18n.t("syncAdjust.submitMine")
+                    )
+                  )
+              )
           )
-        );
-      })()
-    );
-  }
-);
+        )
+      )
+    : null;
+
+  return react.createElement(
+    react.Fragment,
+    null,
+    react.createElement(
+      Spicetify.ReactComponent.TooltipWrapper,
+      { label: I18n.t("menu.syncAdjust") },
+      react.createElement(
+        "button",
+        {
+          ref: triggerRef,
+          className: "lyrics-config-button",
+          onClick: () => setIsOpen((prev) => !prev),
+        },
+        react.createElement(
+          "svg",
+          {
+            width: 20,
+            height: 20,
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: 2,
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+          },
+          react.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+          react.createElement("polyline", { points: "12,6 12,12 16,14" })
+        )
+      )
+    ),
+    modalOverlay && reactDom?.createPortal
+      ? reactDom.createPortal(modalOverlay, document.body)
+      : modalOverlay
+  );
+});
 
 // Community Video Selector를 document.body에 직접 렌더링
 function openCommunityVideoSelector(trackUri, currentVideoId, onVideoSelect) {
@@ -2140,83 +2556,29 @@ function openCommunityVideoSelector(trackUri, currentVideoId, onVideoSelect) {
     return;
   }
 
-  const overlay = document.createElement("div");
-  overlay.id = "ivLyrics-community-video-overlay";
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  `;
-
-  const modalContainer = document.createElement("div");
-  modalContainer.style.cssText = `
-    background: rgba(24, 24, 24, 0.95);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-radius: 16px;
-    max-width: 90vw;
-    max-height: 70vh;
-    width: 560px;
-    overflow: hidden;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    flex-direction: column;
-  `;
-
-  const closeModal = () => {
-    if (overlay.parentNode) {
-      document.body.removeChild(overlay);
-    }
-    document.removeEventListener("keydown", handleEscape);
-  };
-
-  // Close on outside click
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) {
-      closeModal();
-    }
+  openFluentReactModal({
+    overlayId: "ivLyrics-community-video-overlay",
+    overlayClassName: "community-video-overlay",
+    shellClassName: "community-video-modal-shell",
+    shellStyle: `
+      max-width: 90vw;
+      max-height: 70vh;
+      width: 560px;
+    `,
+    removeExisting: false,
+    render: (closeModal) =>
+      react.createElement(CommunityVideoSelector, {
+        trackUri: trackUri,
+        currentVideoId: currentVideoId,
+        onVideoSelect: (newVideoInfo) => {
+          if (onVideoSelect) {
+            onVideoSelect(newVideoInfo);
+          }
+          closeModal();
+        },
+        onClose: closeModal
+      }),
   });
-
-  // Close on escape key
-  const handleEscape = (e) => {
-    if (e.key === "Escape") {
-      closeModal();
-    }
-  };
-  document.addEventListener("keydown", handleEscape);
-
-  overlay.appendChild(modalContainer);
-  document.body.appendChild(overlay);
-
-  // Render React component
-  const dom = window.Spicetify?.ReactDOM ?? window.ReactDOM ?? null;
-  if (!dom?.render) {
-    return;
-  }
-
-  const selectorComponent = react.createElement(CommunityVideoSelector, {
-    trackUri: trackUri,
-    currentVideoId: currentVideoId,
-    onVideoSelect: (newVideoInfo) => {
-      if (onVideoSelect) {
-        onVideoSelect(newVideoInfo);
-      }
-      closeModal();
-    },
-    onClose: closeModal
-  });
-
-  dom.render(selectorComponent, modalContainer);
 }
 
 // Community Video Selector Button
@@ -2531,30 +2893,35 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
   },
     // Header
     react.createElement("div", {
+      className: "ivlyrics-fluent-header share-image-modal-header",
       style: {
         padding: '20px 24px',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
       }
     },
-      react.createElement("h2", {
-        style: {
-          margin: 0,
-          fontSize: '22px',
-          fontWeight: '700',
-          background: "linear-gradient(135deg, #22c55e 0%, #10b981 50%, #14b8a6 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          letterSpacing: "-0.02em",
-        }
-      }, I18n.t("shareImage.title")),
-      react.createElement("p", {
-        style: { margin: '8px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }
-      }, I18n.t("shareImage.subtitle"))
+      react.createElement(
+        "div",
+        { className: "ivlyrics-fluent-title-wrap" },
+        react.createElement("h2", { className: "ivlyrics-fluent-title", style: { margin: 0 } }, I18n.t("shareImage.title")),
+        react.createElement("p", { className: "ivlyrics-fluent-subtitle" }, I18n.t("shareImage.subtitle"))
+      ),
+      react.createElement(
+        "button",
+        {
+          onClick: onClose,
+          className: "ivlyrics-fluent-close",
+        },
+        react.createElement(
+          "svg",
+          { width: 16, height: 16, viewBox: "0 0 16 16", fill: "currentColor" },
+          react.createElement("path", { d: "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" })
+        )
+      )
     ),
 
     // Content
     react.createElement("div", {
+      className: "share-image-modal-content",
       style: {
         flex: 1,
         display: 'flex',
@@ -2564,6 +2931,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
     },
       // Left: Lyrics selection
       react.createElement("div", {
+        className: "share-image-modal-selection-pane",
         style: {
           width: '45%',
           borderRight: '1px solid rgba(255,255,255,0.1)',
@@ -2572,6 +2940,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
         }
       },
         react.createElement("div", {
+          className: "share-image-modal-selection-label",
           style: {
             padding: '12px 16px',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -2581,6 +2950,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           }
         }, `${I18n.t("shareImage.selectLyrics")} (${selectedIndices.length}/${MAX_LINES})`),
         react.createElement("div", {
+          className: "share-image-modal-selection-list",
           style: {
             flex: 1,
             overflowY: 'auto',
@@ -2590,6 +2960,8 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           normalizedLyrics.map((line) =>
             react.createElement("div", {
               key: line.idx,
+              className: "share-image-modal-lyric-line",
+              "data-selected": selectedIndices.includes(line.idx),
               onClick: () => toggleLine(line.idx),
               style: {
                 padding: '10px 12px',
@@ -2620,6 +2992,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
       // Right: Preview & Options
       react.createElement("div", {
+        className: "share-image-modal-config-pane",
         style: {
           width: '55%',
           display: 'flex',
@@ -2630,17 +3003,21 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
       },
         // Preset selector
         react.createElement("div", {
+          className: "share-image-control-group",
           style: { marginBottom: '12px' }
         },
           react.createElement("label", {
             style: { fontSize: '13px', fontWeight: '500', marginBottom: '8px', display: 'block' }
           }, I18n.t("shareImage.template")),
           react.createElement("div", {
+            className: "share-image-segment-group",
             style: { display: 'flex', gap: '6px', flexWrap: 'wrap' }
           },
             presets.map(t =>
               react.createElement("button", {
                 key: t.key,
+                className: "share-image-chip",
+                "data-active": template === t.key,
                 onClick: () => handleTemplateChange(t.key),
                 style: {
                   padding: '5px 10px',
@@ -2659,6 +3036,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
         // Advanced settings toggle
         react.createElement("button", {
+          className: "share-image-advanced-toggle",
           onClick: () => setShowAdvanced(!showAdvanced),
           style: {
             display: 'flex',
@@ -2673,17 +3051,28 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
             marginBottom: showAdvanced ? '12px' : '0',
           }
         },
-          react.createElement("span", {
-            style: {
-              transform: showAdvanced ? 'rotate(90deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-            }
-          }, "▶"),
+          react.createElement(
+            "svg",
+            {
+              width: 12,
+              height: 12,
+              viewBox: "0 0 12 12",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: 1.8,
+              style: {
+                transform: showAdvanced ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+              }
+            },
+            react.createElement("path", { d: "M4 2.5 7.5 6 4 9.5" })
+          ),
           I18n.t("shareImage.advancedSettings") || "세부 설정"
         ),
 
         // Advanced settings panel
         showAdvanced && react.createElement("div", {
+          className: "share-image-advanced-panel",
           style: {
             background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.2) 100%)',
             borderRadius: '12px',
@@ -2701,6 +3090,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
         },
           // === 배경 설정 섹션 ===
           react.createElement("div", {
+            className: "share-image-panel-section",
             style: {
               gridColumn: 'span 2',
               fontSize: '12px',
@@ -2726,6 +3116,8 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
               ['coverBlur', 'gradient', 'solid'].map(type =>
                 react.createElement("button", {
                   key: type,
+                  className: "share-image-segment-btn",
+                  "data-active": currentSettings.backgroundType === type,
                   onClick: () => updateSetting('backgroundType', type),
                   style: {
                     flex: 1,
@@ -2776,6 +3168,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
           // === 앨범 커버 설정 섹션 ===
           react.createElement("div", {
+            className: "share-image-panel-section",
             style: {
               gridColumn: 'span 2',
               fontSize: '12px',
@@ -2796,6 +3189,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           // 커버 표시
           react.createElement("div", null,
             react.createElement("label", {
+              className: "share-image-check",
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -2817,6 +3211,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           // 곡 정보 표시
           react.createElement("div", null,
             react.createElement("label", {
+              className: "share-image-check",
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -2844,6 +3239,8 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
               ['left', 'center'].map(pos =>
                 react.createElement("button", {
                   key: pos,
+                  className: "share-image-segment-btn",
+                  "data-active": currentSettings.coverPosition === pos,
                   onClick: () => updateSetting('coverPosition', pos),
                   style: {
                     flex: 1,
@@ -2907,6 +3304,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
           // === 가사 설정 섹션 ===
           react.createElement("div", {
+            className: "share-image-panel-section",
             style: {
               gridColumn: 'span 2',
               fontSize: '12px',
@@ -2927,6 +3325,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           // 발음 표시
           react.createElement("div", null,
             react.createElement("label", {
+              className: "share-image-check",
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -2948,6 +3347,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           // 번역 표시
           react.createElement("div", null,
             react.createElement("label", {
+              className: "share-image-check",
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -2975,6 +3375,8 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
               ['left', 'center'].map(align =>
                 react.createElement("button", {
                   key: align,
+                  className: "share-image-segment-btn",
+                  "data-active": currentSettings.lyricsAlign === align,
                   onClick: () => updateSetting('lyricsAlign', align),
                   style: {
                     flex: 1,
@@ -3023,6 +3425,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
           // === 레이아웃 설정 섹션 ===
           react.createElement("div", {
+            className: "share-image-panel-section",
             style: {
               gridColumn: 'span 2',
               fontSize: '12px',
@@ -3054,6 +3457,8 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
               ].map(ratio =>
                 react.createElement("button", {
                   key: ratio.key === null ? 'auto' : ratio.key,
+                  className: "share-image-segment-btn",
+                  "data-active": currentSettings.aspectRatio === ratio.key,
                   onClick: () => updateSetting('aspectRatio', ratio.key),
                   style: {
                     flex: 1,
@@ -3103,6 +3508,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
           // === 기타 설정 ===
           react.createElement("div", {
+            className: "share-image-panel-section",
             style: {
               gridColumn: 'span 2',
               fontSize: '12px',
@@ -3123,6 +3529,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           // 워터마크
           react.createElement("div", { style: { gridColumn: 'span 2' } },
             react.createElement("label", {
+              className: "share-image-check",
               style: {
                 display: 'flex',
                 alignItems: 'center',
@@ -3144,6 +3551,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
         // Preview
         react.createElement("div", {
+          className: "share-image-preview-panel",
           style: {
             flex: 1,
             borderRadius: '12px',
@@ -3156,6 +3564,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           }
         },
           isGenerating ? react.createElement("div", {
+            className: "share-image-placeholder",
             style: { color: 'rgba(255,255,255,0.5)', fontSize: '14px' }
           }, "...") :
             previewUrl ? react.createElement("img", {
@@ -3167,6 +3576,7 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
                 borderRadius: '8px',
               }
             }) : react.createElement("div", {
+              className: "share-image-placeholder",
               style: { color: 'rgba(255,255,255,0.4)', fontSize: '14px', textAlign: 'center' }
             }, I18n.t("shareImage.selectLyricsHint"))
         )
@@ -3175,16 +3585,18 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
     // Footer: Actions
     react.createElement("div", {
+      className: "ivlyrics-fluent-footer share-image-modal-footer",
       style: {
         padding: '16px 24px',
         borderTop: '1px solid rgba(255,255,255,0.1)',
         display: 'flex',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
         gap: '10px',
       }
     },
       react.createElement("button", {
         onClick: onClose,
+        className: "ivlyrics-fluent-btn",
         style: {
           padding: '10px 20px',
           borderRadius: '8px',
@@ -3196,181 +3608,102 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
           cursor: 'pointer',
         }
       }, I18n.t("buttons.cancel")),
-      react.createElement("button", {
-        onClick: handleCopy,
-        disabled: selectedIndices.length === 0 || isGenerating,
-        style: {
-          padding: '10px 20px',
-          borderRadius: '8px',
-          border: 'none',
-          background: selectedIndices.length === 0 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)',
-          color: selectedIndices.length === 0 ? 'rgba(255,255,255,0.3)' : '#fff',
-          fontSize: '14px',
-          fontWeight: '500',
-          cursor: selectedIndices.length === 0 ? 'not-allowed' : 'pointer',
-        }
-      }, I18n.t("shareImage.actions.copy")),
-      react.createElement("button", {
-        onClick: handleDownload,
-        disabled: selectedIndices.length === 0 || isGenerating,
-        style: {
-          padding: '10px 20px',
-          borderRadius: '8px',
-          border: 'none',
-          background: selectedIndices.length === 0 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)',
-          color: selectedIndices.length === 0 ? 'rgba(255,255,255,0.3)' : '#fff',
-          fontSize: '14px',
-          fontWeight: '500',
-          cursor: selectedIndices.length === 0 ? 'not-allowed' : 'pointer',
-        }
-      }, I18n.t("shareImage.actions.download")),
-      navigator.canShare && react.createElement("button", {
-        onClick: handleShare,
-        disabled: selectedIndices.length === 0 || isGenerating,
-        style: {
-          padding: '10px 20px',
-          borderRadius: '8px',
-          border: 'none',
-          background: selectedIndices.length === 0 ? 'rgba(29, 185, 84, 0.3)' : '#1db954',
-          color: selectedIndices.length === 0 ? 'rgba(255,255,255,0.5)' : '#000',
-          fontSize: '14px',
-          fontWeight: '600',
-          cursor: selectedIndices.length === 0 ? 'not-allowed' : 'pointer',
-        }
-      }, I18n.t("shareImage.actions.share"))
+      react.createElement(
+        "div",
+        { className: "share-image-modal-actions" },
+        react.createElement("button", {
+          onClick: handleCopy,
+          className: "ivlyrics-fluent-btn",
+          disabled: selectedIndices.length === 0 || isGenerating,
+          style: {
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: selectedIndices.length === 0 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)',
+            color: selectedIndices.length === 0 ? 'rgba(255,255,255,0.3)' : '#fff',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: selectedIndices.length === 0 ? 'not-allowed' : 'pointer',
+          }
+        }, I18n.t("shareImage.actions.copy")),
+        react.createElement("button", {
+          onClick: handleDownload,
+          className: "ivlyrics-fluent-btn",
+          disabled: selectedIndices.length === 0 || isGenerating,
+          style: {
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: selectedIndices.length === 0 ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)',
+            color: selectedIndices.length === 0 ? 'rgba(255,255,255,0.3)' : '#fff',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: selectedIndices.length === 0 ? 'not-allowed' : 'pointer',
+          }
+        }, I18n.t("shareImage.actions.download")),
+        navigator.canShare && react.createElement("button", {
+          onClick: handleShare,
+          className: "ivlyrics-fluent-btn primary",
+          disabled: selectedIndices.length === 0 || isGenerating,
+          style: {
+            padding: '10px 20px',
+            borderRadius: '8px',
+            border: 'none',
+            background: selectedIndices.length === 0 ? 'rgba(29, 185, 84, 0.3)' : '#1db954',
+            color: selectedIndices.length === 0 ? 'rgba(255,255,255,0.5)' : '#000',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: selectedIndices.length === 0 ? 'not-allowed' : 'pointer',
+          }
+        }, I18n.t("shareImage.actions.share"))
+      )
     ),
 
     // 저작권 경고 모달
     showCopyrightModal && react.createElement("div", {
-      style: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.8)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10000,
-        backdropFilter: 'blur(8px)',
-      },
+      className: "ivlyrics-fluent-overlay",
+      "data-ui-theme": getSettingsSurfaceTheme(),
       onClick: (e) => {
         if (e.target === e.currentTarget) handleCopyrightCancel();
       }
     },
       react.createElement("div", {
-        style: {
-          background: 'linear-gradient(180deg, #282828 0%, #1a1a1a 100%)',
-          borderRadius: '16px',
-          padding: '28px 32px',
-          maxWidth: '420px',
-          width: '90%',
-          boxShadow: '0 24px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)',
-          animation: 'fadeInScale 0.2s ease-out',
-        }
+        className: "ivlyrics-fluent-shell share-image-copyright-shell",
+        "data-ui-theme": getSettingsSurfaceTheme(),
+        role: "dialog",
+        "aria-modal": "true",
       },
-        // 아이콘
-        react.createElement("div", {
-          style: {
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            background: 'rgba(255, 179, 0, 0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 20px',
-          }
-        },
-          react.createElement("span", {
-            style: { fontSize: '28px' }
-          }, "⚠️")
-        ),
-
-        // 제목
-        react.createElement("h3", {
-          style: {
-            margin: '0 0 16px',
-            fontSize: '18px',
-            fontWeight: '600',
-            textAlign: 'center',
-            color: '#fff',
-          }
-        }, I18n.t("shareImage.copyrightTitle") || "저작권 알림"),
-
-        // 설명
-        react.createElement("p", {
-          style: {
-            margin: '0 0 20px',
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: 'rgba(255,255,255,0.7)',
-            textAlign: 'center',
-          }
-        }, I18n.t("shareImage.copyrightDesc") || "이 가사 이미지에는 저작권이 있는 콘텐츠가 포함될 수 있습니다."),
-
-        // 주의사항 리스트
-        react.createElement("div", {
-          style: {
-            background: 'rgba(255,255,255,0.05)',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '24px',
-          }
-        },
-          react.createElement("ul", {
-            style: {
-              margin: 0,
-              padding: '0 0 0 20px',
-              fontSize: '13px',
-              lineHeight: '1.8',
-              color: 'rgba(255,255,255,0.6)',
-            }
-          },
+        react.createElement(
+          "div",
+          { className: "ivlyrics-fluent-body share-image-copyright-body" },
+          react.createElement(
+            "div",
+            { className: "share-image-copyright-icon" },
+            react.createElement(
+              "svg",
+              { width: 20, height: 20, viewBox: "0 0 20 20", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" },
+              react.createElement("path", { d: "M10 3 18 17H2L10 3Z" }),
+              react.createElement("path", { d: "M10 7.5v4.5" }),
+              react.createElement("circle", { cx: 10, cy: 14.2, r: 0.7, fill: "currentColor", stroke: "none" })
+            )
+          ),
+          react.createElement("h3", { className: "ivlyrics-fluent-title", style: { margin: 0, fontSize: '18px' } }, I18n.t("shareImage.copyrightTitle") || "저작권 알림"),
+          react.createElement("p", { className: "ivlyrics-fluent-subtitle", style: { margin: 0 } }, I18n.t("shareImage.copyrightDesc") || "이 가사 이미지에는 저작권이 있는 콘텐츠가 포함될 수 있습니다."),
+          react.createElement("ul", { className: "share-image-copyright-points" },
             react.createElement("li", null, I18n.t("shareImage.copyrightPoint1") || "개인적인 용도로만 사용해 주세요"),
             react.createElement("li", null, I18n.t("shareImage.copyrightPoint2") || "상업적 목적으로 사용하지 마세요"),
             react.createElement("li", null, I18n.t("shareImage.copyrightPoint3") || "SNS 공유 시 원작자를 존중해 주세요")
-          )
-        ),
-
-        // 버튼들
-        react.createElement("div", {
-          style: {
-            display: 'flex',
-            gap: '12px',
-          }
-        },
+          ),
+          react.createElement("div", { className: "share-image-copyright-actions" },
           react.createElement("button", {
             onClick: handleCopyrightCancel,
-            style: {
-              flex: 1,
-              padding: '12px 20px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: 'transparent',
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }
+            className: "ivlyrics-fluent-btn",
           }, I18n.t("buttons.cancel") || "취소"),
           react.createElement("button", {
             onClick: handleCopyrightConfirm,
-            style: {
-              flex: 1,
-              padding: '12px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              background: '#1db954',
-              color: '#000',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }
+            className: "ivlyrics-fluent-btn primary share-image-copyright-confirm",
           }, I18n.t("shareImage.copyrightConfirm") || "동의 후 계속")
+          )
         )
       )
     )
@@ -3379,77 +3712,21 @@ const ShareImageModal = ({ lyrics, trackInfo, onClose }) => {
 
 // Open Share Image Modal
 function openShareImageModal(lyrics, trackInfo) {
-  const existingOverlay = document.getElementById("ivLyrics-share-image-overlay");
-  if (existingOverlay) {
-    existingOverlay.remove();
-  }
-
-  const overlay = document.createElement("div");
-  overlay.id = "ivLyrics-share-image-overlay";
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s ease-out;
-  `;
-
-  const modalContainer = document.createElement("div");
-  modalContainer.style.cssText = `
-    background: rgba(24, 24, 24, 0.95);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-radius: 16px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 85vh;
-    overflow: hidden;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  `;
-
-  const closeModal = () => {
-    overlay.style.opacity = "0";
-    setTimeout(() => overlay.remove(), 200);
-  };
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) {
-      closeModal();
-    }
+  openFluentReactModal({
+    overlayId: "ivLyrics-share-image-overlay",
+    shellClassName: "share-image-modal-shell",
+    shellStyle: `
+      width: 90%;
+      max-width: 900px;
+      max-height: 85vh;
+    `,
+    render: (closeModal) =>
+      react.createElement(ShareImageModal, {
+        lyrics,
+        trackInfo,
+        onClose: closeModal,
+      }),
   });
-
-  const handleEscape = (e) => {
-    if (e.key === "Escape") {
-      closeModal();
-      document.removeEventListener("keydown", handleEscape);
-    }
-  };
-  document.addEventListener("keydown", handleEscape);
-
-  overlay.appendChild(modalContainer);
-  document.body.appendChild(overlay);
-
-  const dom = window.Spicetify?.ReactDOM ?? window.ReactDOM ?? null;
-  if (!dom?.render) {
-    return;
-  }
-
-  const modalComponent = react.createElement(ShareImageModal, {
-    lyrics,
-    trackInfo,
-    onClose: closeModal,
-  });
-
-  dom.render(modalComponent, modalContainer);
 }
 
 // Share Image Button

@@ -26,6 +26,51 @@ window.LANG_DE = {
     "clear": "Löschen",
     "inSection": "In {section}"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "Arbeitsbereich",
+      "display": "Anzeige",
+      "text": "Textebenen",
+      "playback": "Wiedergabe und Sync",
+      "surfaces": "Ansichten",
+      "providers": "Anbieter",
+      "fullscreen": "Vollbild",
+      "panel": "Panel-Texte",
+      "system": "System"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "Basis",
+        "typography": "Text",
+        "behavior": "Ablauf",
+        "surface": "Ansicht",
+        "providers": "Quelle",
+        "system": "System"
+      },
+      "generalDesc": "Sprache, Desktop-Overlay und zentrale Grundeinstellungen.",
+      "appearanceDesc": "Hintergründe, Typografie, Animationen und Bildschirmaufbau.",
+      "lyricsDesc": "Synchronisation, Übersetzung, Karaoke und Liedtextverarbeitung.",
+      "fullscreenDesc": "Vollbild-Layout und Darstellung bei der Wiedergabe.",
+      "nowplayingDesc": "Layout, Größe und Hintergrund der Panel-Texte.",
+      "lyricsProvidersDesc": "Quellen-Prioritäten, Tokens und Provider-Steuerung für Liedtexte.",
+      "aiProvidersDesc": "Konfiguration der KI-Anbieter für Übersetzung und Verarbeitung.",
+      "advancedDesc": "Erkennung, Cache, Hilfsprogramme und erweiterte Optionen.",
+      "debugDesc": "Diagnose, Wiederherstellung und Werkzeuge zur Fehlersuche.",
+      "aboutDesc": "Versionsdetails, Update-Prüfung, Mitwirkende und Patchnotes."
+    },
+    "background": {
+      "none": "Minimal",
+      "noneDesc": "Hält die Liedtextfläche ohne zusätzliche Hintergrundeffekte sauber.",
+      "layout": "Layout und Animation",
+      "finetune": "Hintergrunddetails"
+    },
+    "theme": {
+      "light": "In den hellen Modus wechseln",
+      "dark": "In den dunklen Modus wechseln",
+      "lightShort": "Hell",
+      "darkShort": "Dunkel"
+    }
+  },
   "sections": {
     "language": "Sprache",
     "visualEffects": "Visuelle Effekte",
@@ -87,6 +132,13 @@ window.LANG_DE = {
     "language": {
       "label": "Sprache",
       "desc": "Wählen Sie die Sprache der Erweiterung"
+    },
+    "translationTargetLanguage": {
+      "label": "Zielsprache der Übersetzung",
+      "desc": "Wähle die Sprache für die automatische Übersetzung",
+      "options": {
+        "auto": "Automatisch"
+      }
     },
     "alignment": {
       "label": "Ausrichtung",
@@ -419,7 +471,8 @@ window.LANG_DE = {
     "openSettings": "Einstellungen öffnen",
     "translationSettings": "Konvertierungseinstellungen",
     "regenerateTranslation": "Übersetzung neu generieren",
-    "fullscreen": "Vollbild"
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild verlassen"
   },
   "messages": {
     "noLyrics": "Kein Songtext verfügbar",

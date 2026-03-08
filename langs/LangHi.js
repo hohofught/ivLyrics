@@ -26,6 +26,51 @@ window.LANG_HI = {
     "clear": "साफ़ करें",
     "inSection": "{section} में"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "मूल",
+      "display": "प्रदर्शन",
+      "text": "टेक्स्ट परतें",
+      "playback": "प्लेबैक और सिंक",
+      "surfaces": "स्क्रीन",
+      "providers": "प्रदाता",
+      "fullscreen": "फुलस्क्रीन",
+      "panel": "पैनल गीत",
+      "system": "सिस्टम"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "मूल",
+        "typography": "टेक्स्ट",
+        "behavior": "प्रवाह",
+        "surface": "दृश्य",
+        "providers": "स्रोत",
+        "system": "सिस्टम"
+      },
+      "generalDesc": "भाषा, डेस्कटॉप ओवरले और मुख्य डिफ़ॉल्ट सेटिंग्स।",
+      "appearanceDesc": "पृष्ठभूमि, टाइपोग्राफी, एनीमेशन और स्क्रीन संरचना।",
+      "lyricsDesc": "सिंक, अनुवाद, कराओके और गीत प्रसंस्करण।",
+      "fullscreenDesc": "फुलस्क्रीन प्लेबैक लेआउट और दिखने वाले तत्व।",
+      "nowplayingDesc": "पैनल गीतों का लेआउट, आकार और पृष्ठभूमि।",
+      "lyricsProvidersDesc": "गीत स्रोत प्राथमिकताएँ, टोकन और प्रदाता नियंत्रण।",
+      "aiProvidersDesc": "अनुवाद और प्रसंस्करण के लिए AI प्रदाता कॉन्फ़िगरेशन।",
+      "advancedDesc": "डिटेक्शन, कैश, सहायक ऐप्स और उन्नत नियंत्रण।",
+      "debugDesc": "डायग्नोस्टिक्स, रिकवरी टूल और समस्या निवारण।",
+      "aboutDesc": "संस्करण विवरण, अपडेट जाँच, श्रेय और पैच नोट्स।"
+    },
+    "background": {
+      "none": "मिनिमल",
+      "noneDesc": "बिना अतिरिक्त पृष्ठभूमि प्रभाव के गीत सतह को साफ रखता है।",
+      "layout": "लेआउट और मोशन",
+      "finetune": "पृष्ठभूमि विवरण"
+    },
+    "theme": {
+      "light": "लाइट मोड में बदलें",
+      "dark": "डार्क मोड में बदलें",
+      "lightShort": "लाइट",
+      "darkShort": "डार्क"
+    }
+  },
   "sections": {
     "language": "भाषा",
     "visualEffects": "दृश्य प्रभाव",
@@ -87,6 +132,13 @@ window.LANG_HI = {
     "language": {
       "label": "भाषा",
       "desc": "एक्सटेंशन की भाषा चुनें"
+    },
+    "translationTargetLanguage": {
+      "label": "अनुवाद लक्ष्य भाषा",
+      "desc": "स्वतः अनुवाद के लिए उपयोग की जाने वाली भाषा चुनें",
+      "options": {
+        "auto": "स्वचालित"
+      }
     },
     "alignment": {
       "label": "संरेखण",
@@ -419,7 +471,8 @@ window.LANG_HI = {
     "openSettings": "सेटिंग्स खोलें",
     "translationSettings": "रूपांतरण सेटिंग्स",
     "regenerateTranslation": "अनुवाद फिर से करें",
-    "fullscreen": "फुलस्क्रीन"
+    "fullscreen": "फुलस्क्रीन",
+    "exitFullscreen": "फुलस्क्रीन से बाहर निकलें"
   },
   "messages": {
     "noLyrics": "कोई लिरिक्स उपलब्ध नहीं",

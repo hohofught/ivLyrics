@@ -5,6 +5,28 @@
 
 // 커스텀 확인 다이얼로그 컴포넌트
 const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel }) => {
+  const confirmButtonRef = react.useRef(null);
+
+  react.useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    requestAnimationFrame(() => {
+      confirmButtonRef.current?.focus?.();
+    });
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return react.createElement(
@@ -18,16 +40,20 @@ const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel }) => {
       {
         className: "confirm-dialog",
         onClick: (e) => e.stopPropagation(),
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-labelledby": "ivlyrics-community-confirm-title",
       },
       react.createElement(
-        "div",
+        "h3",
         {
+          id: "ivlyrics-community-confirm-title",
           className: "confirm-dialog-title",
         },
         title || I18n.t("communityVideo.delete")
       ),
       react.createElement(
-        "div",
+        "p",
         {
           className: "confirm-dialog-message",
         },
@@ -51,6 +77,7 @@ const ConfirmDialog = ({ isOpen, title, message, onConfirm, onCancel }) => {
           {
             className: "confirm-dialog-btn confirm",
             onClick: onConfirm,
+            ref: confirmButtonRef,
           },
           I18n.t("communityVideo.delete")
         )
@@ -915,7 +942,11 @@ const CommunityVideoSelector = ({
           onClick: onClose,
           title: I18n.t("close"),
         },
-        "✕"
+        react.createElement(
+          "svg",
+          { width: 16, height: 16, viewBox: "0 0 16 16", fill: "currentColor" },
+          react.createElement("path", { d: "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" })
+        )
       )
     ),
 

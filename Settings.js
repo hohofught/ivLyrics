@@ -462,7 +462,7 @@ const SettingsBackup = ({ userHash }) => {
             )
           )
         )
-    )
+      )
   );
 };
 
@@ -1129,12 +1129,17 @@ const AddonSettingsCard = ({ addon, isEnabled, onToggle, isExpanded, onExpandTog
                   react.createElement("circle", { cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "2" })
                 )
         ),
-        react.createElement("div", { className: "lyrics-provider-title-group", style: { display: 'flex', flexDirection: 'column', gap: '1px' } },
-          react.createElement("span", { className: "lyrics-provider-name", style: { lineHeight: '1.2' } }, addon.name),
-          react.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', opacity: 0.6 } },
+        react.createElement("div", { className: "lyrics-provider-title-group" },
+          react.createElement("span", { className: "lyrics-provider-name" }, addon.name),
+          react.createElement("div", { className: "lyrics-provider-title-meta" },
             react.createElement("span", null, `v${addon.version}`),
-            react.createElement("span", null, "•"),
+            react.createElement("span", { className: "lyrics-provider-title-meta-divider" }, "•"),
             react.createElement("span", null, addon.author)
+          ),
+          react.createElement(
+            "div",
+            { className: "lyrics-provider-summary" },
+            getLocalizedDescription(addon.description)
           )
         )
       ),
@@ -1150,14 +1155,10 @@ const AddonSettingsCard = ({ addon, isEnabled, onToggle, isExpanded, onExpandTog
         )
       )
     ),
-    // 설명
-    react.createElement("div", { className: "lyrics-provider-card-description" },
-      getLocalizedDescription(addon.description)
-    ),
     // 확장 영역 (설정 UI + Capabilities)
     isExpanded && (hasCapabilities || SettingsUI) && react.createElement("div", { className: "lyrics-provider-card-body" },
       // Capabilities Toggles (자동 렌더링)
-      hasCapabilities && react.createElement("div", { className: "ai-addon-settings-group", style: { marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' } },
+      hasCapabilities && react.createElement("div", { className: "ai-addon-settings-group" },
         react.createElement("div", { className: "ai-addon-capabilities-title" },
           I18n.t("settings.aiProviders.enabledCapabilities") || "Enabled Capabilities"
         ),
@@ -1173,7 +1174,7 @@ const AddonSettingsCard = ({ addon, isEnabled, onToggle, isExpanded, onExpandTog
             )
           )
         ),
-        react.createElement("div", { style: { fontSize: '11px', color: 'var(--spice-subtext)', marginTop: '8px' } },
+        react.createElement("div", { className: "ai-addon-capabilities-desc" },
           I18n.t("settings.aiProviders.capabilitiesDesc") || "Select which features this provider handles"
         )
       ),
@@ -1283,12 +1284,17 @@ const LyricsProviderCard = ({ provider, isEnabled, onToggle, isExpanded, onExpan
                 react.createElement("circle", { cx: "12", cy: "12", r: "10" })
               )
         ),
-        react.createElement("div", { className: "lyrics-provider-title-group", style: { display: 'flex', flexDirection: 'column', gap: '1px' } },
-          react.createElement("span", { className: "lyrics-provider-name", style: { lineHeight: '1.2' } }, provider.name),
-          react.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', opacity: 0.6 } },
+        react.createElement("div", { className: "lyrics-provider-title-group" },
+          react.createElement("span", { className: "lyrics-provider-name" }, provider.name),
+          react.createElement("div", { className: "lyrics-provider-title-meta" },
             react.createElement("span", null, `v${provider.version}`),
-            react.createElement("span", null, "•"),
+            react.createElement("span", { className: "lyrics-provider-title-meta-divider" }, "•"),
             react.createElement("span", null, provider.author)
+          ),
+          react.createElement(
+            "div",
+            { className: "lyrics-provider-summary" },
+            getLocalizedDescription(provider.description)
           )
         )
       ),
@@ -1304,51 +1310,32 @@ const LyricsProviderCard = ({ provider, isEnabled, onToggle, isExpanded, onExpan
         )
       )
     ),
-    // 설명
-    react.createElement("div", { className: "lyrics-provider-card-description" },
-      getLocalizedDescription(provider.description)
-    ),
     // 확장 영역 (설정 UI)
     isExpanded && react.createElement("div", { className: "lyrics-provider-card-body" },
       // 가사 유형별 필터 토글 영역
-      react.createElement("div", { className: "lyrics-type-toggles-container", style: { marginBottom: "20px", paddingBottom: "16px", borderBottom: "1px solid rgba(255, 255, 255, 0.05)" } },
-        react.createElement("div", { style: { fontSize: "11px", fontWeight: "600", color: "var(--spice-subtext)", marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" } }, I18n.t("settings.lyricsProviders.allowedTypes") || "Allowed Lyrics Types"),
-        react.createElement("div", { className: "lyrics-type-toggles", style: { display: "flex", gap: "8px", flexWrap: "wrap" } },
-          showKaraokeToggle && react.createElement("div", {
+      react.createElement("div", { className: "lyrics-type-toggles-container" },
+        react.createElement("div", { className: "lyrics-type-toggles-title" }, I18n.t("settings.lyricsProviders.allowedTypes") || "Allowed Lyrics Types"),
+        react.createElement("div", { className: "lyrics-type-toggles" },
+          showKaraokeToggle && react.createElement("button", {
+            type: "button",
             onClick: () => handleTypeToggle('karaoke', !enableKaraoke),
-            style: {
-              display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "16px", cursor: "pointer", fontSize: "12px", fontWeight: "500", transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              background: enableKaraoke ? "rgba(99, 102, 241, 0.15)" : "rgba(255, 255, 255, 0.05)",
-              border: enableKaraoke ? "1px solid rgba(99, 102, 241, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
-              color: enableKaraoke ? "#818cf8" : "var(--spice-text)",
-              opacity: enableKaraoke ? 1 : 0.7
-            }
+            className: `lyrics-type-toggle-chip type-karaoke ${enableKaraoke ? "active" : ""}`
           },
             enableKaraoke && react.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" }, react.createElement("polyline", { points: "20 6 9 17 4 12" })),
             I18n.t("settings.lyricsProviders.types.karaoke") || "Karaoke Lyrics"
           ),
-          showSyncedToggle && react.createElement("div", {
+          showSyncedToggle && react.createElement("button", {
+            type: "button",
             onClick: () => handleTypeToggle('synced', !enableSynced),
-            style: {
-              display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "16px", cursor: "pointer", fontSize: "12px", fontWeight: "500", transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              background: enableSynced ? "rgba(34, 197, 94, 0.15)" : "rgba(255, 255, 255, 0.05)",
-              border: enableSynced ? "1px solid rgba(34, 197, 94, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
-              color: enableSynced ? "#4ade80" : "var(--spice-text)",
-              opacity: enableSynced ? 1 : 0.7
-            }
+            className: `lyrics-type-toggle-chip type-synced ${enableSynced ? "active" : ""}`
           },
             enableSynced && react.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" }, react.createElement("polyline", { points: "20 6 9 17 4 12" })),
             I18n.t("settings.lyricsProviders.types.synced") || "Synced Lyrics"
           ),
-          showUnsyncedToggle && react.createElement("div", {
+          showUnsyncedToggle && react.createElement("button", {
+            type: "button",
             onClick: () => handleTypeToggle('unsynced', !enableUnsynced),
-            style: {
-              display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "16px", cursor: "pointer", fontSize: "12px", fontWeight: "500", transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              background: enableUnsynced ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.05)",
-              border: enableUnsynced ? "1px solid rgba(255, 255, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)",
-              color: enableUnsynced ? "#ffffff" : "var(--spice-text)",
-              opacity: enableUnsynced ? 1 : 0.7
-            }
+            className: `lyrics-type-toggle-chip type-unsynced ${enableUnsynced ? "active" : ""}`
           },
             enableUnsynced && react.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" }, react.createElement("polyline", { points: "20 6 9 17 4 12" })),
             I18n.t("settings.lyricsProviders.types.unsynced") || "Unsynced Lyrics"
@@ -1964,7 +1951,7 @@ const DebugInfoPanel = () => {
   // 카테고리별 색상
   const getCategoryColor = (category) => {
     const colors = {
-      lyrics: '#60a5fa',
+      lyrics: '#cbd5e1',
       metadata: '#a78bfa',
       translation: '#4ade80',
       phonetic: '#f472b6',
@@ -1986,7 +1973,7 @@ const DebugInfoPanel = () => {
     return react.createElement(
       "div",
       {
-        className: "info-card",
+        className: "info-card debug-info-panel debug-info-panel-loading",
         style: {
           padding: "20px",
           background: "rgba(255, 255, 255, 0.03)",
@@ -2003,7 +1990,7 @@ const DebugInfoPanel = () => {
   return react.createElement(
     "div",
     {
-      className: "info-card",
+      className: "info-card debug-info-panel",
       style: {
         padding: "20px",
         background: "rgba(255, 255, 255, 0.03)",
@@ -2017,43 +2004,22 @@ const DebugInfoPanel = () => {
     // 헤더 (새로고침 버튼 포함)
     react.createElement(
       "div",
-      {
-        style: {
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "16px",
-          paddingBottom: "12px",
-          borderBottom: "1px solid rgba(255,255,255,0.1)"
-        }
-      },
+      { className: "debug-info-header" },
       react.createElement(
         "div",
         null,
         react.createElement("h3", {
-          style: { margin: "0 0 4px", fontSize: "16px", color: "#ffffff", fontWeight: "600" }
+          className: "debug-info-title"
         }, I18n.t("settingsAdvanced.debugTab.currentTrack")),
         react.createElement("p", {
-          style: { margin: 0, fontSize: "12px", color: "rgba(255,255,255,0.5)" }
+          className: "debug-info-timestamp"
         }, debugInfo.timestamp)
       ),
       react.createElement(
         "button",
         {
           onClick: handleRefresh,
-          style: {
-            background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            color: "rgba(255, 255, 255, 0.9)",
-            padding: "8px 14px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "13px",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px"
-          }
+          className: "btn debug-action-btn",
         },
         react.createElement("svg", {
           width: 14,
@@ -2070,35 +2036,29 @@ const DebugInfoPanel = () => {
     // 트랙 정보
     debugInfo.track && react.createElement(
       "div",
-      { style: { marginBottom: "16px" } },
+      { className: "debug-info-section" },
       react.createElement("div", {
-        style: { fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }
+        className: "debug-info-section-label"
       }, I18n.t("settingsAdvanced.debugTab.trackInfo")),
       react.createElement("div", {
-        style: {
-          background: "rgba(0,0,0,0.25)",
-          borderRadius: "8px",
-          padding: "12px",
-          fontSize: "13px",
-          lineHeight: "1.6"
-        }
+        className: "debug-info-block"
       },
         react.createElement("div", null,
-          react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Title: "),
-          react.createElement("span", { style: { color: "#fff" } }, debugInfo.track.title)
+          react.createElement("span", { className: "debug-info-key" }, "Title: "),
+          react.createElement("span", { className: "debug-info-value" }, debugInfo.track.title)
         ),
         react.createElement("div", null,
-          react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Artist: "),
-          react.createElement("span", { style: { color: "#fff" } }, debugInfo.track.artist)
+          react.createElement("span", { className: "debug-info-key" }, "Artist: "),
+          react.createElement("span", { className: "debug-info-value" }, debugInfo.track.artist)
         ),
         react.createElement("div", null,
-          react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Album: "),
-          react.createElement("span", { style: { color: "#fff" } }, debugInfo.track.album)
+          react.createElement("span", { className: "debug-info-key" }, "Album: "),
+          react.createElement("span", { className: "debug-info-value" }, debugInfo.track.album)
         ),
         react.createElement("div", null,
-          react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Track ID: "),
+          react.createElement("span", { className: "debug-info-key" }, "Track ID: "),
           react.createElement("code", {
-            style: { color: "#fbbf24", fontFamily: "monospace", fontSize: "12px" }
+            className: "debug-info-code"
           }, debugInfo.track.id)
         )
       )
@@ -2106,47 +2066,30 @@ const DebugInfoPanel = () => {
     // API 요청 로그 섹션
     react.createElement(
       "div",
-      { style: { marginBottom: "16px" } },
+      { className: "debug-info-section" },
       react.createElement("div", {
-        style: {
-          fontSize: "11px",
-          color: "rgba(255,255,255,0.4)",
-          marginBottom: "6px",
-          textTransform: "uppercase",
-          letterSpacing: "0.5px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }
+        className: "debug-info-section-label debug-info-section-label-row"
       },
         react.createElement("span", null, `API 요청 로그 (${apiLogs.length})`),
-        window.ApiTracker && react.createElement("span", { style: { color: "rgba(255,255,255,0.3)" } },
+        window.ApiTracker && react.createElement("span", { className: "debug-info-inline-meta" },
           `Total: ${window.ApiTracker.getSummary()?.totalRequests || 0} requests`
         )
       ),
       react.createElement("div", {
-        style: {
-          background: "rgba(0,0,0,0.25)",
-          borderRadius: "8px",
-          padding: "8px",
-          maxHeight: "300px",
-          overflowY: "auto"
-        }
+        className: "debug-api-list"
       },
         apiLogs.length === 0
           ? react.createElement("div", {
-            style: { textAlign: "center", padding: "20px", color: "rgba(255,255,255,0.4)" }
+            className: "debug-api-empty"
           }, "아직 API 요청이 없습니다. 곡을 재생하면 여기에 표시됩니다.")
           : apiLogs.map((log, idx) => react.createElement(
             "div",
             {
               key: log.id || idx,
+              className: "debug-api-item",
               style: {
-                background: "rgba(0,0,0,0.3)",
-                borderRadius: "6px",
-                padding: "10px",
                 marginBottom: idx < apiLogs.length - 1 ? "8px" : 0,
-                borderLeft: `3px solid ${getCategoryColor(log.category)}`
+                borderLeft: `2px solid ${getCategoryColor(log.category)}`
               }
             },
             // 로그 헤더 (클릭 가능)
@@ -2154,96 +2097,56 @@ const DebugInfoPanel = () => {
               "div",
               {
                 onClick: () => toggleApiDetail(log.id),
-                style: {
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer"
-                }
+                className: "debug-api-header"
               },
-              react.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+              react.createElement("div", { className: "debug-api-header-left" },
                 // 카테고리 뱃지
                 react.createElement("span", {
+                  className: "debug-api-category",
                   style: {
                     background: getCategoryColor(log.category),
-                    color: "#000",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    fontWeight: "700",
-                    textTransform: "uppercase"
+                    color: "#0f172a",
                   }
                 }, log.category),
                 // 상태 표시
                 react.createElement("span", {
-                  style: {
-                    color: getStatusColor(log.status),
-                    fontSize: "11px",
-                    fontWeight: "600"
-                  }
-                }, log.cached ? "📦 CACHED" : log.status?.toUpperCase() || "PENDING"),
+                  className: "debug-api-status",
+                  style: { color: getStatusColor(log.status) }
+                }, log.cached ? "CACHED" : log.status?.toUpperCase() || "PENDING"),
                 // 소요 시간
                 log.duration && react.createElement("span", {
-                  style: { color: "rgba(255,255,255,0.4)", fontSize: "11px" }
+                  className: "debug-api-duration"
                 }, `${log.duration}ms`)
               ),
               // 타임스탬프
               react.createElement("span", {
-                style: { color: "rgba(255,255,255,0.3)", fontSize: "10px" }
+                className: "debug-api-timestamp"
               }, new Date(log.timestamp).toLocaleTimeString())
             ),
             // 엔드포인트 URL (축약)
             react.createElement("div", {
-              style: {
-                fontSize: "11px",
-                color: "rgba(255,255,255,0.6)",
-                marginTop: "6px",
-                fontFamily: "monospace",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis"
-              }
+              className: "debug-api-endpoint"
             }, log.endpoint?.replace(/https?:\/\/[^\/]+/, '') || '-'),
             // 상세 정보 (토글)
             showApiDetails[log.id] && react.createElement(
               "div",
-              { style: { marginTop: "10px", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "10px" } },
+              { className: "debug-api-details" },
               // 요청 정보
-              log.request && react.createElement("div", { style: { marginBottom: "8px" } },
+              log.request && react.createElement("div", { className: "debug-api-detail-group" },
                 react.createElement("div", {
-                  style: { fontSize: "10px", color: "rgba(255,255,255,0.4)", marginBottom: "4px" }
+                  className: "debug-json-label"
                 }, "REQUEST:"),
                 react.createElement("pre", {
-                  style: {
-                    background: "rgba(0,0,0,0.4)",
-                    padding: "8px",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    fontFamily: "monospace",
-                    color: "rgba(255,255,255,0.7)",
-                    margin: 0,
-                    overflow: "auto",
-                    maxHeight: "100px"
-                  }
+                  className: "debug-json-block"
                 }, JSON.stringify(log.request, null, 2))
               ),
               // 응답 정보
               log.response && react.createElement("div", null,
                 react.createElement("div", {
-                  style: { fontSize: "10px", color: "rgba(255,255,255,0.4)", marginBottom: "4px" }
+                  className: "debug-json-label"
                 }, "RESPONSE:"),
                 react.createElement("pre", {
-                  style: {
-                    background: "rgba(0,0,0,0.4)",
-                    padding: "8px",
-                    borderRadius: "4px",
-                    fontSize: "10px",
-                    fontFamily: "monospace",
-                    color: log.status === 'error' ? "#ef4444" : "rgba(255,255,255,0.7)",
-                    margin: 0,
-                    overflow: "auto",
-                    maxHeight: "100px"
-                  }
+                  className: `debug-json-block ${log.status === 'error' ? 'error' : ''}`
                 }, log.error || JSON.stringify(log.response, null, 2))
               )
             )
@@ -2253,75 +2156,58 @@ const DebugInfoPanel = () => {
     // 가사 정보
     react.createElement(
       "div",
-      { style: { marginBottom: "16px" } },
+      { className: "debug-info-section" },
       react.createElement("div", {
-        style: { fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }
+        className: "debug-info-section-label"
       }, I18n.t("settingsAdvanced.debugTab.lyricsInfo")),
       react.createElement("div", {
-        style: {
-          background: "rgba(0,0,0,0.25)",
-          borderRadius: "8px",
-          padding: "12px",
-          fontSize: "13px",
-          lineHeight: "1.6"
-        }
+        className: "debug-info-block"
       },
         debugInfo.lyrics ? react.createElement(
           react.Fragment,
           null,
           react.createElement("div", null,
-            react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Provider: "),
+            react.createElement("span", { className: "debug-info-key" }, "Provider: "),
             react.createElement("span", {
+              className: "debug-info-tag",
               style: {
                 color: "#4ade80",
-                fontWeight: "600",
-                padding: "2px 8px",
-                background: "rgba(74, 222, 128, 0.15)",
-                borderRadius: "4px"
+                background: "rgba(74, 222, 128, 0.12)",
               }
             }, debugInfo.lyrics.provider)
           ),
           react.createElement("div", { style: { marginTop: "8px" } },
-            react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Type: "),
+            react.createElement("span", { className: "debug-info-key" }, "Type: "),
             debugInfo.lyrics.hasKaraoke && react.createElement("span", {
               style: { color: "#f472b6", marginRight: "8px" }
             }, `Karaoke (${debugInfo.lyrics.karaokeLineCount} lines)`),
             debugInfo.lyrics.hasSynced && react.createElement("span", {
-              style: { color: "#60a5fa", marginRight: "8px" }
+              style: { color: "#cbd5e1", marginRight: "8px" }
             }, `Synced (${debugInfo.lyrics.syncedLineCount} lines)`),
             debugInfo.lyrics.hasUnsynced && react.createElement("span", {
               style: { color: "#fbbf24" }
             }, `Unsynced (${debugInfo.lyrics.unsyncedLineCount} lines)`)
           ),
           debugInfo.lyrics.error && react.createElement("div", { style: { marginTop: "8px" } },
-            react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, "Error: "),
+            react.createElement("span", { className: "debug-info-key" }, "Error: "),
             react.createElement("span", { style: { color: "#ef4444" } }, debugInfo.lyrics.error)
           )
-        ) : react.createElement("span", { style: { color: "rgba(255,255,255,0.5)" } }, I18n.t("settingsAdvanced.debugTab.noLyrics"))
+        ) : react.createElement("span", { className: "debug-info-empty" }, I18n.t("settingsAdvanced.debugTab.noLyrics"))
       )
     ),
     // 복사 버튼들
     react.createElement(
       "div",
-      { style: { display: "flex", gap: "8px", marginTop: "16px" } },
+      { className: "debug-info-actions" },
       react.createElement(
         "button",
         {
           onClick: handleCopy,
+          className: "btn debug-action-btn",
           style: {
-            flex: 1,
             background: copied ? "rgba(74, 222, 128, 0.15)" : "rgba(255, 255, 255, 0.08)",
             border: copied ? "1px solid rgba(74, 222, 128, 0.3)" : "1px solid rgba(255, 255, 255, 0.15)",
             color: copied ? "#4ade80" : "rgba(255, 255, 255, 0.9)",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
             transition: "all 0.2s ease"
           }
         },
@@ -2342,20 +2228,11 @@ const DebugInfoPanel = () => {
         "button",
         {
           onClick: handleSendToDiscord,
+          className: "btn btn-primary debug-action-btn",
           style: {
-            flex: 1,
             background: "#5865F2",
             border: "none",
             color: "#ffffff",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px"
           }
         },
         react.createElement("svg", {
@@ -2599,102 +2476,34 @@ const ColorPresetSelector = ({ name, defaultValue, onChange = () => { } }) => {
 
   return react.createElement(
     "div",
-    {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        width: "300px",
-      },
-    },
+    { className: "color-preset-selector" },
     // 현재 선택된 색상 표시
     react.createElement(
       "div",
-      {
-        style: {
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          padding: "8px 12px",
-          backgroundColor: "var(--spice-button)",
-          borderRadius: "8px",
-          border: "1px solid var(--spice-button)",
-          width: "100%",
-        },
-      },
+      { className: "color-preset-summary" },
       react.createElement("div", {
-        style: {
-          width: "32px",
-          height: "32px",
-          borderRadius: "6px",
-          backgroundColor: selectedColor,
-          border: "2px solid var(--spice-text)",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-          flexShrink: "0",
-        },
+        className: "color-preset-swatch",
+        style: { backgroundColor: selectedColor },
       }),
       react.createElement(
         "div",
-        {
-          style: {
-            display: "flex",
-            flexDirection: "column",
-            flex: "1",
-            minWidth: "0",
-            overflow: "hidden",
-          },
-        },
+        { className: "color-preset-meta" },
         react.createElement(
           "span",
-          {
-            style: {
-              color: "var(--spice-text)",
-              fontSize: "13px",
-              fontWeight: "500",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            },
-          },
+          { className: "color-preset-name" },
           selectedPreset ? selectedPreset.name : I18n.t("settings.colors.customColor")
         ),
         react.createElement(
           "span",
-          {
-            style: {
-              color: "var(--spice-subtext)",
-              fontSize: "11px",
-              fontFamily: "monospace",
-              whiteSpace: "nowrap",
-            },
-          },
+          { className: "color-preset-code" },
           selectedColor.toUpperCase()
         )
       ),
       react.createElement(
         "button",
         {
+          className: "btn color-preset-toggle-btn",
           onClick: () => setShowAll(!showAll),
-          style: {
-            padding: "6px 12px",
-            backgroundColor: "transparent",
-            color: "var(--spice-text)",
-            border: "1px solid var(--spice-text)",
-            borderRadius: "6px",
-            fontSize: "12px",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            flexShrink: "0",
-            whiteSpace: "nowrap",
-          },
-          onMouseEnter: (e) => {
-            e.target.style.backgroundColor = "var(--spice-text)";
-            e.target.style.color = "var(--spice-card)";
-          },
-          onMouseLeave: (e) => {
-            e.target.style.backgroundColor = "transparent";
-            e.target.style.color = "var(--spice-text)";
-          },
         },
         showAll ? I18n.t("settings.colors.showLess") : I18n.t("settings.colors.showMore")
       )
@@ -2703,50 +2512,17 @@ const ColorPresetSelector = ({ name, defaultValue, onChange = () => { } }) => {
     showAll &&
     react.createElement(
       "div",
-      {
-        style: {
-          display: "grid",
-          gridTemplateColumns: "repeat(6, 1fr)",
-          gap: "6px",
-          padding: "12px",
-          backgroundColor: "rgba(var(--spice-rgb-button), 0.3)",
-          borderRadius: "8px",
-          border: "1px solid var(--spice-button)",
-        },
-      },
+      { className: "color-preset-grid" },
       ...colorPresets.map((preset, index) =>
         react.createElement("button", {
           key: index,
+          className: "color-preset-grid-item",
           onClick: () => handleColorClick(preset.color),
           title: preset.name,
           "aria-label": preset.name,
+          "data-selected": selectedColor === preset.color ? "true" : "false",
           style: {
-            width: "100%",
-            aspectRatio: "1",
-            borderRadius: "6px",
             backgroundColor: preset.color,
-            border:
-              selectedColor === preset.color
-                ? "2.5px solid var(--spice-text)"
-                : "1.5px solid rgba(0,0,0,0.2)",
-            cursor: "pointer",
-            transition: "all 0.15s ease",
-            outline: "none",
-            boxShadow:
-              selectedColor === preset.color
-                ? "0 0 0 3px rgba(var(--spice-rgb-text), 0.2), 0 2px 4px rgba(0,0,0,0.2)"
-                : "0 1px 2px rgba(0,0,0,0.1)",
-          },
-          onMouseEnter: (e) => {
-            e.target.style.transform = "scale(1.1)";
-            e.target.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
-          },
-          onMouseLeave: (e) => {
-            e.target.style.transform = "scale(1)";
-            e.target.style.boxShadow =
-              selectedColor === preset.color
-                ? "0 0 0 3px rgba(var(--spice-rgb-text), 0.2), 0 2px 4px rgba(0,0,0,0.2)"
-                : "0 1px 2px rgba(0,0,0,0.1)";
           },
         })
       )
@@ -2795,11 +2571,7 @@ const ConfigInfo = ({ message, buttonText, onButtonClick }) => {
   return react.createElement(
     "div",
     {
-      className: "setting-row",
-      style: {
-        backgroundColor: "rgba(var(--spice-rgb-accent), 0.1)",
-        borderLeft: "3px solid var(--spice-accent)",
-      },
+      className: "setting-row config-info-row",
     },
     react.createElement(
       "div",
@@ -2810,12 +2582,7 @@ const ConfigInfo = ({ message, buttonText, onButtonClick }) => {
         react.createElement(
           "div",
           {
-            className: "setting-description",
-            style: {
-              color: "var(--spice-text)",
-              whiteSpace: "pre-line",
-              lineHeight: "1.5",
-            },
+            className: "setting-description config-info-message",
           },
           message
         )
@@ -2829,7 +2596,7 @@ const ConfigInfo = ({ message, buttonText, onButtonClick }) => {
           {
             className: "btn",
             onClick: onButtonClick,
-            style: { fontSize: "12px" }
+            style: { fontSize: "12px" },
           },
           buttonText
         )
@@ -3186,6 +2953,7 @@ const ConfigSelection = ({
   return react.createElement(
     "select",
     {
+      className: "config-select",
       value,
       disabled,
       onChange: setValueCallback,
@@ -3232,6 +3000,7 @@ const ConfigInput = ({ name, settingKey, defaultValue, onChange = () => { }, inp
         "div",
         { className: "setting-row-right" },
         react.createElement("input", {
+          className: "config-text-input",
           type: inputType,
           value,
           onChange: setValueCallback,
@@ -3343,45 +3112,37 @@ const ConfigFontSelector = ({
     }
   };
 
-  const commonStyle = {
-    width: "200px",
-    height: "32px",
-    padding: "4px 8px",
-    fontSize: "14px",
-    border: "1px solid var(--spice-button-disabled)",
-    borderRadius: "4px",
-    backgroundColor: "var(--spice-button)",
-    color: "var(--spice-text)",
-    boxSizing: "border-box",
-  };
-
   const fontSelector = react.createElement(
     "div",
-    { style: { display: "flex", gap: "10px", alignItems: "center" } },
+    { className: "config-font-selector" },
     useCustomFont
       ? react.createElement("input", {
+        className: "config-font-selector-control config-text-input",
         type: "text",
         value: customFont,
         onChange: handleCustomFontChange,
         placeholder: I18n.t("settings.fontPlaceholder") || "폰트명 입력 (예: Arial, 맑은 고딕)",
-        style: commonStyle,
       })
       : react.createElement(
         "select",
         {
+          className: "config-font-selector-control config-select",
           value: selectedFont,
           onChange: handleFontChange,
-          style: commonStyle,
         },
         GOOGLE_FONTS.map((font) =>
           react.createElement("option", { key: font, value: font }, font)
         )
       ),
-    react.createElement(ButtonSVG, {
-      icon: Spicetify.SVGIcons.edit,
-      active: useCustomFont,
-      onClick: handleCheckboxChange,
-    })
+    react.createElement(
+      "div",
+      { className: "config-font-selector-action" },
+      react.createElement(ButtonSVG, {
+        icon: Spicetify.SVGIcons.edit,
+        active: useCustomFont,
+        onClick: handleCheckboxChange,
+      })
+    )
   );
 
   // name이 있으면 전체 setting-row로 래핑, 없으면 컨트롤만 반환
@@ -3564,7 +3325,7 @@ const NowPlayingPanelPreview = () => {
             letterSpacing: "0.02em",
           }
         },
-        "🎵 " + (I18n.t("settingsAdvanced.nowPlayingPanel.preview") || "Preview")
+        I18n.t("settingsAdvanced.nowPlayingPanel.preview") || "Preview"
       ),
       // 가사 미리보기 (원어 → 발음 → 번역 순서)
       react.createElement(
@@ -3976,6 +3737,96 @@ const getEffectiveReducedMotionPreference = () =>
 const getSettingsMotionDurationMs = () =>
   getEffectiveReducedMotionPreference() ? 24 : 280;
 
+const getSettingsText = (key, fallback) => {
+  const value = I18n?.t?.(key);
+  return !value || value === key ? fallback : value;
+};
+
+const getSettingsUiTheme = () => {
+  const storedTheme = localStorage.getItem("ivLyrics:settings-ui-theme");
+  if (storedTheme === "light" || storedTheme === "dark") {
+    return storedTheme;
+  }
+
+  try {
+    return window.matchMedia?.("(prefers-color-scheme: light)")?.matches
+      ? "light"
+      : "dark";
+  } catch (error) {
+    return "dark";
+  }
+};
+
+const persistSettingsUiTheme = (theme) => {
+  localStorage.setItem("ivLyrics:settings-ui-theme", theme);
+};
+
+const SETTINGS_BACKGROUND_PRESETS = [
+  {
+    id: "none",
+    labelKey: "settingsUi.background.none",
+    fallbackLabel: "Minimal",
+    descriptionKey: "settingsUi.background.noneDesc",
+    fallbackDescription: "Keep Spotify's base surface and apply only the core lyric layout.",
+    icon:
+      '<rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7 10h10M7 14h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  },
+  {
+    id: "colorful",
+    labelKey: "settings.colorful.label",
+    fallbackLabel: "Colorful",
+    descriptionKey: "settings.colorful.desc",
+    fallbackDescription: "Use the vivid ivLyrics color treatment.",
+    icon:
+      '<circle cx="8" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="16" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="16" cy="15" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10.5 11l3-1.5M10.5 13l3 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  },
+  {
+    id: "gradient-background",
+    labelKey: "settings.gradientBackground.label",
+    fallbackLabel: "Album Gradient",
+    descriptionKey: "settings.gradientBackground.desc",
+    fallbackDescription: "Build a soft gradient from the current album art.",
+    icon:
+      '<rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 17c2.2-4.5 5-6.8 8.2-6.8 2.1 0 4.2 1 5.8 2.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  },
+  {
+    id: "blur-gradient-background",
+    labelKey: "settings.blurGradientBackground.label",
+    fallbackLabel: "Blur Gradient",
+    descriptionKey: "settings.blurGradientBackground.desc",
+    fallbackDescription: "Use a deeper, more atmospheric blur with gradient color.",
+    icon:
+      '<rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6 12h.01M18 12h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  },
+  {
+    id: "solid-background",
+    labelKey: "settings.solidBackground.label",
+    fallbackLabel: "Solid Color",
+    descriptionKey: "settings.solidBackground.desc",
+    fallbackDescription: "Use one fixed color with predictable contrast.",
+    icon:
+      '<rect x="4" y="6" width="16" height="12" rx="3" fill="currentColor"/><path d="M7 10h10" stroke="rgba(255,255,255,0.75)" stroke-width="1.7" stroke-linecap="round"/>',
+  },
+  {
+    id: "video-background",
+    labelKey: "settings.videoBackground.label",
+    fallbackLabel: "Community Video",
+    descriptionKey: "settings.videoBackground.desc",
+    fallbackDescription: "Play synchronized YouTube video backgrounds behind lyrics.",
+    icon:
+      '<rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor"/>',
+  },
+];
+
+const getCurrentSettingsBackgroundMode = () => {
+  if (CONFIG.visual["video-background"]) return "video-background";
+  if (CONFIG.visual["solid-background"]) return "solid-background";
+  if (CONFIG.visual["blur-gradient-background"]) return "blur-gradient-background";
+  if (CONFIG.visual["gradient-background"]) return "gradient-background";
+  if (CONFIG.visual["colorful"]) return "colorful";
+  return "none";
+};
+
 const applySettingsMotionClasses = () => {
   const reduceMotion = getEffectiveReducedMotionPreference();
   document
@@ -3986,10 +3837,49 @@ const applySettingsMotionClasses = () => {
     ?.classList.toggle("motion-reduced", reduceMotion);
 };
 
+const SettingsSidebarShell = ({ sidebarRef, children }) =>
+  react.createElement(
+    "aside",
+    { className: "settings-sidebar", ref: sidebarRef },
+    children
+  );
+
+const SettingsMainPanelShell = ({
+  contentRef,
+  badge,
+  label,
+  description,
+  children,
+}) =>
+  react.createElement(
+    "section",
+    { className: "settings-main-panel" },
+    react.createElement(
+      "div",
+      {
+        className: "settings-content",
+        ref: contentRef,
+      },
+      react.createElement(
+        "div",
+        { className: "settings-panel-hero" },
+        react.createElement("span", { className: "settings-panel-badge" }, badge),
+        react.createElement(
+          "div",
+          { className: "settings-panel-copy" },
+          react.createElement("h2", null, label),
+          react.createElement("p", null, description)
+        )
+      ),
+      children
+    )
+  );
+
 const ConfigModal = ({ onRequestClose = () => {} }) => {
   const [activeTab, setActiveTab] = react.useState("general");
   const [searchQuery, setSearchQuery] = react.useState("");
   const shouldReduceMotion = getEffectiveReducedMotionPreference();
+  const [uiTheme, setUiTheme] = react.useState(getSettingsUiTheme);
 
   // 검색어 변경 시 검색 결과 탭으로 자동 전환
   const handleSearchChange = (e) => {
@@ -4008,9 +3898,79 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     setActiveTab("general");
   };
 
-  // 스크롤 대상 설정 ID (ref 사용하여 리렌더링 방지)
-  const scrollToSettingIdRef = react.useRef(null);
-  const isNavigatingFromSearchRef = react.useRef(false);
+  react.useEffect(() => {
+    persistSettingsUiTheme(uiTheme);
+    document
+      .getElementById("ivLyrics-settings-overlay")
+      ?.setAttribute("data-ui-theme", uiTheme);
+  }, [uiTheme]);
+
+  const settingsContentRef = react.useRef(null);
+  const settingsSidebarRef = react.useRef(null);
+  const pendingSidebarScrollRef = react.useRef(null);
+  const shouldRestoreSidebarScrollRef = react.useRef(false);
+  const isProgrammaticScrollRef = react.useRef(false);
+  const programmaticScrollTimerRef = react.useRef(null);
+  const highlightTimeoutRef = react.useRef(null);
+
+  /**
+   * Scroll the settings-content container so that the element with
+   * the given data-setting-key appears at the top of the visible area.
+   * Uses container.scrollTo() instead of scrollIntoView() to avoid
+   * accidentally scrolling parent containers (Spotify shell, etc.).
+   */
+  const scrollToSetting = react.useCallback(
+    (settingKey, { behavior = "smooth", highlight = true } = {}) => {
+      if (!settingKey) return false;
+
+      const container = settingsContentRef.current;
+      if (!container) return false;
+
+      const activePanel = container.querySelector(".tab-content.active");
+      if (!activePanel) return false;
+
+      const targetElement =
+        activePanel.querySelector(`[data-setting-key="${settingKey}"]`);
+      if (!targetElement) return false;
+
+      // Mark scroll as programmatic so the scroll-spy ignores it
+      isProgrammaticScrollRef.current = true;
+      if (programmaticScrollTimerRef.current) {
+        clearTimeout(programmaticScrollTimerRef.current);
+      }
+
+      // Calculate target position relative to the scroll container
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = targetElement.getBoundingClientRect();
+      const scrollTop =
+        container.scrollTop + (targetRect.top - containerRect.top) - 12;
+
+      container.scrollTo({
+        top: Math.max(0, scrollTop),
+        behavior,
+      });
+
+      // Re-enable scroll spy after animation settles
+      const delay = behavior === "smooth" ? 500 : 60;
+      programmaticScrollTimerRef.current = window.setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+        programmaticScrollTimerRef.current = null;
+      }, delay);
+
+      if (highlight) {
+        targetElement.classList.add("setting-highlight-flash");
+        if (highlightTimeoutRef.current) {
+          clearTimeout(highlightTimeoutRef.current);
+        }
+        highlightTimeoutRef.current = window.setTimeout(() => {
+          targetElement.classList.remove("setting-highlight-flash");
+        }, 1800);
+      }
+
+      return true;
+    },
+    []
+  );
 
   // 텍스트 하이라이트 헬퍼 함수
   const highlightText = (text, query) => {
@@ -4049,20 +4009,20 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     },
     // 일반 탭 - 시각 효과
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "alignment",
       name: I18n.t("settings.alignment.label"),
       desc: I18n.t("settings.alignment.desc"),
-      i18nKeys: ["tabs.general", "settings.alignment.label", "settings.alignment.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.alignment.label", "settings.alignment.desc"]
     },
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "noise",
       name: I18n.t("settings.noise.label"),
       desc: I18n.t("settings.noise.desc"),
-      i18nKeys: ["tabs.general", "settings.noise.label", "settings.noise.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.noise.label", "settings.noise.desc"]
     },
     {
       section: I18n.t("tabs.appearance"),
@@ -4073,44 +4033,44 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
       i18nKeys: ["tabs.appearance", "sections.motion", "settings.reduceMotion.label", "settings.reduceMotion.desc"]
     },
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "colorful",
       name: I18n.t("settings.colorful.label"),
       desc: I18n.t("settings.colorful.desc"),
-      i18nKeys: ["tabs.general", "settings.colorful.label", "settings.colorful.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.colorful.label", "settings.colorful.desc"]
     },
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "gradient-background",
       name: I18n.t("settings.gradientBackground.label"),
       desc: I18n.t("settings.gradientBackground.desc"),
-      i18nKeys: ["tabs.general", "settings.gradientBackground.label", "settings.gradientBackground.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.gradientBackground.label", "settings.gradientBackground.desc"]
     },
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "solid-background",
       name: I18n.t("settings.solidBackground.label"),
       desc: I18n.t("settings.solidBackground.desc"),
-      i18nKeys: ["tabs.general", "settings.solidBackground.label", "settings.solidBackground.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.solidBackground.label", "settings.solidBackground.desc"]
     },
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "video-background",
       name: I18n.t("settings.videoBackground.label"),
       desc: I18n.t("settings.videoBackground.desc"),
-      i18nKeys: ["tabs.general", "settings.videoBackground.label", "settings.videoBackground.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.videoBackground.label", "settings.videoBackground.desc"]
     },
     {
-      section: I18n.t("tabs.general"),
-      sectionKey: "general",
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
       settingKey: "backgroundBrightness",
       name: I18n.t("settings.backgroundBrightness.label"),
       desc: I18n.t("settings.backgroundBrightness.desc"),
-      i18nKeys: ["tabs.general", "settings.backgroundBrightness.label", "settings.backgroundBrightness.desc"]
+      i18nKeys: ["tabs.appearance", "sections.visualEffects", "settings.backgroundBrightness.label", "settings.backgroundBrightness.desc"]
     },
     // 일반 탭 - 데스크탑 오버레이
     {
@@ -4120,6 +4080,14 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
       name: I18n.t("overlay.enabled.label"),
       desc: I18n.t("overlay.enabled.desc"),
       i18nKeys: ["tabs.general", "overlay.enabled.label", "overlay.enabled.desc"]
+    },
+    {
+      section: I18n.t("tabs.appearance"),
+      sectionKey: "appearance",
+      settingKey: "sync-mode",
+      name: I18n.t("settingsAdvanced.syncMode.title"),
+      desc: I18n.t("settingsAdvanced.syncMode.subtitle"),
+      i18nKeys: ["tabs.appearance", "settingsAdvanced.syncMode.title", "settingsAdvanced.syncMode.subtitle", "sections.visualEffects"]
     },
 
     // 외관 탭
@@ -4216,44 +4184,62 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
     // 고급 탭
     {
-      section: I18n.t("tabs.advanced"),
-      sectionKey: "advanced",
+      section: I18n.t("tabs.behavior"),
+      sectionKey: "lyrics",
       settingKey: "playback",
       name: I18n.t("settingsAdvanced.playback.title"),
       desc: I18n.t("settingsAdvanced.playback.subtitle"),
-      i18nKeys: ["tabs.advanced", "settingsAdvanced.playback.title", "settingsAdvanced.playback.subtitle"]
+      i18nKeys: ["tabs.behavior", "settingsAdvanced.playback.title", "settingsAdvanced.playback.subtitle"]
     },
     {
-      section: I18n.t("tabs.advanced"),
-      sectionKey: "advanced",
+      section: I18n.t("tabs.behavior"),
+      sectionKey: "lyrics",
       settingKey: "karaoke-mode",
       name: I18n.t("settingsAdvanced.karaokeMode.title"),
       desc: I18n.t("settingsAdvanced.karaokeMode.subtitle"),
-      i18nKeys: ["tabs.advanced", "settingsAdvanced.karaokeMode.title", "settingsAdvanced.karaokeMode.subtitle"]
+      i18nKeys: ["tabs.behavior", "settingsAdvanced.karaokeMode.title", "settingsAdvanced.karaokeMode.subtitle"]
     },
     {
-      section: I18n.t("tabs.advanced"),
-      sectionKey: "advanced",
+      section: I18n.t("tabs.behavior"),
+      sectionKey: "lyrics",
       settingKey: "prefetch",
       name: I18n.t("settingsAdvanced.prefetch.title"),
       desc: I18n.t("settingsAdvanced.prefetch.subtitle"),
-      i18nKeys: ["tabs.advanced", "settingsAdvanced.prefetch.title", "settingsAdvanced.prefetch.subtitle"]
+      i18nKeys: ["tabs.behavior", "settingsAdvanced.prefetch.title", "settingsAdvanced.prefetch.subtitle"]
     },
     {
-      section: I18n.t("tabs.advanced"),
-      sectionKey: "advanced",
+      section: I18n.t("tabs.behavior"),
+      sectionKey: "lyrics",
       settingKey: "community-sync",
       name: I18n.t("settingsAdvanced.communitySync.title"),
       desc: I18n.t("settingsAdvanced.communitySync.subtitle"),
-      i18nKeys: ["tabs.advanced", "settingsAdvanced.communitySync.title", "settingsAdvanced.communitySync.subtitle"]
+      i18nKeys: ["tabs.behavior", "settingsAdvanced.communitySync.title", "settingsAdvanced.communitySync.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.behavior"),
+      sectionKey: "lyrics",
+      settingKey: "cache-management",
+      name: I18n.t("settingsAdvanced.cacheManagement.title"),
+      desc: I18n.t("settingsAdvanced.cacheManagement.subtitle"),
+      i18nKeys: ["tabs.behavior", "settingsAdvanced.cacheManagement.title", "settingsAdvanced.cacheManagement.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.behavior"),
+      sectionKey: "lyrics",
+      settingKey: "lyrics-helper",
+      name: I18n.t("settings.lyricsHelper.sectionTitle") || "Helper Integration",
+      desc:
+        I18n.t("settings.lyricsHelper.sectionSubtitle") ||
+        "Send lyrics to external helper applications",
+      i18nKeys: ["tabs.behavior", "settings.lyricsHelper.sectionTitle", "settings.lyricsHelper.sectionSubtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
       sectionKey: "advanced",
-      settingKey: "cache-management",
-      name: I18n.t("settingsAdvanced.cacheManagement.title"),
-      desc: I18n.t("settingsAdvanced.cacheManagement.subtitle"),
-      i18nKeys: ["tabs.advanced", "settingsAdvanced.cacheManagement.title", "settingsAdvanced.cacheManagement.subtitle"]
+      settingKey: "language-detection",
+      name: I18n.t("settingsAdvanced.languageDetection.title"),
+      desc: I18n.t("settingsAdvanced.languageDetection.subtitle"),
+      i18nKeys: ["tabs.advanced", "settingsAdvanced.languageDetection.title", "settingsAdvanced.languageDetection.subtitle"]
     },
     {
       section: I18n.t("tabs.advanced"),
@@ -4292,6 +4278,30 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     {
       section: I18n.t("tabs.fullscreen"),
       sectionKey: "fullscreen",
+      settingKey: "normal-mode",
+      name: I18n.t("settingsAdvanced.normalMode.title"),
+      desc: I18n.t("settingsAdvanced.normalMode.subtitle"),
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.normalMode.title", "settingsAdvanced.normalMode.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.fullscreen"),
+      sectionKey: "fullscreen",
+      settingKey: "tv-mode",
+      name: I18n.t("settingsAdvanced.tvMode.title"),
+      desc: I18n.t("settingsAdvanced.tvMode.subtitle"),
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.tvMode.title", "settingsAdvanced.tvMode.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.fullscreen"),
+      sectionKey: "fullscreen",
+      settingKey: "metadata-display",
+      name: I18n.t("settingsAdvanced.metadataDisplay.title"),
+      desc: I18n.t("settingsAdvanced.metadataDisplay.subtitle"),
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.metadataDisplay.title", "settingsAdvanced.metadataDisplay.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.fullscreen"),
+      sectionKey: "fullscreen",
       settingKey: "fullscreen-style",
       name: I18n.t("settingsAdvanced.fullscreenStyle.title"),
       desc: I18n.t("settingsAdvanced.fullscreenStyle.subtitle"),
@@ -4305,6 +4315,118 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
       desc: I18n.t("settingsAdvanced.fullscreenUI.subtitle"),
       i18nKeys: ["tabs.fullscreen", "settingsAdvanced.fullscreenUI.title", "settingsAdvanced.fullscreenUI.subtitle"]
     },
+    {
+      section: I18n.t("tabs.fullscreen"),
+      sectionKey: "fullscreen",
+      settingKey: "controller-style",
+      name: I18n.t("settingsAdvanced.controllerStyle.title"),
+      desc: I18n.t("settingsAdvanced.controllerStyle.subtitle"),
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.controllerStyle.title", "settingsAdvanced.controllerStyle.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.fullscreen"),
+      sectionKey: "fullscreen",
+      settingKey: "auto-hide",
+      name: I18n.t("settingsAdvanced.autoHide.title"),
+      desc: I18n.t("settingsAdvanced.autoHide.subtitle"),
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.autoHide.title", "settingsAdvanced.autoHide.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.fullscreen"),
+      sectionKey: "fullscreen",
+      settingKey: "tmi-style",
+      name: I18n.t("settingsAdvanced.tmiStyle.title"),
+      desc: I18n.t("settingsAdvanced.tmiStyle.subtitle"),
+      i18nKeys: ["tabs.fullscreen", "settingsAdvanced.tmiStyle.title", "settingsAdvanced.tmiStyle.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.nowplaying"),
+      sectionKey: "nowplaying",
+      settingKey: "panel-lyrics-general",
+      name: I18n.t("settingsAdvanced.nowPlayingPanel.title"),
+      desc: I18n.t("settingsAdvanced.nowPlayingPanel.subtitle"),
+      i18nKeys: ["tabs.nowplaying", "settingsAdvanced.nowPlayingPanel.title", "settingsAdvanced.nowPlayingPanel.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.nowplaying"),
+      sectionKey: "nowplaying",
+      settingKey: "panel-background",
+      name: I18n.t("settingsAdvanced.nowPlayingPanel.background.title"),
+      desc: I18n.t("settingsAdvanced.nowPlayingPanel.background.subtitle"),
+      i18nKeys: ["tabs.nowplaying", "settingsAdvanced.nowPlayingPanel.background.title", "settingsAdvanced.nowPlayingPanel.background.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.nowplaying"),
+      sectionKey: "nowplaying",
+      settingKey: "panel-border",
+      name: I18n.t("settingsAdvanced.nowPlayingPanel.border.title"),
+      desc: I18n.t("settingsAdvanced.nowPlayingPanel.border.subtitle"),
+      i18nKeys: ["tabs.nowplaying", "settingsAdvanced.nowPlayingPanel.border.title", "settingsAdvanced.nowPlayingPanel.border.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.lyricsProviders") || "Lyrics Providers",
+      sectionKey: "lyrics-providers",
+      settingKey: "lyrics-providers",
+      name: I18n.t("tabs.lyricsProviders") || "Lyrics Providers",
+      desc: I18n.t("settings.lyricsProviders.description") || "Choose and order lyrics providers",
+      i18nKeys: ["tabs.lyricsProviders", "settings.lyricsProviders.title", "settings.lyricsProviders.description"]
+    },
+    {
+      section: I18n.t("tabs.aiProviders"),
+      sectionKey: "ai-providers",
+      settingKey: "ai-providers",
+      name: I18n.t("tabs.aiProviders"),
+      desc: I18n.t("settings.aiProviders.description") || "Configure AI providers and capabilities",
+      i18nKeys: ["tabs.aiProviders", "settings.aiProviders.title", "settings.aiProviders.description"]
+    },
+    {
+      section: I18n.t("tabs.about"),
+      sectionKey: "about",
+      settingKey: "about-account",
+      name: I18n.t("settingsAdvanced.aboutTab.account.title"),
+      desc: I18n.t("settingsAdvanced.aboutTab.account.subtitle"),
+      i18nKeys: ["tabs.about", "settingsAdvanced.aboutTab.account.title", "settingsAdvanced.aboutTab.account.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.about"),
+      sectionKey: "about",
+      settingKey: "about-app-info",
+      name: I18n.t("settingsAdvanced.aboutTab.appInfo.title"),
+      desc: I18n.t("settingsAdvanced.aboutTab.subtitle"),
+      i18nKeys: ["tabs.about", "settingsAdvanced.aboutTab.appInfo.title", "settingsAdvanced.aboutTab.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.about"),
+      sectionKey: "about",
+      settingKey: "about-client-info",
+      name: I18n.t("settingsAdvanced.aboutTab.clientInfo.title"),
+      desc: I18n.t("settingsAdvanced.aboutTab.clientInfo.subtitle"),
+      i18nKeys: ["tabs.about", "settingsAdvanced.aboutTab.clientInfo.title", "settingsAdvanced.aboutTab.clientInfo.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.about"),
+      sectionKey: "about",
+      settingKey: "about-update",
+      name: I18n.t("settingsAdvanced.aboutTab.update.title"),
+      desc: I18n.t("settingsAdvanced.aboutTab.update.subtitle"),
+      i18nKeys: ["tabs.about", "settingsAdvanced.aboutTab.update.title", "settingsAdvanced.aboutTab.update.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.about"),
+      sectionKey: "about",
+      settingKey: "about-patch-notes",
+      name: I18n.t("settingsAdvanced.aboutTab.patchNotes.title"),
+      desc: I18n.t("settingsAdvanced.aboutTab.patchNotes.subtitle"),
+      i18nKeys: ["tabs.about", "settingsAdvanced.aboutTab.patchNotes.title", "settingsAdvanced.aboutTab.patchNotes.subtitle"]
+    },
+    {
+      section: I18n.t("tabs.debug"),
+      sectionKey: "debug",
+      settingKey: "debug-overview",
+      name: I18n.t("settingsAdvanced.debugTab.title"),
+      desc: I18n.t("settingsAdvanced.debugTab.subtitle"),
+      i18nKeys: ["tabs.debug", "settingsAdvanced.debugTab.title", "settingsAdvanced.debugTab.subtitle"]
+    },
   ], []);
 
   // 검색 결과 필터링 (모든 언어의 번역을 검색 대상에 포함)
@@ -4317,7 +4439,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
       const allTranslations = (setting.i18nKeys || []).flatMap(key =>
         I18n.getAllTranslations(key)
       );
-      const searchIn = allTranslations.join(" ").toLowerCase();
+      const keywords = (setting.keywords || []).join(" ");
+      const searchIn = `${allTranslations.join(" ")} ${keywords}`.toLowerCase();
 
       return searchIn.includes(query);
     });
@@ -4404,16 +4527,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   onClick: (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const targetTab = item.sectionKey;
-                    const targetSettingKey = item.settingKey;
-                    // 스크롤 대상 설정 (ref 사용)
-                    if (targetSettingKey) {
-                      scrollToSettingIdRef.current = targetSettingKey;
-                      isNavigatingFromSearchRef.current = true;
-                    }
-                    // 바로 탭 이동
-                    setActiveTab(targetTab);
-                    setSearchQuery("");
+                    navigateToDestination(
+                      item.sectionKey,
+                      item.settingKey,
+                      resolveNavItemId(item.sectionKey, item.settingKey),
+                      true
+                    );
                   },
                   style: { cursor: "pointer" }
                 },
@@ -4469,57 +4588,63 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     return !!document.getElementById("fad-ivLyrics-container");
   }, []);
 
-  // 탭 변경 시 콘텐츠 상단으로 스크롤 또는 특정 설정으로 스크롤
+  // Pending scroll target when switching tabs
+  const pendingTabScrollRef = react.useRef(null);
+  const shouldResetContentScrollRef = react.useRef(false);
+
   react.useEffect(() => {
-    if (activeTab && activeTab !== "search") {
-      // 약간의 지연 후 스크롤 (DOM 업데이트 후)
-      setTimeout(() => {
-        const contentArea = document.querySelector(`#${APP_NAME}-config-container .settings-content`);
-        const scrollToSettingId = scrollToSettingIdRef.current;
-        const isFromSearch = isNavigatingFromSearchRef.current;
+    if (!activeTab || activeTab === "search") return;
 
-        if (scrollToSettingId && isFromSearch) {
-          window.__ivLyricsDebugLog?.("[ivLyrics Search] Looking for setting:", scrollToSettingId);
-          // 특정 설정으로 스크롤
-          const targetElement = document.querySelector(`[data-setting-key="${scrollToSettingId}"]`);
-          window.__ivLyricsDebugLog?.("[ivLyrics Search] Found element:", targetElement);
+    let cancelled = false;
+    let attempt = 0;
+    let frameId = null;
 
-          if (targetElement && contentArea) {
-            // 컨테이너 내에서의 상대적 위치 계산
-            const containerRect = contentArea.getBoundingClientRect();
-            const elementRect = targetElement.getBoundingClientRect();
-            const scrollTop = contentArea.scrollTop + elementRect.top - containerRect.top - (containerRect.height / 2) + (elementRect.height / 2);
+    const tryScroll = () => {
+      if (cancelled) return;
+      attempt++;
 
-            // 부드럽게 스크롤
-            contentArea.scrollTo({
-              top: Math.max(0, scrollTop),
-              behavior: "smooth"
-            });
-
-            // 빛나는 효과 적용
-            targetElement.classList.add("setting-highlight-flash");
-            // 2초 후 효과 제거
-            setTimeout(() => {
-              targetElement.classList.remove("setting-highlight-flash");
-            }, 2000);
-          } else {
-            window.__ivLyricsDebugLog?.("[ivLyrics Search] Element not found, scrolling to top");
-            if (contentArea) {
-              contentArea.scrollTop = 0;
-            }
-          }
-          // ref 초기화
-          scrollToSettingIdRef.current = null;
-          isNavigatingFromSearchRef.current = false;
-        } else if (!isFromSearch) {
-          // 일반 탭 전환시 상단으로 스크롤
-          if (contentArea) {
-            contentArea.scrollTop = 0;
-          }
+      const targetKey = pendingTabScrollRef.current;
+      if (targetKey) {
+        const ok = scrollToSetting(targetKey, {
+          behavior: attempt <= 1 ? "smooth" : "auto",
+        });
+        if (ok) {
+          pendingTabScrollRef.current = null;
+          return;
         }
-      }, 200);
-    }
-  }, [activeTab]);
+        if (attempt < 12) {
+          frameId = requestAnimationFrame(tryScroll);
+          return;
+        }
+        pendingTabScrollRef.current = null;
+        return;
+      }
+
+      if (shouldResetContentScrollRef.current) {
+        const c = settingsContentRef.current;
+        if (c) c.scrollTo({ top: 0, behavior: "auto" });
+        shouldResetContentScrollRef.current = false;
+      }
+    };
+
+    frameId = requestAnimationFrame(tryScroll);
+
+    return () => {
+      cancelled = true;
+      if (frameId != null) cancelAnimationFrame(frameId);
+    };
+  }, [activeTab, scrollToSetting]);
+
+  react.useEffect(() => {
+    return () => {
+      if (programmaticScrollTimerRef.current) {
+        clearTimeout(programmaticScrollTimerRef.current);
+      }
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // 컴포넌트 마운트 시 저장된 폰트 설정 로드 및 Google Font 링크 추가
   react.useEffect(() => {
@@ -4700,7 +4825,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             // 이미지
             .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; display: block;" />')
             // 링크
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #60a5fa; text-decoration: none; border-bottom: 1px solid rgba(96, 165, 250, 0.3); transition: border-color 0.2s;" onmouseover="this.style.borderBottomColor=\'rgba(96, 165, 250, 0.8)\'" onmouseout="this.style.borderBottomColor=\'rgba(96, 165, 250, 0.3)\'">$1</a>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: rgba(248, 250, 252, 0.92); text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.24); transition: border-color 0.2s;" onmouseover="this.style.borderBottomColor=\'rgba(255, 255, 255, 0.52)\'" onmouseout="this.style.borderBottomColor=\'rgba(255, 255, 255, 0.24)\'">$1</a>')
             // 체크박스 리스트
             .replace(/^- \[x\] (.*?)$/gm, '<li style="margin: 6px 0; list-style: none;"><span style="color: #4ade80; margin-right: 6px;">✓</span>$1</li>')
             .replace(/^- \[ \] (.*?)$/gm, '<li style="margin: 6px 0; list-style: none;"><span style="color: rgba(255,255,255,0.3); margin-right: 6px;">○</span>$1</li>')
@@ -4709,7 +4834,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             // 숫자 리스트
             .replace(/^\d+\. (.*?)$/gm, '<li style="margin: 6px 0; padding-left: 4px;">$1</li>')
             // 블록쿼트
-            .replace(/^> (.*?)$/gm, '<blockquote style="margin: 12px 0; padding-left: 16px; border-left: 3px solid rgba(96, 165, 250, 0.5); color: rgba(255,255,255,0.7); font-style: italic;">$1</blockquote>')
+            .replace(/^> (.*?)$/gm, '<blockquote style="margin: 12px 0; padding-left: 16px; border-left: 3px solid rgba(255, 255, 255, 0.24); color: rgba(255,255,255,0.7); font-style: italic;">$1</blockquote>')
             // 구분선
             .replace(/^---$/gm, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;" />')
             .replace(/^\*\*\*$/gm, '<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;" />')
@@ -4752,7 +4877,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   background: rgba(255,255,255,0.05);
                   border: 1px solid rgba(255,255,255,0.1);
                   border-radius: 8px;
-                  color: #60a5fa;
+                  color: rgba(248, 250, 252, 0.92);
                   text-decoration: none;
                   font-size: 13px;
                   font-weight: 600;
@@ -4814,6 +4939,43 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(
           "div",
           { className: "settings-buttons" },
+          react.createElement(
+            "button",
+            {
+              className: "settings-theme-btn",
+              onClick: () =>
+                setUiTheme((currentTheme) =>
+                  currentTheme === "dark" ? "light" : "dark"
+                ),
+              title:
+                uiTheme === "dark"
+                  ? getSettingsText("settingsUi.theme.light", "Switch to light mode")
+                  : getSettingsText("settingsUi.theme.dark", "Switch to dark mode"),
+            },
+            react.createElement("svg", {
+              width: 16,
+              height: 16,
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: 1.9,
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              dangerouslySetInnerHTML: {
+                __html:
+                  uiTheme === "dark"
+                    ? '<circle cx="12" cy="12" r="4.5"></circle><path d="M12 2.5v2.2M12 19.3v2.2M4.93 4.93l1.56 1.56M17.51 17.51l1.56 1.56M2.5 12h2.2M19.3 12h2.2M4.93 19.07l1.56-1.56M17.51 6.49l1.56-1.56"></path>'
+                    : '<path d="M21 12.8A8.7 8.7 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>',
+              },
+            }),
+            react.createElement(
+              "span",
+              null,
+              uiTheme === "dark"
+                ? getSettingsText("settingsUi.theme.darkShort", "Dark")
+                : getSettingsText("settingsUi.theme.lightShort", "Light")
+            )
+          ),
           react.createElement(
             "button",
             {
@@ -4896,139 +5058,13 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     );
   };
 
-  const TabButton = ({ id, label, icon, isActive, onClick }) => {
-    return react.createElement(
-      "button",
-      {
-        className: `settings-tab-btn ${isActive ? "active" : ""}`,
-        "data-tab-id": id,
-        onClick: (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onClick(id);
-        },
-      },
-      label
-    );
-  };
-
-  // 스크롤 가능한 탭 바 컴포넌트
-  const ScrollableTabBar = ({ children, activeTab }) => {
-    const tabsRef = react.useRef(null);
-    const [showLeftArrow, setShowLeftArrow] = react.useState(false);
-    const [showRightArrow, setShowRightArrow] = react.useState(false);
-
-    const checkScrollButtons = react.useCallback(() => {
-      const container = tabsRef.current;
-      if (!container) return;
-
-      const { scrollLeft, scrollWidth, clientWidth } = container;
-      setShowLeftArrow(scrollLeft > 5);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 5);
-    }, []);
-
-    react.useEffect(() => {
-      const container = tabsRef.current;
-      if (!container) return;
-
-      checkScrollButtons();
-      container.addEventListener('scroll', checkScrollButtons);
-      window.addEventListener('resize', checkScrollButtons);
-
-      // ResizeObserver로 컨테이너 크기 변화 감지
-      const resizeObserver = new ResizeObserver(checkScrollButtons);
-      resizeObserver.observe(container);
-
-      return () => {
-        container.removeEventListener('scroll', checkScrollButtons);
-        window.removeEventListener('resize', checkScrollButtons);
-        resizeObserver.disconnect();
-      };
-    }, [checkScrollButtons]);
-
-    // 활성 탭이 변경되면 해당 탭으로 스크롤
-    react.useEffect(() => {
-      const container = tabsRef.current;
-      if (!container) return;
-
-      const activeButton = container.querySelector(`[data-tab-id="${activeTab}"]`);
-      if (activeButton) {
-        const containerRect = container.getBoundingClientRect();
-        const buttonRect = activeButton.getBoundingClientRect();
-
-        if (buttonRect.left < containerRect.left || buttonRect.right > containerRect.right) {
-          activeButton.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        }
-      }
-    }, [activeTab]);
-
-    const scroll = (direction) => {
-      const container = tabsRef.current;
-      if (!container) return;
-
-      const scrollAmount = container.clientWidth * 0.6;
-      container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    };
-
-    return react.createElement(
-      "div",
-      { className: "settings-tabs-wrapper" },
-      // 왼쪽 스크롤 버튼
-      react.createElement(
-        "button",
-        {
-          className: `settings-tabs-scroll-btn left ${showLeftArrow ? 'visible' : ''}`,
-          onClick: () => scroll('left'),
-          "aria-label": "Scroll left",
-        },
-        react.createElement("svg", {
-          viewBox: "0 0 16 16",
-          dangerouslySetInnerHTML: {
-            __html: '<path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>'
-          }
-        })
-      ),
-      // 탭 컨테이너
-      react.createElement(
-        "div",
-        { className: "settings-tabs", ref: tabsRef },
-        children
-      ),
-      // 오른쪽 스크롤 버튼
-      react.createElement(
-        "button",
-        {
-          className: `settings-tabs-scroll-btn right ${showRightArrow ? 'visible' : ''}`,
-          onClick: () => scroll('right'),
-          "aria-label": "Scroll right",
-        },
-        react.createElement("svg", {
-          viewBox: "0 0 16 16",
-          dangerouslySetInnerHTML: {
-            __html: '<path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>'
-          }
-        })
-      )
-    );
-  };
-
-  const TabContainer = ({ children }) => {
+  const SectionTitle = ({ title, subtitle, sectionKey }) => {
     return react.createElement(
       "div",
       {
-        className: "settings-content",
+        className: "section-title",
+        ...(sectionKey ? { "data-setting-key": sectionKey } : {}),
       },
-      children
-    );
-  };
-
-  const SectionTitle = ({ title, subtitle }) => {
-    return react.createElement(
-      "div",
-      { className: "section-title" },
       react.createElement(
         "div",
         { className: "section-title-content" },
@@ -5042,11 +5078,745 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     );
   };
 
+  const tabMeta = {
+    general: {
+      label: I18n.t("tabs.general"),
+      badge: getSettingsText("settingsUi.nav.badges.workspace", "Workspace"),
+      description: getSettingsText(
+        "settingsUi.nav.generalDesc",
+        "Language, translation target, and desktop overlay behavior"
+      ),
+    },
+    appearance: {
+      label: I18n.t("tabs.appearance"),
+      badge: getSettingsText("settingsUi.nav.badges.typography", "Typography"),
+      description: getSettingsText(
+        "settingsUi.nav.appearanceDesc",
+        "Background, sync presentation, motion, and text styles"
+      ),
+    },
+    lyrics: {
+      label: I18n.t("tabs.behavior"),
+      badge: getSettingsText("settingsUi.nav.badges.behavior", "Playback"),
+      description: getSettingsText(
+        "settingsUi.nav.lyricsDesc",
+        "Playback buttons, karaoke behavior, prefetch, sync sharing, and helper integrations"
+      ),
+    },
+    fullscreen: {
+      label: I18n.t("tabs.fullscreen"),
+      badge: getSettingsText("settingsUi.nav.badges.surface", "Surface"),
+      description: getSettingsText(
+        "settingsUi.nav.fullscreenDesc",
+        "Fullscreen layout, metadata display, controller UI, and TV mode presentation"
+      ),
+    },
+    nowplaying: {
+      label: I18n.t("tabs.nowplaying"),
+      badge: getSettingsText("settingsUi.nav.badges.surface", "Surface"),
+      description: getSettingsText(
+        "settingsUi.nav.nowplayingDesc",
+        "Panel lyrics typography, background, border, and preview behavior"
+      ),
+    },
+    "lyrics-providers": {
+      label: I18n.t("tabs.lyricsProviders") || "Lyrics Providers",
+      badge: getSettingsText("settingsUi.nav.badges.providers", "Providers"),
+      description: getSettingsText(
+        "settingsUi.nav.lyricsProvidersDesc",
+        "Choose, order, and scope each lyrics source"
+      ),
+    },
+    "ai-providers": {
+      label: I18n.t("tabs.aiProviders"),
+      badge: getSettingsText("settingsUi.nav.badges.providers", "Providers"),
+      description: getSettingsText(
+        "settingsUi.nav.aiProvidersDesc",
+        "Configure AI translation providers, models, and keys"
+      ),
+    },
+    advanced: {
+      label: I18n.t("tabs.advanced"),
+      badge: getSettingsText("settingsUi.nav.badges.system", "System"),
+      description: getSettingsText(
+        "settingsUi.nav.advancedDesc",
+        "Language detection, import/export, database tools, and reset operations"
+      ),
+    },
+    debug: {
+      label: I18n.t("tabs.debug"),
+      badge: getSettingsText("settingsUi.nav.badges.system", "System"),
+      description: getSettingsText(
+        "settingsUi.nav.debugDesc",
+        "Inspect track, lyrics, and runtime state for troubleshooting"
+      ),
+    },
+    about: {
+      label: I18n.t("tabs.about"),
+      badge: getSettingsText("settingsUi.nav.badges.system", "System"),
+      description: getSettingsText(
+        "settingsUi.nav.aboutDesc",
+        "Account, update status, client info, and release notes"
+      ),
+    },
+  };
+
+  const activeTabMeta = tabMeta[activeTab] || tabMeta.general;
+
+  const sidebarTabs = [
+    {
+      id: "general",
+      label: I18n.t("tabs.general"),
+      badge: tabMeta.general.badge,
+      description: tabMeta.general.description,
+    },
+    {
+      id: "appearance",
+      label: I18n.t("tabs.appearance"),
+      badge: tabMeta.appearance.badge,
+      description: tabMeta.appearance.description,
+    },
+    {
+      id: "lyrics",
+      label: I18n.t("tabs.behavior"),
+      badge: tabMeta.lyrics.badge,
+      description: tabMeta.lyrics.description,
+    },
+    {
+      id: "lyrics-providers",
+      label: I18n.t("tabs.lyricsProviders"),
+      badge: tabMeta["lyrics-providers"].badge,
+      description: tabMeta["lyrics-providers"].description,
+      standalone: true,
+    },
+    {
+      id: "ai-providers",
+      label: I18n.t("tabs.aiProviders"),
+      badge: tabMeta["ai-providers"].badge,
+      description: tabMeta["ai-providers"].description,
+      standalone: true,
+    },
+    {
+      id: "fullscreen",
+      label: I18n.t("tabs.fullscreen"),
+      badge: tabMeta.fullscreen.badge,
+      description: tabMeta.fullscreen.description,
+    },
+    {
+      id: "nowplaying",
+      label: I18n.t("tabs.nowplaying"),
+      badge: tabMeta.nowplaying.badge,
+      description: tabMeta.nowplaying.description,
+    },
+    {
+      id: "advanced",
+      label: I18n.t("tabs.advanced"),
+      badge: tabMeta.advanced.badge,
+      description: tabMeta.advanced.description,
+    },
+    {
+      id: "debug",
+      label: I18n.t("tabs.debug"),
+      badge: tabMeta.debug.badge,
+      description: tabMeta.debug.description,
+    },
+    {
+      id: "about",
+      label: I18n.t("tabs.about"),
+      badge: tabMeta.about.badge,
+      description: tabMeta.about.description,
+    },
+  ];
+  const [sidebarSectionsByTab, setSidebarSectionsByTab] = react.useState({});
+  const [expandedGroupIds, setExpandedGroupIds] = react.useState(() =>
+    sidebarTabs.filter((tab) => !tab.standalone).map((tab) => tab.id)
+  );
+  const resolveNavItemId = (tabId, settingKey) => settingKey || tabId;
+  const [activeNavItemId, setActiveNavItemId] = react.useState(() =>
+    resolveNavItemId("general", "language")
+  );
+  const activeNavItemIdRef = react.useRef(activeNavItemId);
+
+  react.useEffect(() => {
+    activeNavItemIdRef.current = activeNavItemId;
+  }, [activeNavItemId]);
+
+  /* ==========================================================
+   *  Sidebar ↔ Content Synchronisation  (complete rewrite)
+   * ========================================================== */
+
+  // ---- 1. Section discovery (build sidebarSectionsByTab) ----
+  react.useEffect(() => {
+    const container = settingsContentRef.current;
+    if (!container) return;
+
+    // Wait one frame so the DOM for the new activeTab is rendered
+    const frameId = requestAnimationFrame(() => {
+      const tabNodes = Array.from(
+        container.querySelectorAll(".tab-content[data-tab-id]")
+      );
+      if (tabNodes.length === 0) return;
+
+      const next = {};
+      tabNodes.forEach((tabNode) => {
+        const tabId = tabNode.getAttribute("data-tab-id");
+        if (!tabId || tabId === "search") return;
+
+        const seen = new Set();
+        next[tabId] = Array.from(
+          tabNode.querySelectorAll(".section-title[data-setting-key]")
+        )
+          .map((el) => {
+            const key = el.getAttribute("data-setting-key");
+            if (!key || seen.has(key)) return null;
+            const h3 = el.querySelector("h3");
+            const p = el.querySelector("p");
+            const label = h3?.textContent?.trim();
+            if (!label) return null;
+            seen.add(key);
+            return {
+              id: key,
+              settingKey: key,
+              label,
+              description: p?.textContent?.trim() || "",
+              tabId,
+            };
+          })
+          .filter(Boolean);
+      });
+
+      setSidebarSectionsByTab(next);
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [activeTab, searchQuery]);
+
+  // Derived helpers (remain the same)
+  const activeSidebarTab =
+    sidebarTabs.find((tab) => tab.id === activeTab) ||
+    sidebarTabs.find((tab) => tab.id === "general") ||
+    sidebarTabs[0];
+  const activeSectionItems =
+    activeTab === "search" ? [] : sidebarSectionsByTab[activeTab] || [];
+
+  const activeNavItem =
+    activeTab === "search"
+      ? {
+          label: I18n.t("search.placeholder"),
+          description: I18n.t("search.noResultsDesc"),
+          badge: I18n.t("search.resultCount")
+            .replace("{count}", searchResults.length || 0),
+        }
+      : activeSectionItems.find((item) => item.settingKey === activeNavItemId) ||
+        activeSidebarTab || {
+          label: activeTabMeta?.label,
+          description: activeTabMeta?.description,
+          badge: activeTabMeta?.badge,
+        };
+
+  const activeNavigationGroup =
+    activeTab === "search"
+      ? activeNavItem
+      : activeSidebarTab || {
+          label: activeTabMeta?.label,
+          description: activeTabMeta?.description,
+          badge: activeTabMeta?.badge,
+        };
+
+  // ---- 2. navigateToDestination (click handler) ----
+  const navigateToDestination = react.useCallback(
+    (tabId, settingKey, navItemId, clearSearch = false) => {
+      // preserve sidebar scroll position
+      if (settingsSidebarRef.current) {
+        pendingSidebarScrollRef.current = settingsSidebarRef.current.scrollTop;
+        shouldRestoreSidebarScrollRef.current = true;
+      }
+
+      if (navItemId) {
+        setActiveNavItemId(navItemId);
+      }
+      if (clearSearch) {
+        setSearchQuery("");
+      }
+
+      // Different tab → switch tab and schedule scroll
+      if (tabId !== activeTab) {
+        if (settingKey) {
+          pendingTabScrollRef.current = settingKey;
+          shouldResetContentScrollRef.current = false;
+        } else {
+          pendingTabScrollRef.current = null;
+          shouldResetContentScrollRef.current = true;
+        }
+        setActiveTab(tabId);
+        return;
+      }
+
+      // Same tab → scroll directly
+      if (settingKey) {
+        isProgrammaticScrollRef.current = true;
+        requestAnimationFrame(() => {
+          scrollToSetting(settingKey);
+        });
+      } else if (settingsContentRef.current) {
+        isProgrammaticScrollRef.current = true;
+        settingsContentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+        if (programmaticScrollTimerRef.current) clearTimeout(programmaticScrollTimerRef.current);
+        programmaticScrollTimerRef.current = setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 500);
+      }
+    },
+    [activeTab, scrollToSetting]
+  );
+
+  // ---- 3. Keep activeNavItemId valid for the current tab ----
+  react.useEffect(() => {
+    if (activeTab === "search") return;
+
+    const items = sidebarSectionsByTab[activeTab] || [];
+    if (items.length === 0) {
+      if (activeNavItemId !== activeTab) setActiveNavItemId(activeTab);
+      return;
+    }
+
+    const valid = items.some((i) => i.settingKey === activeNavItemId);
+    if (!valid) {
+      setActiveNavItemId(items[0].settingKey);
+    }
+  }, [activeNavItemId, activeTab, sidebarSectionsByTab]);
+
+  // ---- 4. Auto-expand the sidebar group for the active tab ----
+  react.useEffect(() => {
+    if (activeTab === "search" || !activeSidebarTab?.id || activeSidebarTab.standalone) {
+      return;
+    }
+    setExpandedGroupIds((prev) =>
+      prev.includes(activeSidebarTab.id) ? prev : [...prev, activeSidebarTab.id]
+    );
+  }, [activeSidebarTab, activeTab]);
+
+  // ---- 5. Scroll-spy: update sidebar highlight on user scroll ----
+  // Read the current scroll container from the ref on every frame so the
+  // active section stays in sync even after normal React re-renders.
+  react.useEffect(() => {
+    if (activeTab === "search") return;
+
+    let active = true;
+    let prevScrollTop = -1;
+
+    const tick = () => {
+      if (!active) return;
+
+      // Always read the CURRENT container from the ref (it may have
+      // been replaced by a React re-render since the last tick).
+      const container = settingsContentRef.current;
+
+      if (!container || isProgrammaticScrollRef.current) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      // Only do the expensive work when scrollTop has actually changed
+      const st = container.scrollTop;
+      if (st === prevScrollTop) {
+        requestAnimationFrame(tick);
+        return;
+      }
+      prevScrollTop = st;
+
+      const nodes = Array.from(
+        container.querySelectorAll(
+          ".tab-content.active .section-title[data-setting-key]"
+        )
+      );
+      if (nodes.length === 0) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      const containerTop = container.getBoundingClientRect().top;
+      const anchorLine = containerTop + 100;
+
+      let bestNode = nodes[0];
+      for (const node of nodes) {
+        if (node.getBoundingClientRect().top <= anchorLine) {
+          bestNode = node;
+        } else {
+          break;
+        }
+      }
+
+      const key = bestNode?.getAttribute("data-setting-key");
+      if (key && key !== activeNavItemIdRef.current) {
+        setActiveNavItemId(key);
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    const frameId = requestAnimationFrame(tick);
+
+    return () => {
+      active = false;
+      cancelAnimationFrame(frameId);
+    };
+  }, [activeTab, searchQuery]);
+
+  // ---- 6. Restore sidebar scroll position after tab / group changes ----
+  react.useLayoutEffect(() => {
+    if (
+      !shouldRestoreSidebarScrollRef.current ||
+      pendingSidebarScrollRef.current == null ||
+      !settingsSidebarRef.current
+    ) {
+      return;
+    }
+    settingsSidebarRef.current.scrollTop = pendingSidebarScrollRef.current;
+    pendingSidebarScrollRef.current = null;
+    shouldRestoreSidebarScrollRef.current = false;
+  }, [activeTab, expandedGroupIds]);
+
+  const BackgroundExperienceSection = () => {
+    const [selectedMode, setSelectedMode] = react.useState(
+      getCurrentSettingsBackgroundMode()
+    );
+
+    const dispatchVisualUpdate = (name, value) => {
+      lyricContainerUpdate?.();
+      window.dispatchEvent(
+        new CustomEvent("ivLyrics", {
+          detail: { type: "config", name, value },
+        })
+      );
+    };
+
+    const applyMode = (modeId) => {
+      setSelectedMode(modeId);
+      const optionKeys = SETTINGS_BACKGROUND_PRESETS
+        .map((preset) => preset.id)
+        .filter((id) => id !== "none");
+
+      optionKeys.forEach((optionId) => {
+        const isEnabled = optionId === modeId;
+        CONFIG.visual[optionId] = isEnabled;
+        StorageManager.saveConfig(optionId, isEnabled);
+      });
+
+      dispatchVisualUpdate("background-mode", modeId);
+    };
+
+    const handleVisualChange = (name, value) => {
+      CONFIG.visual[name] = value;
+      StorageManager.saveConfig(name, value);
+      dispatchVisualUpdate(name, value);
+    };
+
+    const modeSpecificItems = [];
+
+    if (
+      selectedMode === "gradient-background" ||
+      selectedMode === "blur-gradient-background"
+    ) {
+      modeSpecificItems.push({
+        desc: I18n.t("settings.albumBgBlur.label"),
+        info: I18n.t("settings.albumBgBlur.desc"),
+        key: "album-bg-blur",
+        type: ConfigSliderRange,
+        min: 0,
+        max: 100,
+        step: 5,
+        unit: "px",
+      });
+    }
+
+    if (selectedMode === "solid-background") {
+      modeSpecificItems.push(
+        {
+          desc: I18n.t("settings.solidBackgroundColor.label"),
+          key: "solid-background-color",
+          info: I18n.t("settings.solidBackgroundColor.desc"),
+          type: ColorPresetSelector,
+        },
+        {
+          desc: "",
+          key: "solid-background-warning",
+          type: ConfigWarning,
+          message: I18n.t("settings.solidBackgroundWarning"),
+        }
+      );
+    }
+
+    if (selectedMode === "video-background") {
+      modeSpecificItems.push(
+        {
+          desc: I18n.t("settings.videoHelper.label"),
+          info: I18n.t("settings.videoHelper.desc"),
+          key: "video-helper-enabled",
+          type: VideoHelperToggle,
+          disabled: isFadActive,
+        },
+        {
+          desc: "",
+          key: "video-helper-info",
+          type: ConfigInfo,
+          message: I18n.t("settings.videoHelper.info"),
+          buttonText: I18n.t("settings.videoHelper.download"),
+          onButtonClick: () => {
+            window.open("https://ivlis.kr/ivLyrics/extensions/#helper", "_blank");
+          },
+          when: () => !CONFIG.visual["video-helper-enabled"],
+        },
+        {
+          desc: I18n.t("settings.videoBlur.label"),
+          info: I18n.t("settings.videoBlur.desc"),
+          key: "video-blur",
+          type: ConfigSliderRange,
+          min: 0,
+          max: 40,
+          step: 1,
+          unit: "px",
+        },
+        {
+          desc: I18n.t("settings.videoCover.label"),
+          info: I18n.t("settings.videoCover.desc"),
+          key: "video-cover",
+          type: ConfigSlider,
+        }
+      );
+    }
+
+    if (selectedMode !== "solid-background" && selectedMode !== "none") {
+      modeSpecificItems.push({
+        desc: I18n.t("settings.backgroundBrightness.label"),
+        key: "background-brightness",
+        info: I18n.t("settings.backgroundBrightness.desc"),
+        type: ConfigSliderRange,
+        min: 0,
+        max: 100,
+        step: 1,
+        unit: "%",
+      });
+    }
+
+    return react.createElement(
+      react.Fragment,
+      null,
+      react.createElement(
+        "div",
+        { className: "settings-card-grid background-mode-grid" },
+        SETTINGS_BACKGROUND_PRESETS.map((preset) =>
+          react.createElement(
+            "button",
+            {
+              key: preset.id,
+              className: `settings-choice-card ${
+                selectedMode === preset.id ? "active" : ""
+              }`,
+              onClick: () => applyMode(preset.id),
+              type: "button",
+            },
+            react.createElement(
+              "div",
+              { className: "settings-choice-icon" },
+              react.createElement("svg", {
+                width: 20,
+                height: 20,
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                dangerouslySetInnerHTML: { __html: preset.icon },
+              })
+            ),
+            react.createElement(
+              "div",
+              { className: "settings-choice-content" },
+              react.createElement(
+                "strong",
+                null,
+                getSettingsText(preset.labelKey, preset.fallbackLabel)
+              ),
+              react.createElement(
+                "span",
+                null,
+                getSettingsText(preset.descriptionKey, preset.fallbackDescription)
+              )
+            )
+          )
+        )
+      ),
+      react.createElement(
+        "div",
+        { className: "settings-subsection-label" },
+        getSettingsText("settingsUi.background.layout", "Layout & Motion")
+      ),
+      react.createElement(OptionList, {
+        items: [
+          {
+            desc: I18n.t("settings.alignment.label"),
+            key: "alignment",
+            info: I18n.t("settings.alignment.desc"),
+            type: ConfigSelection,
+            disabled: isFadActive,
+            options: {
+              left: I18n.t("settings.alignment.options.left"),
+              center: I18n.t("settings.alignment.options.center"),
+              right: I18n.t("settings.alignment.options.right"),
+            },
+          },
+          {
+            desc: I18n.t("settings.noise.label"),
+            key: "noise",
+            info: I18n.t("settings.noise.desc"),
+            type: ConfigSlider,
+            disabled: isFadActive,
+          },
+        ],
+        onChange: handleVisualChange,
+      }),
+      modeSpecificItems.length > 0 &&
+        react.createElement(
+          react.Fragment,
+          null,
+          react.createElement(
+            "div",
+            { className: "settings-subsection-label" },
+            getSettingsText("settingsUi.background.finetune", "Background Details")
+          ),
+          react.createElement(OptionList, {
+            items: modeSpecificItems,
+            onChange: handleVisualChange,
+          })
+        )
+    );
+  };
+
+  const toggleNavigationGroup = react.useCallback((groupId) => {
+    setExpandedGroupIds((prevGroupIds) =>
+      prevGroupIds.includes(groupId)
+        ? prevGroupIds.filter((id) => id !== groupId)
+        : [...prevGroupIds, groupId]
+    );
+  }, []);
+
+  const SidebarNavigation = () =>
+    react.createElement(
+      "div",
+      { className: "settings-sidebar-nav" },
+      sidebarTabs.map((tab) =>
+        (() => {
+          const sectionItems = sidebarSectionsByTab[tab.id] || [];
+          const hasSubmenu = !tab.standalone && sectionItems.length > 0;
+          const isExpanded = expandedGroupIds.includes(tab.id);
+          const isTabActive = activeTab === tab.id;
+
+          if (!hasSubmenu) {
+            return react.createElement(
+              "button",
+              {
+                key: tab.id,
+                className: `settings-nav-card ${isTabActive ? "active" : ""}`,
+                type: "button",
+                onClick: () =>
+                  navigateToDestination(tab.id, null, resolveNavItemId(tab.id)),
+              },
+              react.createElement(
+                "strong",
+                { className: "settings-nav-card-title" },
+                tab.label
+              ),
+              react.createElement(
+                "span",
+                { className: "settings-nav-card-badge" },
+                tab.badge || ""
+              )
+            );
+          }
+
+          return react.createElement(
+            "div",
+            {
+              key: tab.id,
+              className: "settings-nav-group",
+            },
+            react.createElement(
+              "button",
+              {
+                className: `settings-nav-group-toggle ${
+                  isExpanded || isTabActive ? "expanded" : ""
+                }`,
+                type: "button",
+                onClick: () => {
+                  if (activeTab !== tab.id) {
+                    navigateToDestination(tab.id, null, resolveNavItemId(tab.id));
+                    setExpandedGroupIds((prevGroupIds) =>
+                      prevGroupIds.includes(tab.id)
+                        ? prevGroupIds
+                        : [...prevGroupIds, tab.id]
+                    );
+                    return;
+                  }
+
+                  toggleNavigationGroup(tab.id);
+                },
+                "aria-expanded": isExpanded,
+              },
+              react.createElement(
+                "span",
+                { className: "settings-nav-group-title" },
+                tab.label
+              ),
+              react.createElement(
+                "span",
+                { className: "settings-nav-group-indicator" },
+                isExpanded ? "-" : "+"
+              )
+            ),
+            isExpanded &&
+              react.createElement(
+                "div",
+                { className: "settings-nav-group-items" },
+                sectionItems.map((item) => {
+                  const isItemActive =
+                    activeTab === item.tabId && activeNavItemId === item.settingKey;
+
+                  return react.createElement(
+                    "button",
+                    {
+                      key: `${item.tabId}:${item.settingKey}`,
+                      className: `settings-nav-subitem ${
+                        isItemActive ? "active" : ""
+                      }`,
+                      type: "button",
+                      onClick: () =>
+                        navigateToDestination(
+                          item.tabId,
+                          item.settingKey,
+                          resolveNavItemId(item.tabId, item.settingKey)
+                        ),
+                      title: item.description || item.label,
+                    },
+                    react.createElement(
+                      "span",
+                      { className: "settings-nav-subitem-label" },
+                      item.label
+                    )
+                  );
+                })
+              )
+          );
+        })()
+      )
+    );
+
   return react.createElement(
     "div",
     {
       id: `${APP_NAME}-config-container`,
       className: shouldReduceMotion ? "motion-reduced" : "",
+      "data-ui-theme": uiTheme,
     },
     react.createElement("style", {
       dangerouslySetInnerHTML: {
@@ -5057,64 +5827,115 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 /* CSS Variables */
 #${APP_NAME}-config-container {
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-bg-hover: rgba(255, 255, 255, 0.06);
-    --glass-bg-active: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-border-light: rgba(255, 255, 255, 0.12);
-    --glass-blur: blur(40px);
-    --accent-primary: #7c3aed;
-    --accent-primary-light: rgba(124, 58, 237, 0.15);
-    --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
-    --accent-glow: rgba(124, 58, 237, 0.4);
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.6);
-    --text-tertiary: rgba(255, 255, 255, 0.4);
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
-    --shadow-glow: 0 0 20px var(--accent-glow);
-    --transition-fast: var(--iv-motion-duration-fast, 180ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
-    --transition-normal: var(--iv-motion-duration-medium, 280ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
-    --transition-slow: var(--iv-motion-duration-slow, 420ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+    --glass-bg: rgba(255, 255, 255, 0.045);
+    --glass-bg-hover: rgba(255, 255, 255, 0.075);
+    --glass-bg-active: rgba(255, 255, 255, 0.11);
+    --glass-border: rgba(255, 255, 255, 0.085);
+    --glass-border-light: rgba(255, 255, 255, 0.16);
+    --glass-blur: blur(24px);
+    --accent-primary: #6cb8ff;
+    --accent-primary-light: rgba(108, 184, 255, 0.18);
+    --accent-gradient: linear-gradient(180deg, rgba(108, 184, 255, 0.24) 0%, rgba(108, 184, 255, 0.08) 100%);
+    --accent-glow: rgba(108, 184, 255, 0.18);
+    --text-primary: #f6f8fb;
+    --text-secondary: rgba(246, 248, 251, 0.72);
+    --text-tertiary: rgba(246, 248, 251, 0.48);
+    --success: #5fd38d;
+    --warning: #f7c86b;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.14);
+    --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.18);
+    --shadow-lg: 0 28px 60px rgba(0, 0, 0, 0.28);
+    --shadow-glow: 0 0 0 4px var(--accent-primary-light);
+    --transition-fast: var(--iv-motion-duration-fast, 160ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+    --transition-normal: var(--iv-motion-duration-medium, 240ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+    --transition-slow: var(--iv-motion-duration-slow, 360ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] {
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-bg-hover: rgba(255, 255, 255, 0.92);
+    --glass-bg-active: rgba(244, 247, 251, 0.98);
+    --glass-border: rgba(15, 23, 42, 0.085);
+    --glass-border-light: rgba(15, 23, 42, 0.14);
+    --accent-primary: #0f6cbd;
+    --accent-primary-light: rgba(15, 108, 189, 0.12);
+    --accent-gradient: linear-gradient(180deg, rgba(15, 108, 189, 0.12) 0%, rgba(15, 108, 189, 0.04) 100%);
+    --accent-glow: rgba(15, 108, 189, 0.12);
+    --text-primary: #0f172a;
+    --text-secondary: rgba(15, 23, 42, 0.68);
+    --text-tertiary: rgba(15, 23, 42, 0.46);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 14px 30px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 28px 64px rgba(15, 23, 42, 0.12);
 }
 
 /* 전체 컨테이너 */
 #${APP_NAME}-config-container {
     padding: 0;
     height: 80vh;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(15, 15, 20, 0.95) 0%, rgba(10, 10, 15, 0.98) 100%);
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(108, 184, 255, 0.12), transparent 26%),
+        linear-gradient(180deg, #0f1318 0%, #0b0f14 100%);
+    font-family: "Segoe UI Variable Text", "Segoe UI", "Pretendard Variable", Pretendard, sans-serif;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] {
+    background:
+        radial-gradient(circle at top left, rgba(15, 108, 189, 0.08), transparent 28%),
+        linear-gradient(180deg, #f6f8fb 0%, #eef2f7 100%);
 }
 
 /* 헤더 영역 */
 #${APP_NAME}-config-container .settings-header {
-    background: var(--glass-bg);
+    background: transparent;
     border-bottom: 1px solid var(--glass-border);
-    padding: 24px 32px 20px;
-    flex-shrink: 0;
+    padding: 24px 32px 18px;
+    position: relative;
+    grid-column: 1 / -1;
+}
+
+#${APP_NAME}-config-container .settings-sidebar {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    padding: 20px 16px 24px 24px;
+    overflow-y: auto;
+    min-height: 0;
+    border-right: 1px solid var(--glass-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--glass-bg-hover) 78%, transparent) 0%, transparent 100%);
+}
+
+#${APP_NAME}-config-container .settings-main-panel {
+    grid-column: 2;
+    grid-row: 3;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin: 0 24px 24px 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    background: var(--glass-bg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    position: relative;
 }
 
 #${APP_NAME}-config-container .settings-header::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    left: 32px;
+    right: 32px;
+    bottom: -1px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
 }
 
 #${APP_NAME}-config-container .settings-header-content {
@@ -5126,115 +5947,183 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 #${APP_NAME}-config-container .settings-title-section {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
 }
 
 #${APP_NAME}-config-container .settings-buttons {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+#${APP_NAME}-config-container .settings-theme-btn,
+#${APP_NAME}-config-container .settings-github-btn,
+#${APP_NAME}-config-container .settings-discord-btn,
+#${APP_NAME}-config-container .settings-coffee-btn,
+#${APP_NAME}-config-container .settings-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-normal);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+#${APP_NAME}-config-container .settings-theme-btn:hover,
+#${APP_NAME}-config-container .settings-github-btn:hover,
+#${APP_NAME}-config-container .settings-discord-btn:hover,
+#${APP_NAME}-config-container .settings-coffee-btn:hover,
+#${APP_NAME}-config-container .settings-close-btn:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-light);
+    box-shadow: var(--shadow-md);
 }
 
 #${APP_NAME}-config-container .settings-close-btn {
     width: 40px;
-    height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--glass-bg-hover);
-    border: 1px solid var(--glass-border);
-    border-radius: 999px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: transform var(--transition-normal), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-normal);
-    font-size: 24px;
-    line-height: 1;
     padding: 0;
+    font-size: 22px;
+    line-height: 1;
 }
 
-#${APP_NAME}-config-container .settings-close-btn:hover {
-    background: var(--glass-bg-active);
-    border-color: var(--glass-border-light);
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: var(--shadow-md);
-}
-
+#${APP_NAME}-config-container .settings-theme-btn:active,
+#${APP_NAME}-config-container .settings-github-btn:active,
+#${APP_NAME}-config-container .settings-discord-btn:active,
+#${APP_NAME}-config-container .settings-coffee-btn:active,
 #${APP_NAME}-config-container .settings-close-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.98);
 }
 
 #${APP_NAME}-config-container .settings-title-section h1 {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
     margin: 0;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    letter-spacing: -0.035em;
 }
 
 #${APP_NAME}-config-container .settings-version {
     font-size: 11px;
     color: var(--text-secondary);
     font-weight: 600;
-    padding: 4px 10px;
-    background: var(--glass-bg-hover);
+    padding: 5px 10px;
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
-    backdrop-filter: blur(10px);
+    border-radius: 999px;
 }
 
-#${APP_NAME}-config-container .settings-github-btn {
-    display: inline-flex;
+#${APP_NAME}-config-container .settings-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 8px;
+}
+
+#${APP_NAME}-config-container .settings-nav-card {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: var(--glass-bg-hover);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 16px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 14px;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all var(--transition-normal);
-    font-size: 13px;
-    font-weight: 600;
-    backdrop-filter: blur(10px);
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-normal);
 }
 
-#${APP_NAME}-config-container .settings-github-btn:hover {
+#${APP_NAME}-config-container .settings-nav-card:hover {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+}
+
+#${APP_NAME}-config-container .settings-nav-card.active {
     background: var(--glass-bg-active);
-    border-color: var(--glass-border-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent-primary), var(--shadow-sm);
 }
 
-#${APP_NAME}-config-container .settings-github-btn:active {
-    transform: translateY(0) scale(0.98);
-}
-
-#${APP_NAME}-config-container .settings-coffee-btn {
+#${APP_NAME}-config-container .settings-nav-card-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #FFDD00 0%, #FBB034 100%);
-    border: none;
-    border-radius: var(--radius-md);
-    color: #000000;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    font-size: 13px;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 34px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    color: var(--text-secondary);
+    font-size: 10px;
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(255, 221, 0, 0.25);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
-#${APP_NAME}-config-container .settings-coffee-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(255, 221, 0, 0.35);
+#${APP_NAME}-config-container .settings-nav-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-#${APP_NAME}-config-container .settings-coffee-btn:active {
-    transform: translateY(0) scale(0.98);
+#${APP_NAME}-config-container .settings-panel-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 0 0 20px;
+    margin: 0 0 8px;
+    border-bottom: 1px solid var(--glass-border);
+    background: transparent;
+}
+
+#${APP_NAME}-config-container .settings-panel-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--accent-primary-light);
+    color: var(--accent-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+#${APP_NAME}-config-container .settings-panel-copy h2 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .settings-panel-copy p {
+    margin: 0;
+    max-width: 640px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.65;
 }
 
 /* 탭 영역 래퍼 (스크롤 화살표 포함) */
@@ -5362,10 +6251,10 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 /* 검색 영역 */
 #${APP_NAME}-config-container .settings-search-container {
-    padding: 16px 32px 16px;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    grid-column: 2;
+    grid-row: 2;
+    padding: 18px 24px 14px 0;
+    background: transparent;
 }
 
 #${APP_NAME}-config-container .settings-search-wrapper {
@@ -5376,24 +6265,24 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 #${APP_NAME}-config-container .settings-search-wrapper .settings-search-input {
     width: 100% !important;
-    height: 44px !important;
-    padding: 0 44px 0 44px !important;
-    background: var(--glass-bg-hover) !important;
+    height: 46px !important;
+    padding: 0 48px 0 46px !important;
+    background: var(--glass-bg) !important;
     border: 1px solid var(--glass-border) !important;
-    border-radius: var(--radius-md) !important;
+    border-radius: 12px !important;
     color: var(--text-primary) !important;
     font-size: 14px !important;
-    font-weight: 400 !important;
+    font-weight: 500 !important;
     outline: none !important;
     transition: all var(--transition-normal) !important;
     box-sizing: border-box !important;
-    backdrop-filter: blur(10px) !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
 #${APP_NAME}-config-container .settings-search-input:focus {
     background: var(--glass-bg-active) !important;
     border-color: var(--accent-primary) !important;
-    box-shadow: 0 0 0 3px var(--accent-primary-light), var(--shadow-glow) !important;
+    box-shadow: var(--shadow-glow), var(--shadow-md) !important;
 }
 
 #${APP_NAME}-config-container .settings-search-input::placeholder {
@@ -5436,6 +6325,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     justify-content: center;
     opacity: 0;
     transition: all var(--transition-fast);
+    font-size: 0;
 }
 
 #${APP_NAME}-config-container .settings-search-wrapper.has-query .settings-search-clear {
@@ -5446,6 +6336,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     background: var(--accent-primary-light);
     border-color: var(--accent-primary);
     color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .settings-search-clear::before {
+    content: "\\00d7";
+    font-size: 18px;
+    line-height: 1;
 }
 
 /* 검색 결과 영역 */
@@ -5528,7 +6424,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     letter-spacing: 1px;
     padding: 5px 10px;
     background: var(--accent-primary-light);
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 24%, transparent);
     border-radius: var(--radius-sm);
     margin-bottom: 10px;
 }
@@ -5540,7 +6436,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     color: var(--text-primary);
     border-radius: 4px;
     padding: 2px 4px;
-    border: 1px solid rgba(124, 58, 237, 0.3);
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 32%, transparent);
 }
 
 /* 설정 항목 빛나는 효과 애니메이션 */
@@ -5550,8 +6446,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         box-shadow: var(--shadow-glow);
     }
     50% {
-        background-color: rgba(124, 58, 237, 0.1);
-        box-shadow: 0 0 10px rgba(124, 58, 237, 0.2);
+        background-color: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+        box-shadow: 0 0 10px color-mix(in srgb, var(--accent-primary) 20%, transparent);
     }
     100% {
         background-color: transparent;
@@ -5567,8 +6463,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 /* 콘텐츠 영역 */
 #${APP_NAME}-config-container .settings-content {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
-    padding: 24px 32px 40px;
+    padding: 24px 28px 40px;
     background: transparent;
 }
 
@@ -5597,6 +6494,124 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 #${APP_NAME}-config-container .tab-content.active {
     display: block;
     animation: slideUp var(--iv-motion-duration-medium, 280ms) var(--iv-motion-ease-standard, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+#${APP_NAME}-config-container .settings-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+#${APP_NAME}-config-container .settings-choice-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+    padding: 18px 18px 16px;
+    text-align: left;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-normal);
+}
+
+#${APP_NAME}-config-container .settings-choice-card:hover {
+    border-color: var(--glass-border-light);
+    background: var(--glass-bg-hover);
+    box-shadow: var(--shadow-md);
+}
+
+#${APP_NAME}-config-container .settings-choice-card.active {
+    border-color: var(--accent-primary);
+    background: var(--accent-gradient);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), var(--shadow-md);
+}
+
+#${APP_NAME}-config-container .settings-choice-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg-active);
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+#${APP_NAME}-config-container .settings-choice-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#${APP_NAME}-config-container .settings-choice-content strong {
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+#${APP_NAME}-config-container .settings-choice-content span {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+#${APP_NAME}-config-container .settings-subsection-label {
+    margin: 8px 0 12px;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+    #${APP_NAME}-config-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+    }
+
+    #${APP_NAME}-config-container .settings-header,
+    #${APP_NAME}-config-container .settings-sidebar,
+    #${APP_NAME}-config-container .settings-search-container,
+    #${APP_NAME}-config-container .settings-main-panel {
+        grid-column: 1;
+    }
+
+    #${APP_NAME}-config-container .settings-sidebar {
+        grid-row: 2;
+        padding: 16px 20px 8px;
+    }
+
+    #${APP_NAME}-config-container .settings-search-container {
+        grid-row: 3;
+        padding: 12px 20px 12px;
+    }
+
+    #${APP_NAME}-config-container .settings-main-panel {
+        grid-row: 4;
+        margin: 0 20px 20px;
+    }
+
+    #${APP_NAME}-config-container .setting-row-content {
+        align-items: flex-start;
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    #${APP_NAME}-config-container .setting-row-right {
+        width: 100%;
+        max-width: none;
+        justify-content: flex-start;
+    }
+
+    #${APP_NAME}-config-container .slider-container {
+        width: 100%;
+        max-width: none;
+    }
 }
 
 @keyframes slideUp {
@@ -5629,10 +6644,10 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     content: "";
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    left: 18px;
+    right: 18px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--glass-border-light), transparent);
+    background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
 }
 
 #${APP_NAME}-config-container .section-title:first-child {
@@ -5651,10 +6666,10 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 #${APP_NAME}-config-container .section-text h3 {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
 }
 
 #${APP_NAME}-config-container .section-text p {
@@ -5675,7 +6690,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     border-right: 1px solid var(--glass-border);
     border-radius: 0;
     border-bottom: 1px solid var(--glass-border);
-    transition: all var(--transition-fast);
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
     position: relative;
 }
 
@@ -5745,6 +6760,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 #${APP_NAME}-config-container .setting-row:hover {
     background: var(--glass-bg-hover);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
 }
 
 #${APP_NAME}-config-container .setting-row:active {
@@ -5752,12 +6768,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 }
 
 #${APP_NAME}-config-container .setting-row-content {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
     align-items: center;
-    gap: 24px;
-    padding: 14px 20px;
-    min-height: 52px;
+    gap: 20px;
+    padding: 14px 18px;
+    min-height: 56px;
 }
 
 #${APP_NAME}-config-container .setting-row-left {
@@ -5766,6 +6782,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    padding-right: 4px;
 }
 
 #${APP_NAME}-config-container .setting-name {
@@ -5773,7 +6790,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     font-size: 14px;
     color: var(--text-primary);
     line-height: 1.4;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
 }
 
 #${APP_NAME}-config-container .setting-description {
@@ -5783,10 +6800,18 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 }
 
 #${APP_NAME}-config-container .setting-row-right {
-    flex-shrink: 0;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+}
+
+#${APP_NAME}-config-container .setting-row-right > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 /* 슬라이더 컨트롤 */
@@ -5794,7 +6819,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     display: flex;
     align-items: center;
     gap: 14px;
-    width: 280px;
+    width: 100%;
+    min-width: 220px;
+    max-width: 360px;
     position: relative;
 }
 
@@ -5811,28 +6838,29 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 #${APP_NAME}-config-container .config-slider::-webkit-slider-runnable-track {
     width: 100%;
-    height: 6px;
-    background: var(--glass-bg-active);
-    border-radius: 3px;
+    height: 4px;
+    background: color-mix(in srgb, var(--glass-border-light) 70%, transparent);
+    border-radius: 999px;
     transition: background var(--transition-fast);
 }
 
 #${APP_NAME}-config-container .config-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--accent-gradient);
+    width: 18px;
+    height: 18px;
+    background: var(--accent-primary);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+    border: 2px solid rgba(255,255,255,0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
     margin-top: -7px;
     transition: all var(--transition-fast);
 }
 
 #${APP_NAME}-config-container .config-slider:hover::-webkit-slider-thumb {
-    transform: scale(1.15);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 #${APP_NAME}-config-container .config-slider:active::-webkit-slider-thumb {
@@ -5842,33 +6870,33 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 /* Firefox Styles */
 #${APP_NAME}-config-container .config-slider::-moz-range-track {
     width: 100%;
-    height: 6px;
-    background: var(--glass-bg-active);
-    border-radius: 3px;
+    height: 4px;
+    background: color-mix(in srgb, var(--glass-border-light) 70%, transparent);
+    border-radius: 999px;
     border: none;
 }
 
 #${APP_NAME}-config-container .config-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--accent-gradient);
+    width: 18px;
+    height: 18px;
+    background: var(--accent-primary);
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 #${APP_NAME}-config-container .slider-value {
     min-width: 56px;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-primary);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-    background: var(--glass-bg-hover);
+    background: var(--glass-bg-active);
     border: 1px solid var(--glass-border);
-    padding: 6px 10px;
-    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    border-radius: 10px;
 }
 
 /* 조정 버튼 (+ -) */
@@ -5884,9 +6912,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--glass-bg-hover);
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
+    border-radius: 10px;
     color: var(--accent-primary);
     font-size: 18px;
     font-weight: 500;
@@ -5896,9 +6924,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 }
 
 #${APP_NAME}-config-container .adjust-button:hover {
-    background: var(--accent-primary-light);
-    border-color: var(--accent-primary);
-    transform: scale(1.05);
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-light);
 }
 
 #${APP_NAME}-config-container .adjust-button:active {
@@ -5921,16 +6948,16 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--glass-bg-hover);
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
+    border-radius: 10px;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
 
 #${APP_NAME}-config-container .swap-button:hover {
-    background: var(--accent-primary-light);
-    border-color: var(--accent-primary);
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-light);
 }
 
 #${APP_NAME}-config-container .swap-button:active {
@@ -5948,6 +6975,23 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     display: flex;
     align-items: center;
     gap: 12px;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+#${APP_NAME}-config-container .font-selector-container,
+#${APP_NAME}-config-container .config-font-selector {
+    width: 100%;
+    min-width: 0;
+}
+
+#${APP_NAME}-config-container .font-selector-container {
+    justify-content: flex-end;
+}
+
+#${APP_NAME}-config-container .config-font-selector > input,
+#${APP_NAME}-config-container .config-font-selector > select {
+    flex: 1 1 auto;
 }
 
 #${APP_NAME}-config-container .config-color-picker {
@@ -5956,7 +7000,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     padding: 3px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -5974,9 +7018,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 
 #${APP_NAME}-config-container .config-color-input {
     width: 100px !important;
-    background: var(--glass-bg-hover) !important;
+    background: var(--glass-bg) !important;
     border: 1px solid var(--glass-border) !important;
-    border-radius: var(--radius-sm) !important;
+    border-radius: 10px !important;
     padding: 8px 12px !important;
     font-size: 12px !important;
     color: var(--text-primary) !important;
@@ -5991,9 +7035,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 #${APP_NAME}-config-container input[type="url"]:not(.settings-search-input),
 #${APP_NAME}-config-container input:not(.settings-search-input),
 #${APP_NAME}-config-container textarea {
-    background: var(--glass-bg-hover) !important;
+    background: var(--glass-bg) !important;
     border: 1px solid var(--glass-border) !important;
-    border-radius: var(--radius-md) !important;
+    border-radius: 12px !important;
     padding: 10px 14px !important;
     width: min(280px, 100%) !important;
     outline: none !important;
@@ -6004,15 +7048,17 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
     min-height: 40px !important;
     box-sizing: border-box !important;
     font-weight: 400 !important;
-    backdrop-filter: blur(10px) !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
-#${APP_NAME}-config-container select {
+#${APP_NAME}-config-container select,
+#${APP_NAME}-config-container .config-select {
     background: var(--glass-bg-hover) !important;
     border: 1px solid var(--glass-border) !important;
     border-radius: var(--radius-md) !important;
     padding: 10px 36px 10px 14px !important;
-    width: 180px !important;
+    width: min(100%, 260px) !important;
+    max-width: 100% !important;
     outline: none !important;
     color: var(--text-primary) !important;
     transition: all var(--transition-normal) !important;
@@ -7040,83 +8086,1242 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 #${APP_NAME}-config-container .setting-row:hover::after {
     opacity: 1;
 }
+
+/* ========================================
+   Fluent Flat Overrides
+   ======================================== */
+#${APP_NAME}-config-container {
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg-hover: rgba(255, 255, 255, 0.05);
+    --glass-bg-active: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-border-light: rgba(255, 255, 255, 0.16);
+    --accent-primary: #76b9ff;
+    --accent-primary-light: rgba(118, 185, 255, 0.14);
+    --accent-gradient: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-glow: none;
+    height: 84vh;
+    grid-template-columns: 248px minmax(0, 1fr);
+    background: #0f1113;
+    border-top: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] {
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-bg-hover: rgba(249, 250, 251, 0.96);
+    --glass-bg-active: rgba(243, 244, 246, 1);
+    --glass-border: rgba(15, 23, 42, 0.1);
+    --glass-border-light: rgba(15, 23, 42, 0.16);
+    --accent-primary: #0f6cbd;
+    --accent-primary-light: rgba(15, 108, 189, 0.12);
+    --text-primary: #111827;
+    --text-secondary: rgba(17, 24, 39, 0.72);
+    --text-tertiary: rgba(17, 24, 39, 0.5);
+    background: #f3f4f6;
+}
+
+#${APP_NAME}-config-container [style*="border-radius"] {
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container [style*="backdrop-filter"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+#${APP_NAME}-config-container .settings-header {
+    padding: 20px 28px 16px;
+}
+
+#${APP_NAME}-config-container .settings-theme-btn,
+#${APP_NAME}-config-container .settings-github-btn,
+#${APP_NAME}-config-container .settings-discord-btn,
+#${APP_NAME}-config-container .settings-coffee-btn,
+#${APP_NAME}-config-container .settings-close-btn,
+#${APP_NAME}-config-container .settings-version,
+#${APP_NAME}-config-container .settings-nav-card,
+#${APP_NAME}-config-container .settings-nav-card-badge,
+#${APP_NAME}-config-container .settings-panel-badge,
+#${APP_NAME}-config-container .settings-search-wrapper .settings-search-input,
+#${APP_NAME}-config-container .settings-main-panel,
+#${APP_NAME}-config-container .section-title,
+#${APP_NAME}-config-container .setting-row,
+#${APP_NAME}-config-container .settings-choice-card,
+#${APP_NAME}-config-container .font-preview-container,
+#${APP_NAME}-config-container .info-card,
+#${APP_NAME}-config-container .lyrics-providers-container,
+#${APP_NAME}-config-container .lyrics-provider-item,
+#${APP_NAME}-config-container .slider-value,
+#${APP_NAME}-config-container .config-color-picker,
+#${APP_NAME}-config-container .config-color-input,
+#${APP_NAME}-config-container .btn,
+#${APP_NAME}-config-container .btn-primary,
+#${APP_NAME}-config-container .switch-checkbox,
+#${APP_NAME}-config-container .search-result-item,
+#${APP_NAME}-config-container .order-btn,
+#${APP_NAME}-config-container input,
+#${APP_NAME}-config-container select,
+#${APP_NAME}-config-container textarea,
+#${APP_NAME}-config-container button {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#${APP_NAME}-config-container .settings-buttons button,
+#${APP_NAME}-config-container .btn,
+#${APP_NAME}-config-container .order-btn,
+#${APP_NAME}-config-container .switch-checkbox,
+#${APP_NAME}-config-container .settings-choice-card,
+#${APP_NAME}-config-container .setting-row,
+#${APP_NAME}-config-container .search-result-item {
+    transform: none !important;
+}
+
+#${APP_NAME}-config-container .settings-theme-btn:hover,
+#${APP_NAME}-config-container .settings-github-btn:hover,
+#${APP_NAME}-config-container .settings-discord-btn:hover,
+#${APP_NAME}-config-container .settings-coffee-btn:hover,
+#${APP_NAME}-config-container .settings-close-btn:hover,
+#${APP_NAME}-config-container .btn:hover:not(:disabled),
+#${APP_NAME}-config-container .settings-choice-card:hover,
+#${APP_NAME}-config-container .setting-row:hover,
+#${APP_NAME}-config-container .order-btn:hover:not(:disabled) {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#${APP_NAME}-config-container .settings-title-section h1 {
+    font-size: 28px;
+    letter-spacing: -0.04em;
+}
+
+#${APP_NAME}-config-container .settings-sidebar {
+    padding: 16px 0 20px 20px;
+    background: transparent;
+}
+
+#${APP_NAME}-config-container .settings-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+#${APP_NAME}-config-container .settings-nav-group {
+    border-bottom: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .settings-nav-group-toggle {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+#${APP_NAME}-config-container .settings-nav-group-toggle:hover,
+#${APP_NAME}-config-container .settings-nav-group-toggle.expanded {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .settings-nav-group-title {
+    font: inherit;
+}
+
+#${APP_NAME}-config-container .settings-nav-group-indicator {
+    color: var(--text-tertiary);
+    font-size: 16px;
+    line-height: 1;
+}
+
+#${APP_NAME}-config-container .settings-nav-group-items {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 6px;
+}
+
+#${APP_NAME}-config-container .settings-nav-subitem {
+    min-height: 42px;
+    padding: 0 14px 0 24px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: none;
+    border-left: 2px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#${APP_NAME}-config-container .settings-nav-subitem:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .settings-nav-subitem.active {
+    border-left-color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .settings-nav-subitem-label {
+    display: block;
+    white-space: normal;
+    line-height: 1.3;
+}
+
+#${APP_NAME}-config-container .settings-nav-card {
+    min-height: 46px;
+    padding: 0 14px;
+    border: none;
+    border-left: 2px solid transparent;
+    border-bottom: 1px solid var(--glass-border);
+    background: transparent;
+}
+
+#${APP_NAME}-config-container .settings-nav-card.active {
+    border-color: transparent;
+    border-left-color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+}
+
+#${APP_NAME}-config-container .settings-nav-card-badge,
+#${APP_NAME}-config-container .settings-panel-badge,
+#${APP_NAME}-config-container .settings-version {
+    min-width: 32px;
+    height: 22px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .settings-search-container {
+    padding: 16px 28px 12px 0;
+}
+
+#${APP_NAME}-config-container .settings-search-wrapper .settings-search-input {
+    height: 40px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .settings-search-wrapper .settings-search-input {
+    background: rgba(255, 255, 255, 0.84) !important;
+}
+
+#${APP_NAME}-config-container .settings-main-panel {
+    margin: 0 28px 28px 0;
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .settings-main-panel {
+    background: rgba(255, 255, 255, 0.62);
+}
+
+#${APP_NAME}-config-container .settings-panel-hero {
+    padding: 0 0 16px;
+    margin: 0 0 8px;
+    background: transparent;
+}
+
+#${APP_NAME}-config-container .settings-panel-copy h2 {
+    font-size: 34px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+}
+
+#${APP_NAME}-config-container .section-title {
+    margin: 24px 0 0;
+    padding: 12px 0 10px 14px;
+    background: transparent;
+    border: none;
+    border-left: 2px solid var(--accent-primary);
+    scroll-margin-top: 24px;
+}
+
+#${APP_NAME}-config-container .section-title::before {
+    display: none;
+}
+
+#${APP_NAME}-config-container .section-title-content {
+    gap: 2px;
+}
+
+#${APP_NAME}-config-container .section-text h3 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+#${APP_NAME}-config-container .section-text p {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .setting-row,
+#${APP_NAME}-config-container .search-result-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    margin-top: -1px;
+}
+
+#${APP_NAME}-config-container .setting-row:hover,
+#${APP_NAME}-config-container .search-result-item:hover {
+    background: var(--glass-bg-hover);
+}
+
+#${APP_NAME}-config-container .setting-row::after {
+    display: none;
+}
+
+#${APP_NAME}-config-container .setting-row-content {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+    gap: 18px;
+    padding: 12px 16px;
+    min-height: 52px;
+}
+
+#${APP_NAME}-config-container .setting-name {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+#${APP_NAME}-config-container .setting-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .settings-card-grid {
+    gap: 0;
+    border-top: 1px solid var(--glass-border);
+    border-left: 1px solid var(--glass-border);
+    margin-bottom: 20px;
+}
+
+#${APP_NAME}-config-container .settings-choice-card {
+    padding: 16px;
+    background: var(--glass-bg);
+    border: none;
+    border-right: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    position: relative;
+}
+
+#${APP_NAME}-config-container .settings-choice-card.active {
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--glass-bg));
+    border-left: 2px solid var(--accent-primary);
+    z-index: 1;
+}
+
+#${APP_NAME}-config-container .settings-choice-card.active::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--accent-primary);
+    pointer-events: none;
+}
+
+#${APP_NAME}-config-container .font-preview-container,
+#${APP_NAME}-config-container .info-card,
+#${APP_NAME}-config-container .lyrics-providers-container {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+#${APP_NAME}-config-container .font-preview {
+    padding: 18px 20px;
+}
+
+#${APP_NAME}-config-container .lyrics-providers-list {
+    gap: 0;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-item {
+    padding: 14px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    margin-top: -1px;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card,
+#${APP_NAME}-config-container .lyrics-provider-card-header,
+#${APP_NAME}-config-container .lyrics-provider-card-description,
+#${APP_NAME}-config-container .lyrics-provider-card-body,
+#${APP_NAME}-config-container .ai-addon-settings-group,
+#${APP_NAME}-config-container .lyrics-type-toggles-container,
+#${APP_NAME}-config-container .ai-addon-cap-chip,
+#${APP_NAME}-config-container .lyrics-type-toggle-chip,
+#${APP_NAME}-config-container .support-badge,
+#${APP_NAME}-config-container .lyrics-provider-icon,
+#${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider,
+#${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider:before {
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card {
+    border: 1px solid var(--glass-border);
+    background: transparent;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card.disabled {
+    opacity: 0.66;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card-header {
+    min-height: 64px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card-description {
+    padding: 12px 14px;
+    background: transparent;
+    border-top: none;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card:not(.expanded) .lyrics-provider-card-description {
+    border-bottom: none;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card-body {
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-title-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    line-height: 1.3;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-title-meta-divider {
+    opacity: 0.65;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-toggle {
+    width: 40px;
+    height: 22px;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider:before {
+    width: 12px;
+    height: 12px;
+    left: 4px;
+    bottom: 4px;
+    background: var(--text-secondary);
+    box-shadow: none;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-toggle input:checked + .toggle-slider {
+    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    border-color: var(--accent-primary);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-toggle input:checked + .toggle-slider:before {
+    background: var(--accent-primary);
+    transform: translateX(18px);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-icon {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--glass-border);
+    background: color-mix(in srgb, var(--accent-primary) 7%, transparent);
+}
+
+#${APP_NAME}-config-container .support-badges {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+#${APP_NAME}-config-container .support-badge {
+    padding: 3px 6px;
+    border: 1px solid currentColor;
+    background: transparent;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+#${APP_NAME}-config-container .support-badge.karaoke,
+#${APP_NAME}-config-container .support-badge.synced,
+#${APP_NAME}-config-container .support-badge.unsynced,
+#${APP_NAME}-config-container .support-badge.ivsync {
+    background: transparent;
+}
+
+#${APP_NAME}-config-container .support-badge.ivsync {
+    color: var(--accent-primary);
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggles-container,
+#${APP_NAME}-config-container .ai-addon-settings-group {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggles-title,
+#${APP_NAME}-config-container .ai-addon-capabilities-title {
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggles,
+#${APP_NAME}-config-container .ai-addon-caps-container {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggle-chip,
+#${APP_NAME}-config-container .ai-addon-cap-chip {
+    min-height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggle-chip.active,
+#${APP_NAME}-config-container .ai-addon-cap-chip.active {
+    border-color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggle-chip.type-karaoke.active,
+#${APP_NAME}-config-container .ai-addon-cap-chip.cap-metadata.active {
+    color: #b45309;
+    border-color: rgba(180, 83, 9, 0.45);
+    background: rgba(180, 83, 9, 0.08);
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggle-chip.type-synced.active,
+#${APP_NAME}-config-container .ai-addon-cap-chip.cap-translate.active {
+    color: var(--accent-primary);
+}
+
+#${APP_NAME}-config-container .lyrics-type-toggle-chip.type-unsynced.active,
+#${APP_NAME}-config-container .ai-addon-cap-chip.cap-tmi.active {
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .ai-addon-capabilities-desc {
+    margin-top: 8px;
+    color: var(--text-tertiary);
+    font-size: 11px;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-order-buttons .order-btn {
+    width: 26px;
+    height: 26px;
+}
+
+#${APP_NAME}-config-container .btn,
+#${APP_NAME}-config-container .btn-primary {
+    min-height: 36px;
+    padding: 0 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .btn,
+#${APP_NAME}-config-container[data-ui-theme="light"] .btn-primary {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+#${APP_NAME}-config-container .btn::before {
+    display: none;
+}
+
+#${APP_NAME}-config-container .btn-primary {
+    background: color-mix(in srgb, var(--accent-primary) 16%, transparent) !important;
+    border-color: var(--accent-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+#${APP_NAME}-config-container .switch-checkbox {
+    width: 46px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .switch-checkbox::after {
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    background: var(--text-secondary);
+    border-radius: 0;
+}
+
+#${APP_NAME}-config-container .switch-checkbox.active {
+    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    border-color: var(--accent-primary);
+}
+
+#${APP_NAME}-config-container .switch-checkbox.active::after {
+    background: var(--accent-primary);
+    transform: translateX(22px);
+}
+
+#${APP_NAME}-config-container .slider-container {
+    max-width: 420px;
+}
+
+#${APP_NAME}-config-container .config-slider::-webkit-slider-runnable-track,
+#${APP_NAME}-config-container .config-slider::-moz-range-track,
+#${APP_NAME}-config-container .config-slider::-moz-range-progress {
+    height: 2px;
+    border-radius: 0;
+}
+
+#${APP_NAME}-config-container .config-slider::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    margin-top: -6px;
+    border: 1px solid var(--accent-primary);
+    background: #ffffff;
+    border-radius: 0;
+    transform: none !important;
+}
+
+#${APP_NAME}-config-container .config-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--accent-primary);
+    background: #ffffff;
+    border-radius: 0;
+}
+
+#${APP_NAME}-config-container .slider-value {
+    min-width: 48px;
+    padding: 6px 8px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-left: 2px solid var(--accent-primary);
+}
+
+#${APP_NAME}-config-container input[type="text"]:not(.settings-search-input),
+#${APP_NAME}-config-container input[type="password"]:not(.settings-search-input),
+#${APP_NAME}-config-container input[type="number"]:not(.settings-search-input),
+#${APP_NAME}-config-container input[type="url"]:not(.settings-search-input),
+#${APP_NAME}-config-container input:not(.settings-search-input),
+#${APP_NAME}-config-container textarea,
+#${APP_NAME}-config-container select,
+#${APP_NAME}-config-container .config-select,
+#${APP_NAME}-config-container .config-color-input,
+#${APP_NAME}-config-container .config-color-picker {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] input[type="text"]:not(.settings-search-input),
+#${APP_NAME}-config-container[data-ui-theme="light"] input[type="password"]:not(.settings-search-input),
+#${APP_NAME}-config-container[data-ui-theme="light"] input[type="number"]:not(.settings-search-input),
+#${APP_NAME}-config-container[data-ui-theme="light"] input[type="url"]:not(.settings-search-input),
+#${APP_NAME}-config-container[data-ui-theme="light"] input:not(.settings-search-input),
+#${APP_NAME}-config-container[data-ui-theme="light"] textarea,
+#${APP_NAME}-config-container[data-ui-theme="light"] select,
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-select,
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-color-input,
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-color-picker {
+    background: rgba(255, 255, 255, 0.88) !important;
+}
+
+#${APP_NAME}-config-container .settings-subsection-label {
+    margin: 18px 0 8px;
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .font-preview {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-header,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-description,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-item,
+#${APP_NAME}-config-container[data-ui-theme="light"] .ai-addon-settings-group,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-type-toggles-container,
+#${APP_NAME}-config-container[data-ui-theme="light"] .info-card,
+#${APP_NAME}-config-container[data-ui-theme="light"] .font-preview-container {
+    color: var(--text-primary) !important;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body .setting-name,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-name,
+#${APP_NAME}-config-container[data-ui-theme="light"] .ai-addon-cap-chip.active,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-type-toggle-chip.active {
+    color: var(--text-primary) !important;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body :where(div, span, p, label, strong):not(.support-badge):not(.lyrics-type-toggle-chip):not(.ai-addon-cap-chip) {
+    color: inherit;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-description,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-title-meta,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body .setting-description,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body .lyrics-addon-info p,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-card-body .lyrics-addon-note,
+#${APP_NAME}-config-container[data-ui-theme="light"] .ai-addon-capabilities-desc {
+    color: var(--text-secondary) !important;
+}
+
+#${APP_NAME}-config-container .about-info-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .about-info-title {
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .about-info-description,
+#${APP_NAME}-config-container .about-info-note,
+#${APP_NAME}-config-container .about-info-description-compact {
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .about-info-meta {
+    color: var(--text-tertiary);
+}
+
+#${APP_NAME}-config-container .about-info-line {
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .about-info-divider {
+    background: var(--glass-border);
+}
+
+#${APP_NAME}-config-container .about-client-id-box {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255,255,255,0.9);
+}
+
+#${APP_NAME}-config-container .about-client-id-row {
+    gap: 12px;
+}
+
+#${APP_NAME}-config-container .about-client-copy-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+#${APP_NAME}-config-container .about-client-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .about-client-id-box {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: rgba(15, 23, 42, 0.1);
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .about-info-card {
+    background: rgba(255, 255, 255, 0.64) !important;
+    border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .about-client-copy-btn {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: rgba(15, 23, 42, 0.12);
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .about-client-copy-btn:hover {
+    background: rgba(15, 23, 42, 0.1);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .support-badge.unsynced,
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-type-toggle-chip.type-unsynced.active,
+#${APP_NAME}-config-container[data-ui-theme="light"] .ai-addon-cap-chip.cap-tmi.active {
+    color: #334155 !important;
+}
+
+#${APP_NAME}-config-container .config-color-picker:hover,
+#${APP_NAME}-config-container .config-slider:hover::-webkit-slider-thumb {
+    transform: none !important;
+}
+
+#${APP_NAME}-config-container .search-result-group .section-title {
+    margin-top: 0;
+}
+
+#${APP_NAME}-config-container .section-title {
+    margin: 24px 0 0;
+    padding: 12px 14px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-left: 2px solid var(--accent-primary);
+}
+
+#${APP_NAME}-config-container .section-title + .option-list-wrapper > .setting-row:first-child,
+#${APP_NAME}-config-container .section-title + .service-list-wrapper > .setting-row:first-child {
+    margin-top: 0;
+    border-top: none;
+}
+
+#${APP_NAME}-config-container .config-font-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    min-width: 0;
+}
+
+#${APP_NAME}-config-container .config-font-selector-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 320px;
+    width: 100%;
+}
+
+#${APP_NAME}-config-container .config-font-selector-action {
+    flex: 0 0 auto;
+}
+
+#${APP_NAME}-config-container input[type="text"]:not(.settings-search-input),
+#${APP_NAME}-config-container input[type="password"]:not(.settings-search-input),
+#${APP_NAME}-config-container input[type="number"]:not(.settings-search-input),
+#${APP_NAME}-config-container input[type="url"]:not(.settings-search-input),
+#${APP_NAME}-config-container input:not(.settings-search-input),
+#${APP_NAME}-config-container textarea,
+#${APP_NAME}-config-container select,
+#${APP_NAME}-config-container .config-select,
+#${APP_NAME}-config-container .config-text-input,
+#${APP_NAME}-config-container .config-font-selector-control,
+#${APP_NAME}-config-container .config-color-input,
+#${APP_NAME}-config-container .config-color-picker {
+    color: var(--text-primary) !important;
+    caret-color: var(--text-primary) !important;
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container input::placeholder,
+#${APP_NAME}-config-container textarea::placeholder {
+    color: var(--text-tertiary) !important;
+}
+
+#${APP_NAME}-config-container select option,
+#${APP_NAME}-config-container .config-select option,
+#${APP_NAME}-config-container .config-font-selector-control option {
+    color: #f8fafc;
+    background: #111827;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] select option,
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-select option,
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-font-selector-control option {
+    color: #0f172a;
+    background: #ffffff;
+}
+
+#${APP_NAME}-config-container .color-preset-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(300px, 100%);
+}
+
+#${APP_NAME}-config-container .color-preset-summary,
+#${APP_NAME}-config-container .color-preset-grid {
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container .color-preset-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+}
+
+#${APP_NAME}-config-container .color-preset-swatch {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container .color-preset-meta {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#${APP_NAME}-config-container .color-preset-name {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#${APP_NAME}-config-container .color-preset-code {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    white-space: nowrap;
+}
+
+#${APP_NAME}-config-container .color-preset-toggle-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+#${APP_NAME}-config-container .color-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    padding: 12px;
+}
+
+#${APP_NAME}-config-container .color-preset-grid-item {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+    outline: none;
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container .color-preset-grid-item:hover {
+    transform: translateY(-1px);
+}
+
+#${APP_NAME}-config-container .color-preset-grid-item[data-selected="true"] {
+    border: 2px solid var(--accent-primary);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card-description {
+    display: none;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-card-header {
+    align-items: flex-start;
+}
+
+#${APP_NAME}-config-container .lyrics-provider-summary {
+    margin-top: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .lyrics-provider-summary {
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .debug-info-panel {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+#${APP_NAME}-config-container .debug-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .debug-info-title {
+    margin: 0 0 4px;
+    font-size: 16px;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+#${APP_NAME}-config-container .debug-info-timestamp,
+#${APP_NAME}-config-container .debug-info-inline-meta,
+#${APP_NAME}-config-container .debug-info-empty {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .debug-info-section {
+    margin-bottom: 16px;
+}
+
+#${APP_NAME}-config-container .debug-info-section-label {
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+
+#${APP_NAME}-config-container .debug-info-section-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+#${APP_NAME}-config-container .debug-info-block,
+#${APP_NAME}-config-container .debug-api-list {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--glass-border);
+    border-radius: 0 !important;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#${APP_NAME}-config-container .debug-info-key {
+    color: var(--text-secondary);
+}
+
+#${APP_NAME}-config-container .debug-info-value {
+    color: var(--text-primary);
+}
+
+#${APP_NAME}-config-container .debug-info-code {
+    color: #fbbf24;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 12px;
+}
+
+#${APP_NAME}-config-container .debug-info-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border: 1px solid rgba(74, 222, 128, 0.28);
+    font-weight: 600;
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container .debug-api-list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+#${APP_NAME}-config-container .debug-api-empty {
+    padding: 20px 12px;
+    text-align: center;
+}
+
+#${APP_NAME}-config-container .debug-api-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 0 !important;
+    padding: 10px 12px;
+}
+
+#${APP_NAME}-config-container .debug-api-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+#${APP_NAME}-config-container .debug-api-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+#${APP_NAME}-config-container .debug-api-category,
+#${APP_NAME}-config-container .debug-api-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 0 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 0 !important;
+}
+
+#${APP_NAME}-config-container .debug-api-status {
+    padding: 0;
+}
+
+#${APP_NAME}-config-container .debug-api-duration,
+#${APP_NAME}-config-container .debug-api-timestamp {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+#${APP_NAME}-config-container .debug-api-endpoint {
+    margin-top: 6px;
+    font-size: 11px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#${APP_NAME}-config-container .debug-api-details {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--glass-border);
+}
+
+#${APP_NAME}-config-container .debug-api-detail-group {
+    margin-bottom: 8px;
+}
+
+#${APP_NAME}-config-container .debug-json-label {
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+
+#${APP_NAME}-config-container .debug-json-block {
+    margin: 0;
+    max-height: 120px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid var(--glass-border);
+    border-radius: 0 !important;
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--text-primary);
+    font-size: 10px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+#${APP_NAME}-config-container .debug-json-block.error {
+    color: #ef4444;
+}
+
+#${APP_NAME}-config-container .debug-info-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+#${APP_NAME}-config-container .debug-action-btn {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+}
+
+#${APP_NAME}-config-container .config-info-row {
+    background: color-mix(in srgb, var(--accent-primary) 8%, var(--glass-bg));
+    border-left: 2px solid var(--accent-primary);
+}
+
+#${APP_NAME}-config-container .config-info-message {
+    color: var(--text-primary) !important;
+    white-space: pre-line;
+    line-height: 1.55;
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-info-row {
+    background: color-mix(in srgb, var(--accent-primary) 6%, #ffffff);
+    border-color: var(--accent-primary);
+}
+
+#${APP_NAME}-config-container[data-ui-theme="light"] .config-info-message {
+    color: var(--text-primary) !important;
+}
+
+@media (max-width: 1100px) {
+    #${APP_NAME}-config-container .settings-main-panel {
+        margin: 0 20px 20px;
+    }
+
+    #${APP_NAME}-config-container .setting-row-content {
+        grid-template-columns: 1fr;
+    }
+}
 `,
       },
     }),
     react.createElement(HeaderSection),
     react.createElement(
-      ScrollableTabBar,
-      { activeTab },
-      react.createElement(TabButton, {
-        id: "general",
-        label: I18n.t("tabs.general"),
-        icon: "",
-        isActive: activeTab === "general",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "appearance",
-        label: I18n.t("tabs.appearance"),
-        icon: "",
-        isActive: activeTab === "appearance",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "lyrics",
-        label: I18n.t("tabs.behavior"),
-        icon: "",
-        isActive: activeTab === "lyrics",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "advanced",
-        label: I18n.t("tabs.advanced"),
-        icon: "",
-        isActive: activeTab === "advanced",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "lyrics-providers",
-        label: I18n.t("tabs.lyricsProviders") || "가사 제공자",
-        icon: "",
-        isActive: activeTab === "lyrics-providers",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "ai-providers",
-        label: I18n.t("tabs.aiProviders"),
-        icon: "",
-        isActive: activeTab === "ai-providers",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "fullscreen",
-        label: I18n.t("tabs.fullscreen"),
-        icon: "",
-        isActive: activeTab === "fullscreen",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "nowplaying",
-        label: I18n.t("tabs.nowplaying"),
-        icon: "",
-        isActive: activeTab === "nowplaying",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "debug",
-        label: I18n.t("tabs.debug"),
-        icon: "",
-        isActive: activeTab === "debug",
-        onClick: setActiveTab,
-      }),
-      react.createElement(TabButton, {
-        id: "about",
-        label: I18n.t("tabs.about"),
-        icon: "",
-        isActive: activeTab === "about",
-        onClick: setActiveTab,
-      })
+      SettingsSidebarShell,
+      { sidebarRef: settingsSidebarRef },
+      react.createElement(SidebarNavigation)
     ),
     // 검색창
     react.createElement(
@@ -7157,26 +9362,35 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
       )
     ),
     react.createElement(
-      TabContainer,
-      null,
+      SettingsMainPanelShell,
+      {
+        contentRef: settingsContentRef,
+        badge: activeNavigationGroup?.badge || activeTabMeta?.badge,
+        label: activeNavigationGroup?.label || activeTabMeta?.label,
+        description:
+          activeNavigationGroup?.description || activeTabMeta?.description,
+      },
       // 검색 결과 탭
-      react.createElement(
-        "div",
-        {
-          className: `tab-content ${activeTab === "search" ? "active" : ""}`,
-        },
+        react.createElement(
+          "div",
+          {
+            className: `tab-content ${activeTab === "search" ? "active" : ""}`,
+            "data-tab-id": "search",
+          },
         react.createElement(SearchResults)
       ),
       // 일반 탭 (동작 관련 설정)
-      react.createElement(
-        "div",
-        {
-          className: `tab-content ${activeTab === "general" ? "active" : ""}`,
-        },
+        react.createElement(
+          "div",
+          {
+            className: `tab-content ${activeTab === "general" ? "active" : ""}`,
+            "data-tab-id": "general",
+          },
         // 언어 설정 섹션
         react.createElement(SectionTitle, {
           title: I18n.t("sections.language"),
           subtitle: I18n.t("settings.language.desc"),
+          sectionKey: "language",
         }),
         react.createElement(OptionList, {
           items: [
@@ -7263,13 +9477,23 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("sections.desktopOverlay"),
           subtitle: I18n.t("sections.desktopOverlaySubtitle"),
+          sectionKey: "overlay-enabled",
         }),
-        react.createElement(OverlaySettings),
+        react.createElement(OverlaySettings)
+      ),
+      // 외관 탭 (시각 효과 + 타이포그래피)
+      react.createElement(
+        "div",
+        {
+          className: `tab-content ${activeTab === "appearance" ? "active" : ""
+            }`,
+          "data-tab-id": "appearance",
+        },
         react.createElement(SectionTitle, {
           title: I18n.t("sections.visualEffects"),
           subtitle: I18n.t("sections.visualEffectsSubtitle"),
+          sectionKey: "background-experience",
         }),
-        // FAD 경고 메시지
         isFadActive &&
         react.createElement(
           "div",
@@ -7306,168 +9530,11 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             )
           )
         ),
-        react.createElement(OptionList, {
-          items: [
-            {
-              desc: I18n.t("settings.alignment.label"),
-              key: "alignment",
-              info: I18n.t("settings.alignment.desc"),
-              type: ConfigSelection,
-              disabled: isFadActive,
-              options: {
-                left: I18n.t("settings.alignment.options.left"),
-                center: I18n.t("settings.alignment.options.center"),
-                right: I18n.t("settings.alignment.options.right"),
-              },
-            },
-            {
-              desc: I18n.t("settings.noise.label"),
-              key: "noise",
-              info: I18n.t("settings.noise.desc"),
-              type: ConfigSlider,
-              disabled: isFadActive,
-            },
-            {
-              desc: I18n.t("settings.colorful.label"),
-              key: "colorful",
-              info: I18n.t("settings.colorful.desc"),
-              type: ConfigSlider,
-              disabled: isFadActive,
-            },
-            {
-              desc: I18n.t("settings.gradientBackground.label"),
-              info: I18n.t("settings.gradientBackground.desc"),
-              key: "gradient-background",
-              type: ConfigSlider,
-              disabled: isFadActive,
-            },
-            {
-              desc: I18n.t("settings.albumBgBlur.label"),
-              info: I18n.t("settings.albumBgBlur.desc"),
-              key: "album-bg-blur",
-              type: ConfigSliderRange,
-              disabled: isFadActive,
-              when: () => CONFIG.visual["gradient-background"] || CONFIG.visual["blur-gradient-background"],
-              min: 0,
-              max: 100,
-              step: 5,
-              unit: "px",
-            },
-            {
-              desc: I18n.t("settings.blurGradientBackground.label"),
-              info: I18n.t("settings.blurGradientBackground.desc"),
-              key: "blur-gradient-background",
-              type: ConfigSlider,
-              disabled: isFadActive,
-            },
-            {
-              desc: I18n.t("settings.solidBackground.label"),
-              info: I18n.t("settings.solidBackground.desc"),
-              key: "solid-background",
-              type: ConfigSlider,
-              disabled: isFadActive,
-            },
-            {
-              desc: I18n.t("settings.solidBackgroundColor.label"),
-              key: "solid-background-color",
-              info: I18n.t("settings.solidBackgroundColor.desc"),
-              type: ColorPresetSelector,
-              disabled: isFadActive,
-              when: () => CONFIG.visual["solid-background"],
-            },
-            {
-              desc: I18n.t("settings.videoBackground.label"),
-              info: I18n.t("settings.videoBackground.desc"),
-              key: "video-background",
-              type: ConfigSlider,
-              disabled: isFadActive,
-            },
-            {
-              desc: I18n.t("settings.videoHelper.label"),
-              info: I18n.t("settings.videoHelper.desc"),
-              key: "video-helper-enabled",
-              type: VideoHelperToggle,
-              disabled: isFadActive,
-              when: () => CONFIG.visual["video-background"],
-            },
-            {
-              desc: "",
-              key: "video-helper-info",
-              type: ConfigInfo,
-              message: I18n.t("settings.videoHelper.info"),
-              buttonText: I18n.t("settings.videoHelper.download"),
-              onButtonClick: () => {
-                window.open("https://ivlis.kr/ivLyrics/extensions/#helper", "_blank");
-              },
-              when: () => CONFIG.visual["video-background"] && !CONFIG.visual["video-helper-enabled"],
-            },
-            {
-              desc: I18n.t("settings.videoBlur.label"),
-              info: I18n.t("settings.videoBlur.desc"),
-              key: "video-blur",
-              type: ConfigSliderRange,
-              disabled: isFadActive,
-              when: () => CONFIG.visual["video-background"],
-              min: 0,
-              max: 40,
-              step: 1,
-              unit: "px",
-            },
-            {
-              desc: I18n.t("settings.videoCover.label"),
-              info: I18n.t("settings.videoCover.desc"),
-              key: "video-cover",
-              type: ConfigSlider,
-              disabled: isFadActive,
-              when: () => CONFIG.visual["video-background"],
-            },
-            {
-              desc: "",
-              key: "solid-background-warning",
-              type: ConfigWarning,
-              message: I18n.t("settings.solidBackgroundWarning"),
-              when: () => CONFIG.visual["solid-background"],
-            },
-            {
-              desc: I18n.t("settings.backgroundBrightness.label"),
-              key: "background-brightness",
-              info: I18n.t("settings.backgroundBrightness.desc"),
-              type: ConfigSliderRange,
-              disabled: () => isFadActive || CONFIG.visual["solid-background"],
-              min: 0,
-              max: 100,
-              step: 1,
-              unit: "%",
-            },
-          ],
-          onChange: (name, value) => {
-            // 컬러풀 배경, 앨범 커버 배경, 단색 배경, 동영상 배경, 블러 그라데이션 배경은 상호 배타적으로 동작
-            const bgOptions = ["colorful", "gradient-background", "solid-background", "video-background", "blur-gradient-background"];
-            if (bgOptions.includes(name) && value) {
-              bgOptions.forEach(opt => {
-                if (opt !== name) {
-                  CONFIG.visual[opt] = false;
-                  StorageManager.saveConfig(opt, false);
-                }
-              });
-            }
-
-            CONFIG.visual[name] = value;
-            StorageManager.saveConfig(name, value);
-            lyricContainerUpdate?.();
-            const configChange = new CustomEvent("ivLyrics", {
-              detail: {
-                type: "config",
-                name: name,
-                value: value,
-              },
-            });
-            window.dispatchEvent(configChange);
-          },
-        }),
+        react.createElement(BackgroundExperienceSection, { isFadActive }),
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.syncMode.title"),
           subtitle: I18n.t("settingsAdvanced.syncMode.subtitle"),
+          sectionKey: "sync-mode",
         }),
         react.createElement(OptionList, {
           items: [
@@ -7521,18 +9588,11 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             });
             window.dispatchEvent(configChange);
           },
-        })
-      ),
-      // 외관 탭 (시각 효과 + 타이포그래피)
-      react.createElement(
-        "div",
-        {
-          className: `tab-content ${activeTab === "appearance" ? "active" : ""
-            }`,
-        },
+        }),
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.livePreview.title"),
           subtitle: I18n.t("settingsAdvanced.livePreview.subtitle"),
+          sectionKey: "live-preview",
         }),
         react.createElement(
           "div",
@@ -7555,6 +9615,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                     CONFIG.visual["original-font-family"] ||
                     "Pretendard Variable",
                   textAlign: CONFIG.visual["alignment"] || "left",
+                  color: uiTheme === "light" ? "#0f172a" : "#f6f8fb",
                   opacity: (CONFIG.visual["original-opacity"] || 100) / 100,
                   letterSpacing: `${CONFIG.visual["original-letter-spacing"] || 0}px`,
                   textShadow: CONFIG.visual["text-shadow-enabled"]
@@ -7582,7 +9643,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   textAlign: CONFIG.visual["alignment"] || "left",
                   lineHeight: "1.3",
                   opacity: (CONFIG.visual["phonetic-opacity"] || 70) / 100,
-                  color: "rgba(255,255,255,0.7)",
+                  color: uiTheme === "light"
+                    ? "rgba(15, 23, 42, 0.66)"
+                    : "rgba(246, 248, 251, 0.7)",
                   marginTop: `${(parseInt(CONFIG.visual["phonetic-spacing"]) || 4) - 10
                     }px`,
                   letterSpacing: `${CONFIG.visual["phonetic-letter-spacing"] || 0}px`,
@@ -7611,7 +9674,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   textAlign: CONFIG.visual["alignment"] || "left",
                   lineHeight: "1.4",
                   opacity: (CONFIG.visual["translation-opacity"] || 100) / 100,
-                  color: "rgba(255,255,255,0.7)",
+                  color: uiTheme === "light"
+                    ? "rgba(15, 23, 42, 0.72)"
+                    : "rgba(246, 248, 251, 0.76)",
                   marginTop: `${parseInt(CONFIG.visual["translation-spacing"]) || 8
                     }px`,
                   letterSpacing: `${CONFIG.visual["translation-letter-spacing"] || 0}px`,
@@ -7632,6 +9697,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("sections.motion"),
           subtitle: I18n.t("settings.reduceMotion.desc"),
+          sectionKey: "reduce-motion",
         }),
         react.createElement(OptionList, {
           items: [
@@ -7658,6 +9724,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.originalStyle.title"),
           subtitle: I18n.t("settingsAdvanced.originalStyle.subtitle"),
+          sectionKey: "original-style",
         }),
         react.createElement(
           "div",
@@ -7817,6 +9884,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.pronunciationStyle.title"),
           subtitle: I18n.t("settingsAdvanced.pronunciationStyle.subtitle"),
+          sectionKey: "pronunciation-style",
         }),
         react.createElement(
           "div",
@@ -8004,6 +10072,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.translationStyle.title"),
           subtitle: I18n.t("settingsAdvanced.translationStyle.subtitle"),
+          sectionKey: "translation-style",
         }),
         react.createElement(
           "div",
@@ -8179,9 +10248,16 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.furiganaStyle.title"),
           subtitle: I18n.t("settingsAdvanced.furiganaStyle.subtitle"),
+          sectionKey: "furigana-style",
         }),
         react.createElement(OptionList, {
           items: [
+            {
+              desc: I18n.t("settingsAdvanced.languageDetection.furigana.label"),
+              info: I18n.t("settingsAdvanced.languageDetection.furigana.desc"),
+              key: "furigana-enabled",
+              type: ConfigSlider,
+            },
             {
               desc: I18n.t("settingsAdvanced.furiganaStyle.fontSize.label"),
               info: I18n.t("settingsAdvanced.furiganaStyle.fontSize.desc"),
@@ -8244,6 +10320,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.textShadow.title"),
           subtitle: I18n.t("settingsAdvanced.textShadow.subtitle"),
+          sectionKey: "text-shadow",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8320,10 +10397,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         "div",
         {
           className: `tab-content ${activeTab === "lyrics" ? "active" : ""}`,
+          "data-tab-id": "lyrics",
         },
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.playback.title"),
           subtitle: I18n.t("settingsAdvanced.playback.subtitle"),
+          sectionKey: "playback",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8354,6 +10433,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.karaokeMode.title"),
           subtitle: I18n.t("settingsAdvanced.karaokeMode.subtitle"),
+          sectionKey: "karaoke-mode",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8384,6 +10464,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.prefetch.title"),
           subtitle: I18n.t("settingsAdvanced.prefetch.subtitle"),
+          sectionKey: "prefetch",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8408,6 +10489,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.communitySync.title"),
           subtitle: I18n.t("settingsAdvanced.communitySync.subtitle"),
+          sectionKey: "community-sync",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8452,6 +10534,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.cacheManagement.title"),
           subtitle: I18n.t("settingsAdvanced.cacheManagement.subtitle"),
+          sectionKey: "cache-management",
         }),
         // 로컬 캐시 관리 (IndexedDB) - 메모리 캐시와 통합됨
         react.createElement(LocalCacheManager),
@@ -8459,6 +10542,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settings.lyricsHelper.sectionTitle") || "Helper Integration",
           subtitle: I18n.t("settings.lyricsHelper.sectionSubtitle") || "Send lyrics to external helper applications",
+          sectionKey: "lyrics-helper",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8498,19 +10582,15 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         "div",
         {
           className: `tab-content ${activeTab === "advanced" ? "active" : ""}`,
+          "data-tab-id": "advanced",
         },
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.languageDetection.title"),
           subtitle: I18n.t("settingsAdvanced.languageDetection.subtitle"),
+          sectionKey: "language-detection",
         }),
         react.createElement(OptionList, {
           items: [
-            {
-              desc: I18n.t("settingsAdvanced.languageDetection.furigana.label"),
-              info: I18n.t("settingsAdvanced.languageDetection.furigana.desc"),
-              key: "furigana-enabled",
-              type: ConfigSlider,
-            },
             {
               desc: I18n.t("settingsAdvanced.languageDetection.japaneseThreshold.label"),
               info: I18n.t("settingsAdvanced.languageDetection.japaneseThreshold.desc"),
@@ -8547,6 +10627,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.exportImport.title"),
           subtitle: I18n.t("settingsAdvanced.exportImport.subtitle"),
+          sectionKey: "export-import",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8602,7 +10683,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   resultContainer.innerHTML = `<div style="
 													padding: 16px 20px;
 													background: rgba(255, 255, 255, 0.03);
-													border: 1px solid rgba(96, 165, 250, 0.15);
+													border: 1px solid rgba(255, 255, 255, 0.12);
 													border-left: 1px solid rgba(255, 255, 255, 0.08);
 													border-right: 1px solid rgba(255, 255, 255, 0.08);
 													border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -8613,7 +10694,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 														display: flex;
 														align-items: center;
 														gap: 12px;
-														color: rgba(96, 165, 250, 0.9);
+														color: rgba(248, 250, 252, 0.9);
 														font-size: 13px;
 													">
 														<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -8751,12 +10832,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                         resultContainer.innerHTML = `<div style="
 													padding: 16px 20px;
 													background: rgba(255, 255, 255, 0.03);
-													border: 1px solid rgba(96, 165, 250, 0.15);
+													border: 1px solid rgba(255, 255, 255, 0.12);
 													border-left: 1px solid rgba(255, 255, 255, 0.08);
 													border-right: 1px solid rgba(255, 255, 255, 0.08);
 													border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-													border-bottom-left-radius: 12px;
-													border-bottom-right-radius: 12px;
+													border-bottom-left-radius: 0;
+													border-bottom-right-radius: 0;
 													backdrop-filter: blur(30px) saturate(150%);
 													-webkit-backdrop-filter: blur(30px) saturate(150%);
 												">
@@ -8764,7 +10845,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 														display: flex;
 														align-items: center;
 														gap: 12px;
-														color: rgba(96, 165, 250, 0.9);
+														color: rgba(248, 250, 252, 0.9);
 														font-size: 13px;
 													">
 														<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -8807,8 +10888,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 												border-left: 1px solid rgba(255, 255, 255, 0.08);
 												border-right: 1px solid rgba(255, 255, 255, 0.08);
 												border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-												border-bottom-left-radius: 12px;
-												border-bottom-right-radius: 12px;
+												border-bottom-left-radius: 0;
+												border-bottom-right-radius: 0;
 												backdrop-filter: blur(30px) saturate(150%);
 												-webkit-backdrop-filter: blur(30px) saturate(150%);
 											">
@@ -8854,6 +10935,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.dbExportImport.title"),
           subtitle: I18n.t("settingsAdvanced.dbExportImport.subtitle"),
+          sectionKey: "db-export-import",
         }),
         react.createElement(OptionList, {
           items: [
@@ -8903,7 +10985,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   resultContainer.innerHTML = `<div style="
                     padding: 16px 20px;
                     background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(96, 165, 250, 0.15);
+                    border: 1px solid rgba(255, 255, 255, 0.12);
                     border-left: 1px solid rgba(255, 255, 255, 0.08);
                     border-right: 1px solid rgba(255, 255, 255, 0.08);
                     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -8914,7 +10996,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                       display: flex;
                       align-items: center;
                       gap: 12px;
-                      color: rgba(96, 165, 250, 0.9);
+                      color: rgba(248, 250, 252, 0.9);
                       font-size: 13px;
                     ">
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -9040,12 +11122,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                         resultContainer.innerHTML = `<div style="
                           padding: 16px 20px;
                           background: rgba(255, 255, 255, 0.03);
-                          border: 1px solid rgba(96, 165, 250, 0.15);
+                          border: 1px solid rgba(255, 255, 255, 0.12);
                           border-left: 1px solid rgba(255, 255, 255, 0.08);
                           border-right: 1px solid rgba(255, 255, 255, 0.08);
                           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-                          border-bottom-left-radius: 12px;
-                          border-bottom-right-radius: 12px;
+                          border-bottom-left-radius: 0;
+                          border-bottom-right-radius: 0;
                           backdrop-filter: blur(30px) saturate(150%);
                           -webkit-backdrop-filter: blur(30px) saturate(150%);
                         ">
@@ -9053,7 +11135,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                             display: flex;
                             align-items: center;
                             gap: 12px;
-                            color: rgba(96, 165, 250, 0.9);
+                            color: rgba(248, 250, 252, 0.9);
                             font-size: 13px;
                           ">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -9137,6 +11219,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.resetSettings.title"),
           subtitle: I18n.t("settingsAdvanced.resetSettings.subtitle"),
+          sectionKey: "reset-settings",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9195,12 +11278,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   resultContainer.innerHTML = `<div style="
 													padding: 16px 20px;
 													background: rgba(255, 255, 255, 0.03);
-													border: 1px solid rgba(96, 165, 250, 0.15);
+													border: 1px solid rgba(255, 255, 255, 0.12);
 													border-left: 1px solid rgba(255, 255, 255, 0.08);
 													border-right: 1px solid rgba(255, 255, 255, 0.08);
 													border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-													border-bottom-left-radius: 12px;
-													border-bottom-right-radius: 12px;
+													border-bottom-left-radius: 0;
+													border-bottom-right-radius: 0;
 													backdrop-filter: blur(30px) saturate(150%);
 													-webkit-backdrop-filter: blur(30px) saturate(150%);
 												">
@@ -9208,7 +11291,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 														display: flex;
 														align-items: center;
 														gap: 12px;
-														color: rgba(96, 165, 250, 0.9);
+														color: rgba(248, 250, 252, 0.9);
 														font-size: 13px;
 													">
 														<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -9234,8 +11317,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 												border-left: 1px solid rgba(255, 255, 255, 0.08);
 												border-right: 1px solid rgba(255, 255, 255, 0.08);
 												border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-												border-bottom-left-radius: 12px;
-												border-bottom-right-radius: 12px;
+												border-bottom-left-radius: 0;
+												border-bottom-right-radius: 0;
 												backdrop-filter: blur(30px) saturate(150%);
 												-webkit-backdrop-filter: blur(30px) saturate(150%);
 											">
@@ -9273,27 +11356,39 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         "div",
         {
           className: `tab-content ${activeTab === "lyrics-providers" ? "active" : ""}`,
+          "data-tab-id": "lyrics-providers",
         },
-        react.createElement(LyricsProvidersTab)
+        react.createElement(
+          "div",
+          { "data-setting-key": "lyrics-providers" },
+          react.createElement(LyricsProvidersTab)
+        )
       ),
       // AI 제공자 탭
       react.createElement(
         "div",
         {
           className: `tab-content ${activeTab === "ai-providers" ? "active" : ""}`,
+          "data-tab-id": "ai-providers",
         },
-        react.createElement(AIProvidersTab)
+        react.createElement(
+          "div",
+          { "data-setting-key": "ai-providers" },
+          react.createElement(AIProvidersTab)
+        )
       ),
       // 전체화면 탭
       react.createElement(
         "div",
         {
           className: `tab-content ${activeTab === "fullscreen" ? "active" : ""}`,
+          "data-tab-id": "fullscreen",
         },
         // ===== 기본 설정 섹션 =====
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.fullscreenMode.title"),
           subtitle: I18n.t("settingsAdvanced.fullscreenMode.subtitle"),
+          sectionKey: "fullscreen-mode",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9341,6 +11436,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.normalMode.title"),
           subtitle: I18n.t("settingsAdvanced.normalMode.subtitle"),
+          sectionKey: "normal-mode",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9407,6 +11503,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.tvMode.title"),
           subtitle: I18n.t("settingsAdvanced.tvMode.subtitle"),
+          sectionKey: "tv-mode",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9459,6 +11556,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.metadataDisplay.title"),
           subtitle: I18n.t("settingsAdvanced.metadataDisplay.subtitle"),
+          sectionKey: "metadata-display",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9506,6 +11604,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.fullscreenStyle.title"),
           subtitle: I18n.t("settingsAdvanced.fullscreenStyle.subtitle"),
+          sectionKey: "fullscreen-style",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9590,6 +11689,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.fullscreenUI.title"),
           subtitle: I18n.t("settingsAdvanced.fullscreenUI.subtitle"),
+          sectionKey: "fullscreen-ui",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9698,6 +11798,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.controllerStyle.title"),
           subtitle: I18n.t("settingsAdvanced.controllerStyle.subtitle"),
+          sectionKey: "controller-style",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9734,6 +11835,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.autoHide.title"),
           subtitle: I18n.t("settingsAdvanced.autoHide.subtitle"),
+          sectionKey: "auto-hide",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9771,6 +11873,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.tmiStyle.title"),
           subtitle: I18n.t("settingsAdvanced.tmiStyle.subtitle"),
+          sectionKey: "tmi-style",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9803,10 +11906,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         "div",
         {
           className: `tab-content ${activeTab === "nowplaying" ? "active" : ""}`,
+          "data-tab-id": "nowplaying",
         },
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.nowPlayingPanel.title") || "NowPlaying Panel Lyrics",
           subtitle: I18n.t("settingsAdvanced.nowPlayingPanel.subtitle") || "Lyrics display settings for the Now Playing panel",
+          sectionKey: "panel-lyrics-general",
         }),
         // 미리보기 컴포넌트
         react.createElement(NowPlayingPanelPreview),
@@ -9916,6 +12021,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.nowPlayingPanel.background.title") || "Background",
           subtitle: I18n.t("settingsAdvanced.nowPlayingPanel.background.subtitle") || "Customize the panel background",
+          sectionKey: "panel-background",
         }),
         react.createElement(OptionList, {
           items: [
@@ -9967,6 +12073,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.nowPlayingPanel.border.title") || "Border",
           subtitle: I18n.t("settingsAdvanced.nowPlayingPanel.border.subtitle") || "Customize the panel border",
+          sectionKey: "panel-border",
         }),
         react.createElement(OptionList, {
           items: [
@@ -10016,10 +12123,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         "div",
         {
           className: `tab-content ${activeTab === "debug" ? "active" : ""}`,
+          "data-tab-id": "debug",
         },
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.debugTab.title"),
           subtitle: I18n.t("settingsAdvanced.debugTab.subtitle"),
+          sectionKey: "debug-overview",
         }),
         react.createElement(DebugInfoPanel)
       ),
@@ -10028,21 +12137,24 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         "div",
         {
           className: `tab-content ${activeTab === "about" ? "active" : ""}`,
+          "data-tab-id": "about",
         },
         // ivLogin 계정 연동 섹션 (최상단)
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.aboutTab.account.title"),
           subtitle: I18n.t("settingsAdvanced.aboutTab.account.subtitle"),
+          sectionKey: "about-account",
         }),
         react.createElement(AccountSection),
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.aboutTab.appInfo.title"),
           subtitle: I18n.t("settingsAdvanced.aboutTab.subtitle"),
+          sectionKey: "about-app-info",
         }),
         react.createElement(
           "div",
           {
-            className: "info-card",
+            className: "info-card about-info-card",
             style: {
               padding: "20px",
               background: "rgba(255, 255, 255, 0.03)",
@@ -10056,24 +12168,23 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           react.createElement(
             "h3",
             {
+              className: "about-info-title",
               style: {
                 margin: "0 0 12px",
                 fontSize: "18px",
-                color: "#ffffff",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
               },
             },
-            react.createElement("span", null, "🎵"),
             "ivLyrics"
           ),
           react.createElement(
             "p",
             {
+              className: "about-info-description",
               style: {
                 margin: "0 0 16px",
-                color: "rgba(255,255,255,0.7)",
                 lineHeight: "1.6",
               },
             },
@@ -10082,27 +12193,27 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           react.createElement(
             "p",
             {
+              className: "about-info-meta",
               style: {
                 margin: "0 0 8px",
-                color: "rgba(255,255,255,0.5)",
                 fontSize: "14px",
               },
             },
             `${I18n.t("settingsAdvanced.aboutTab.versionPrefix")}: ${Utils.currentVersion}`
           ),
           react.createElement("div", {
+            className: "about-info-divider",
             style: {
               height: "1px",
-              background: "rgba(255, 255, 255, 0.1)",
               margin: "16px 0",
             },
           }),
           react.createElement(
             "p",
             {
+              className: "about-info-line",
               style: {
                 margin: "0 0 12px",
-                color: "rgba(255,255,255,0.9)",
                 lineHeight: "1.6",
               },
             },
@@ -10112,9 +12223,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           react.createElement(
             "p",
             {
+              className: "about-info-line",
               style: {
                 margin: "0 0 12px",
-                color: "rgba(255,255,255,0.9)",
                 lineHeight: "1.6",
               },
             },
@@ -10124,9 +12235,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           react.createElement(
             "p",
             {
+              className: "about-info-note",
               style: {
                 margin: "0",
-                color: "rgba(255,255,255,0.7)",
                 fontSize: "14px",
                 lineHeight: "1.6",
               },
@@ -10137,11 +12248,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.aboutTab.clientInfo.title"),
           subtitle: I18n.t("settingsAdvanced.aboutTab.clientInfo.subtitle"),
+          sectionKey: "about-client-info",
         }),
         react.createElement(
           "div",
           {
-            className: "info-card",
+            className: "info-card about-info-card about-client-card",
             style: {
               padding: "20px",
               background: "rgba(255, 255, 255, 0.03)",
@@ -10155,9 +12267,9 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           react.createElement(
             "p",
             {
+              className: "about-info-description about-info-description-compact",
               style: {
                 margin: "0 0 8px",
-                color: "rgba(255,255,255,0.7)",
                 fontSize: "13px",
                 lineHeight: "1.6",
               },
@@ -10167,6 +12279,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
           react.createElement(
             "div",
             {
+              className: "about-client-id-row",
               style: {
                 marginTop: "12px",
                 display: "flex",
@@ -10177,15 +12290,13 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             react.createElement(
               "div",
               {
+                className: "about-client-id-box",
                 style: {
                   flex: 1,
-                  background: "rgba(0, 0, 0, 0.25)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
                   borderRadius: "8px",
                   padding: "10px 14px",
                   fontFamily: 'Consolas, Monaco, "Courier New", monospace',
                   fontSize: "13px",
-                  color: "rgba(255,255,255,0.9)",
                   userSelect: "all",
                   wordBreak: "break-all",
                   lineHeight: "1.5",
@@ -10196,6 +12307,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
             react.createElement(
               "button",
               {
+                className: "btn about-client-copy-btn",
                 onClick: () => {
                   const clientId = Spicetify.LocalStorage.get("ivLyrics:user-hash");
                   navigator.clipboard.writeText(clientId).then(() => {
@@ -10205,23 +12317,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
                   });
                 },
                 style: {
-                  background: "rgba(255, 255, 255, 0.08)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "rgba(255, 255, 255, 0.9)",
                   padding: "10px 16px",
                   borderRadius: "8px",
-                  cursor: "pointer",
                   fontSize: "13px",
                   fontWeight: "600",
-                  transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
                   letterSpacing: "-0.01em",
                   whiteSpace: "nowrap",
-                },
-                onMouseEnter: (e) => {
-                  e.target.style.background = "rgba(255, 255, 255, 0.12)";
-                },
-                onMouseLeave: (e) => {
-                  e.target.style.background = "rgba(255, 255, 255, 0.08)";
                 },
               },
               I18n.t("settingsAdvanced.aboutTab.clientInfo.copy")
@@ -10231,6 +12332,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.aboutTab.update.title"),
           subtitle: I18n.t("settingsAdvanced.aboutTab.update.subtitle"),
+          sectionKey: "about-update",
         }),
         react.createElement(OptionList, {
           items: [
@@ -10291,8 +12393,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 													border-left: 1px solid rgba(255, 255, 255, 0.08);
 													border-right: 1px solid rgba(255, 255, 255, 0.08);
 													border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-													border-bottom-left-radius: 12px;
-													border-bottom-right-radius: 12px;
+													border-bottom-left-radius: 0;
+													border-bottom-right-radius: 0;
 													backdrop-filter: blur(30px) saturate(150%);
 													-webkit-backdrop-filter: blur(30px) saturate(150%);
 												">
@@ -10326,8 +12428,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 													border-left: 1px solid rgba(255, 255, 255, 0.08);
 													border-right: 1px solid rgba(255, 255, 255, 0.08);
 													border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-													border-bottom-left-radius: 12px;
-													border-bottom-right-radius: 12px;
+													border-bottom-left-radius: 0;
+													border-bottom-right-radius: 0;
 													backdrop-filter: blur(30px) saturate(150%);
 													-webkit-backdrop-filter: blur(30px) saturate(150%);
 												">
@@ -10446,12 +12548,12 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 												<div style="
 													padding: 16px 20px;
 													background: rgba(255, 255, 255, 0.03);
-													border: 1px solid rgba(96, 165, 250, 0.15);
+													border: 1px solid rgba(255, 255, 255, 0.12);
 													border-left: 1px solid rgba(255, 255, 255, 0.08);
 													border-right: 1px solid rgba(255, 255, 255, 0.08);
 													border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-													border-bottom-left-radius: 12px;
-													border-bottom-right-radius: 12px;
+													border-bottom-left-radius: 0;
+													border-bottom-right-radius: 0;
 													backdrop-filter: blur(30px) saturate(150%);
 													-webkit-backdrop-filter: blur(30px) saturate(150%);
 												">
@@ -10459,7 +12561,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 														display: flex;
 														align-items: center;
 														gap: 12px;
-														color: rgba(96, 165, 250, 0.9);
+														color: rgba(248, 250, 252, 0.9);
 														font-size: 13px;
 													">
 														<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -10484,8 +12586,8 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
 												border-left: 1px solid rgba(255, 255, 255, 0.08);
 												border-right: 1px solid rgba(255, 255, 255, 0.08);
 												border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-												border-bottom-left-radius: 12px;
-												border-bottom-right-radius: 12px;
+												border-bottom-left-radius: 0;
+												border-bottom-right-radius: 0;
 												backdrop-filter: blur(30px) saturate(150%);
 												-webkit-backdrop-filter: blur(30px) saturate(150%);
 											">
@@ -10521,6 +12623,7 @@ const ConfigModal = ({ onRequestClose = () => {} }) => {
         react.createElement(SectionTitle, {
           title: I18n.t("settingsAdvanced.aboutTab.patchNotes.title"),
           subtitle: I18n.t("settingsAdvanced.aboutTab.patchNotes.subtitle"),
+          sectionKey: "about-patch-notes",
         }),
         react.createElement(
           "div",

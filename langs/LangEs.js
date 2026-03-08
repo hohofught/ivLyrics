@@ -26,6 +26,51 @@ window.LANG_ES = {
     "clear": "Borrar",
     "inSection": "en {section}"
   },
+  "settingsUi": {
+    "groups": {
+      "core": "Espacio de trabajo",
+      "display": "Visualización",
+      "text": "Capas de texto",
+      "playback": "Reproducción y sincronización",
+      "surfaces": "Pantallas",
+      "providers": "Proveedores",
+      "fullscreen": "Pantalla completa",
+      "panel": "Letras del panel",
+      "system": "Sistema"
+    },
+    "nav": {
+      "badges": {
+        "workspace": "Base",
+        "typography": "Texto",
+        "behavior": "Flujo",
+        "surface": "Vista",
+        "providers": "Fuente",
+        "system": "Sistema"
+      },
+      "generalDesc": "Idioma, superposición de escritorio y ajustes principales.",
+      "appearanceDesc": "Fondos, tipografía, animaciones y composición de pantalla.",
+      "lyricsDesc": "Sincronización, traducción, karaoke y procesamiento de letras.",
+      "fullscreenDesc": "Diseño de reproducción en pantalla completa y elementos visibles.",
+      "nowplayingDesc": "Diseño, tamaño y fondo de las letras del panel.",
+      "lyricsProvidersDesc": "Prioridades de fuentes, tokens y controles de proveedores de letras.",
+      "aiProvidersDesc": "Configuración de proveedores de IA para traducción y procesamiento.",
+      "advancedDesc": "Detección, caché, aplicaciones auxiliares y controles avanzados.",
+      "debugDesc": "Diagnóstico, utilidades de recuperación y solución de problemas.",
+      "aboutDesc": "Versión, comprobación de actualizaciones, créditos y notas de la versión."
+    },
+    "background": {
+      "none": "Minimalista",
+      "noneDesc": "Mantiene la superficie de letras limpia, sin efectos de fondo adicionales.",
+      "layout": "Diseño y animación",
+      "finetune": "Detalles del fondo"
+    },
+    "theme": {
+      "light": "Cambiar a modo claro",
+      "dark": "Cambiar a modo oscuro",
+      "lightShort": "Claro",
+      "darkShort": "Oscuro"
+    }
+  },
   "sections": {
     "language": "Idioma",
     "visualEffects": "Efectos visuales",
@@ -87,6 +132,13 @@ window.LANG_ES = {
     "language": {
       "label": "Idioma",
       "desc": "Selecciona el idioma de la extensión"
+    },
+    "translationTargetLanguage": {
+      "label": "Idioma de destino de la traducción",
+      "desc": "Elige el idioma usado para la traducción automática",
+      "options": {
+        "auto": "Automático"
+      }
     },
     "alignment": {
       "label": "Alineación",
@@ -419,7 +471,8 @@ window.LANG_ES = {
     "openSettings": "Abrir ajustes",
     "translationSettings": "Ajustes de conversión",
     "regenerateTranslation": "Regenerar traducción",
-    "fullscreen": "Pantalla completa"
+    "fullscreen": "Pantalla completa",
+    "exitFullscreen": "Salir de pantalla completa"
   },
   "messages": {
     "noLyrics": "No hay letras disponibles",
