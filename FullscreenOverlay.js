@@ -843,17 +843,19 @@ const FullscreenOverlay = (() => {
                             react.createElement("div", { className: "fullscreen-queue-section-title" },
                                 I18n.t("fullscreen.queue.nowPlaying")
                             ),
-                            react.createElement("div", { className: "fullscreen-queue-item current" },
-                                currentTrack.image && react.createElement("img", {
-                                    src: currentTrack.image,
-                                    className: "fullscreen-queue-item-image"
-                                }),
-                                react.createElement("div", { className: "fullscreen-queue-item-info" },
-                                    react.createElement("div", { className: "fullscreen-queue-item-title" }, currentTrack.title),
-                                    react.createElement("div", { className: "fullscreen-queue-item-artist" }, currentTrack.artist)
-                                ),
-                                react.createElement("div", { className: "fullscreen-queue-item-playing" },
-                                    react.createElement("span", { className: "fullscreen-queue-playing-icon" }, "♪")
+                            react.createElement("div", { className: "fullscreen-queue-list" },
+                                react.createElement("div", { className: "fullscreen-queue-item current" },
+                                    currentTrack.image && react.createElement("img", {
+                                        src: currentTrack.image,
+                                        className: "fullscreen-queue-item-image"
+                                    }),
+                                    react.createElement("div", { className: "fullscreen-queue-item-info" },
+                                        react.createElement("div", { className: "fullscreen-queue-item-title" }, currentTrack.title),
+                                        react.createElement("div", { className: "fullscreen-queue-item-artist" }, currentTrack.artist)
+                                    ),
+                                    react.createElement("div", { className: "fullscreen-queue-item-playing" },
+                                        react.createElement("span", { className: "fullscreen-queue-playing-icon" }, "♪")
+                                    )
                                 )
                             )
                         ),
@@ -916,10 +918,14 @@ const FullscreenOverlay = (() => {
                 react.createElement("div", { className: "fullscreen-queue-footer" },
                     react.createElement("button", {
                         className: `fullscreen-queue-tab ${activeTab === 'queue' ? 'active' : ''}`,
+                        type: "button",
+                        "aria-pressed": activeTab === 'queue',
                         onClick: () => setActiveTab('queue')
                     }, I18n.t("fullscreen.queue.title")),
                     react.createElement("button", {
                         className: `fullscreen-queue-tab ${activeTab === 'recent' ? 'active' : ''}`,
+                        type: "button",
+                        "aria-pressed": activeTab === 'recent',
                         onClick: () => setActiveTab('recent')
                     }, I18n.t("fullscreen.queue.recentlyPlayed"))
                 )

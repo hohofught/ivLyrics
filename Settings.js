@@ -7760,6 +7760,8 @@ const ConfigModal = ({ onRequestClose = () => {}, initialTab = "general" }) => {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 /* Toggle Switch */
@@ -7768,6 +7770,9 @@ const ConfigModal = ({ onRequestClose = () => {}, initialTab = "general" }) => {
     display: inline-block;
     width: 36px;
     height: 20px;
+    min-width: 36px;
+    flex: 0 0 36px;
+    align-self: flex-start;
 }
 
 #${APP_NAME}-config-container .lyrics-provider-toggle input {
@@ -7812,12 +7817,16 @@ const ConfigModal = ({ onRequestClose = () => {}, initialTab = "general" }) => {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 #${APP_NAME}-config-container .lyrics-provider-name {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 #${APP_NAME}-config-container .lyrics-provider-version {
@@ -7829,6 +7838,8 @@ const ConfigModal = ({ onRequestClose = () => {}, initialTab = "general" }) => {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 0 0 auto;
+    min-width: fit-content;
 }
 
 #${APP_NAME}-config-container .support-badges {
@@ -8440,6 +8451,8 @@ const ConfigModal = ({ onRequestClose = () => {}, initialTab = "general" }) => {
 #${APP_NAME}-config-container .lyrics-provider-toggle {
     width: 40px;
     height: 22px;
+    min-width: 40px;
+    flex-basis: 40px;
 }
 
 #${APP_NAME}-config-container .lyrics-provider-toggle .toggle-slider {
