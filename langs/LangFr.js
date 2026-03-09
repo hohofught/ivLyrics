@@ -26,51 +26,6 @@ window.LANG_FR = {
     "clear": "Effacer",
     "inSection": "dans {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Espace de travail",
-      "display": "Affichage",
-      "text": "Couches de texte",
-      "playback": "Lecture et synchro",
-      "surfaces": "Écrans",
-      "providers": "Fournisseurs",
-      "fullscreen": "Plein écran",
-      "panel": "Paroles du panneau",
-      "system": "Système"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Base",
-        "typography": "Texte",
-        "behavior": "Flux",
-        "surface": "Vue",
-        "providers": "Source",
-        "system": "Système"
-      },
-      "generalDesc": "Langue, overlay bureau et réglages principaux.",
-      "appearanceDesc": "Arrière-plans, typographie, animations et composition de l’écran.",
-      "lyricsDesc": "Synchronisation, traduction, karaoké et traitement des paroles.",
-      "fullscreenDesc": "Disposition plein écran et présentation en lecture.",
-      "nowplayingDesc": "Disposition, taille et fond des paroles du panneau.",
-      "lyricsProvidersDesc": "Priorités des sources, jetons et contrôles des fournisseurs de paroles.",
-      "aiProvidersDesc": "Configuration des fournisseurs IA pour la traduction et le traitement.",
-      "advancedDesc": "Détection, cache, applications auxiliaires et options avancées.",
-      "debugDesc": "Diagnostic, outils de récupération et dépannage.",
-      "aboutDesc": "Version, mises à jour, crédits et notes de version."
-    },
-    "background": {
-      "none": "Minimal",
-      "noneDesc": "Garde l’affichage des paroles propre, sans effet d’arrière-plan supplémentaire.",
-      "layout": "Disposition et animation",
-      "finetune": "Détails de l'arrière-plan"
-    },
-    "theme": {
-      "light": "Passer en mode clair",
-      "dark": "Passer en mode sombre",
-      "lightShort": "Clair",
-      "darkShort": "Sombre"
-    }
-  },
   "sections": {
     "language": "Langue",
     "visualEffects": "Effets visuels",
@@ -105,8 +60,7 @@ window.LANG_FR = {
     "fadWarningDesc": "Non pris en charge lors de l'utilisation de l'extension Full Screen.",
     "fadWarningTip": "Veuillez modifier l'alignement dans les paramètres de Full Screen.",
     "desktopOverlay": "Overlay de bureau",
-    "desktopOverlaySubtitle": "Affiche les paroles en superposition sur le bureau",
-    "motion": "Animations"
+    "desktopOverlaySubtitle": "Affiche les paroles en superposition sur le bureau"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_FR = {
       "label": "Langue",
       "desc": "Sélectionnez la langue de l'extension"
     },
-    "translationTargetLanguage": {
-      "label": "Langue cible de traduction",
-      "desc": "Choisissez la langue utilisée pour la traduction automatique",
-      "options": {
-        "auto": "Automatique"
-      }
-    },
     "alignment": {
       "label": "Alignement",
       "desc": "Choisissez l'alignement du texte des paroles",
@@ -156,10 +103,6 @@ window.LANG_FR = {
     "albumBgBlur": {
       "label": "Flou pochette album",
       "desc": "Ajuste l'intensité du flou de l'arrière-plan de l'album"
-    },
-    "reduceMotion": {
-      "label": "Réduire les animations",
-      "desc": "Réduit les animations de l’interface."
     },
     "blurGradientBackground": {
       "label": "Fond dégradé flou",
@@ -471,8 +414,7 @@ window.LANG_FR = {
     "openSettings": "Ouvrir les paramètres",
     "translationSettings": "Paramètres de conversion",
     "regenerateTranslation": "Régénérer la traduction",
-    "fullscreen": "Plein écran",
-    "exitFullscreen": "Quitter le plein écran"
+    "fullscreen": "Plein écran"
   },
   "messages": {
     "noLyrics": "Aucune parole disponible",
@@ -1497,8 +1439,6 @@ window.LANG_FR = {
     "applyShort": "Appliquer",
     "applied": "Vidéo appliquée",
     "videoTitle": "Titre vidéo",
-    "edit": "Éditer",
-    "updateAction": "Mettre à jour",
     "loadingTitle": "Récupération titre...",
     "startTimeLabel": "Temps début 1ère ligne (sec)",
     "startTimeHint": "Entrez le moment où la première ligne de paroles commence dans la vidéo",
@@ -1521,6 +1461,7 @@ window.LANG_FR = {
       "gradient": "Dégradé",
       "minimal": "Minimal",
       "glass": "Verre",
+      "story": "Story"
     },
     "advancedSettings": "Paramètres avancés",
     "sections": {

@@ -26,51 +26,6 @@ window.LANG_KO = {
     "clear": "지우기",
     "inSection": "{section}에서"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "기본",
-      "display": "화면 구성",
-      "text": "가사 텍스트",
-      "playback": "재생과 싱크",
-      "surfaces": "화면",
-      "providers": "제공자",
-      "fullscreen": "전체화면",
-      "panel": "패널 가사",
-      "system": "시스템"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "기본",
-        "typography": "텍스트",
-        "behavior": "동작",
-        "surface": "화면",
-        "providers": "소스",
-        "system": "관리"
-      },
-      "generalDesc": "언어, 데스크톱 오버레이, 기본 동작을 정리합니다.",
-      "appearanceDesc": "배경, 타이포그래피, 모션, 레이아웃을 조정합니다.",
-      "lyricsDesc": "싱크, 번역, 가사 처리 흐름을 설정합니다.",
-      "fullscreenDesc": "전체화면 재생 레이아웃과 표시 요소를 다룹니다.",
-      "nowplayingDesc": "패널 가사의 배치, 배경, 크기를 설정합니다.",
-      "lyricsProvidersDesc": "가사 제공자 우선순위와 연결 설정을 관리합니다.",
-      "aiProvidersDesc": "AI 번역 및 처리 제공자를 설정합니다.",
-      "advancedDesc": "감지, 캐시, 헬퍼 연동 등 고급 기능을 다룹니다.",
-      "debugDesc": "진단, 복구, 문제 해결 도구를 제공합니다.",
-      "aboutDesc": "버전, 업데이트, 기여자, 패치 노트를 확인합니다."
-    },
-    "background": {
-      "none": "미니멀",
-      "noneDesc": "추가 배경 효과 없이 가사에만 집중합니다.",
-      "layout": "레이아웃 및 모션",
-      "finetune": "배경 세부 설정"
-    },
-    "theme": {
-      "light": "라이트 모드로 전환",
-      "dark": "다크 모드로 전환",
-      "lightShort": "라이트",
-      "darkShort": "다크"
-    }
-  },
   "sections": {
     "language": "언어",
     "visualEffects": "시각 효과",
@@ -101,12 +56,11 @@ window.LANG_KO = {
     "github": "GitHub",
     "maintainers": "유지 관리자",
     "contributors": "기여자",
-    "fadWarningTitle": "Full Screen 확장 프로그램 사용 중",
+    "fadWarningTitle": "⚠️ Full Screen 확장 프로그램 사용 중",
     "fadWarningDesc": "Full Screen 확장 프로그램 사용 중에는 지원하지 않습니다.",
     "fadWarningTip": "정렬 방식은 Full Screen 자체 설정에서 변경하십시오.",
     "desktopOverlay": "데스크탑 오버레이",
-    "desktopOverlaySubtitle": "가사를 데스크탑에 오버레이로 표시합니다",
-    "motion": "모션"
+    "desktopOverlaySubtitle": "가사를 데스크탑에 오버레이로 표시합니다"
   },
   "overlay": {
     "enabled": {
@@ -156,10 +110,6 @@ window.LANG_KO = {
     "albumBgBlur": {
       "label": "앨범 배경 블러",
       "desc": "앨범 배경의 블러 강도를 조절합니다"
-    },
-    "reduceMotion": {
-      "label": "모션 줄이기",
-      "desc": "인터페이스 애니메이션을 줄입니다."
     },
     "blurGradientBackground": {
       "label": "블러 그라데이션 배경",
@@ -1497,8 +1447,6 @@ window.LANG_KO = {
     "applyShort": "적용",
     "applied": "영상이 적용되었습니다",
     "videoTitle": "영상 제목",
-    "edit": "수정",
-    "updateAction": "업데이트",
     "loadingTitle": "제목 가져오는 중...",
     "startTimeLabel": "첨 가사 시작 시간 (초)",
     "startTimeHint": "YouTube 영상에서 첫 번째 가사가 시작되는 시간을 입력하세요",
@@ -1521,6 +1469,7 @@ window.LANG_KO = {
       "gradient": "그라디언트",
       "minimal": "미니멀",
       "glass": "글래스",
+      "story": "스토리"
     },
     "advancedSettings": "세부 설정",
     "sections": {
@@ -1530,7 +1479,7 @@ window.LANG_KO = {
       "layout": "레이아웃",
       "other": "기타"
     },
-    "copyrightWarning": "저작권 알림\n\n이 가사 이미지에는 저작권이 있는 콘텐츠가 포함될 수 있습니다.\n\n• 개인적인 용도로만 사용해 주세요\n• 상업적 목적으로 사용하지 마세요\n• SNS 공유 시 원작자를 존중해 주세요\n\n계속하시겠습니까?",
+    "copyrightWarning": "⚠️ 저작권 알림\n\n이 가사 이미지에는 저작권이 있는 콘텐츠가 포함될 수 있습니다.\n\n• 개인적인 용도로만 사용해 주세요\n• 상업적 목적으로 사용하지 마세요\n• SNS 공유 시 원작자를 존중해 주세요\n\n계속하시겠습니까?",
     "copyrightTitle": "저작권 알림",
     "copyrightDesc": "이 가사 이미지에는 저작권이 있는 콘텐츠가 포함될 수 있습니다.",
     "copyrightPoint1": "개인적인 용도로만 사용해 주세요",
@@ -1762,7 +1711,7 @@ window.LANG_KO = {
       "publishing": "등록 중...",
       "cancelPublish": "등록 취소",
       "publishCancelled": "등록이 취소되었습니다",
-      "timeWarning": "LRCLIB은 무분별한 가사 등록을 막기 위해 암호화 토큰 해석 작업을 요구합니다. 이 과정은 컴퓨터 성능에 따라 약 5분 정도 소요될 수 있습니다.",
+      "timeWarning": "⚠️ LRCLIB은 무분별한 가사 등록을 막기 위해 암호화 토큰 해석 작업을 요구합니다. 이 과정은 컴퓨터 성능에 따라 약 5분 정도 소요될 수 있습니다.",
       "requestingChallenge": "인증 요청 중...",
       "solvingChallenge": "인증 처리 중...",
       "solving": "인증 처리 중... ({nonce} 시도)",

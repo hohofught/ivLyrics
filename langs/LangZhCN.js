@@ -26,51 +26,6 @@ window.LANG_ZH_CN = {
     "clear": "清除",
     "inSection": "在 {section} 中"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "工作区",
-      "display": "显示",
-      "text": "文本层",
-      "playback": "播放与同步",
-      "surfaces": "显示界面",
-      "providers": "提供商",
-      "fullscreen": "全屏",
-      "panel": "面板歌词",
-      "system": "系统"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "核心",
-        "typography": "文本",
-        "behavior": "流程",
-        "surface": "视图",
-        "providers": "来源",
-        "system": "系统"
-      },
-      "generalDesc": "语言、桌面悬浮窗与核心默认设置。",
-      "appearanceDesc": "背景、字体、动效与画面布局。",
-      "lyricsDesc": "同步、翻译、卡拉 OK 与歌词处理。",
-      "fullscreenDesc": "全屏播放布局与展示内容设置。",
-      "nowplayingDesc": "面板歌词的布局、大小与背景效果。",
-      "lyricsProvidersDesc": "歌词来源优先级、令牌与提供商控制。",
-      "aiProvidersDesc": "AI 翻译与处理提供商配置。",
-      "advancedDesc": "检测、缓存、辅助程序与高级控制。",
-      "debugDesc": "诊断、恢复工具与问题排查。",
-      "aboutDesc": "版本信息、更新检查、致谢与更新日志。"
-    },
-    "background": {
-      "none": "极简",
-      "noneDesc": "不添加额外背景效果，保持歌词界面干净清晰。",
-      "layout": "布局与动效",
-      "finetune": "背景细节"
-    },
-    "theme": {
-      "light": "切换到浅色模式",
-      "dark": "切换到深色模式",
-      "lightShort": "浅色",
-      "darkShort": "深色"
-    }
-  },
   "sections": {
     "language": "语言",
     "visualEffects": "视觉效果",
@@ -105,8 +60,7 @@ window.LANG_ZH_CN = {
     "fadWarningDesc": "在使用 Full Screen 扩展程序时不支持此功能。",
     "fadWarningTip": "请在 Full Screen 扩展本身的设置中更改对齐方式。",
     "desktopOverlay": "桌面悬浮窗",
-    "desktopOverlaySubtitle": "在桌面上以悬浮窗形式显示歌词",
-    "motion": "动效"
+    "desktopOverlaySubtitle": "在桌面上以悬浮窗形式显示歌词"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_ZH_CN = {
       "label": "语言",
       "desc": "选择扩展程序的语言"
     },
-    "translationTargetLanguage": {
-      "label": "翻译目标语言",
-      "desc": "选择自动翻译使用的目标语言",
-      "options": {
-        "auto": "自动"
-      }
-    },
     "alignment": {
       "label": "对齐方式",
       "desc": "选择歌词文本的对齐位置",
@@ -156,10 +103,6 @@ window.LANG_ZH_CN = {
     "albumBgBlur": {
       "label": "专辑背景模糊",
       "desc": "调节专辑背景的模糊强度"
-    },
-    "reduceMotion": {
-      "label": "减少动效",
-      "desc": "减少界面动画。"
     },
     "blurGradientBackground": {
       "label": "模糊渐变背景",
@@ -471,8 +414,7 @@ window.LANG_ZH_CN = {
     "openSettings": "打开设置",
     "translationSettings": "转换设置",
     "regenerateTranslation": "重新生成翻译",
-    "fullscreen": "全屏",
-    "exitFullscreen": "退出全屏"
+    "fullscreen": "全屏"
   },
   "messages": {
     "noLyrics": "暂无可用歌词",
@@ -1497,8 +1439,6 @@ window.LANG_ZH_CN = {
     "applyShort": "应用",
     "applied": "视频已应用",
     "videoTitle": "视频标题",
-    "edit": "编辑",
-    "updateAction": "更新",
     "loadingTitle": "正在获取标题...",
     "startTimeLabel": "第一句歌词开始时间 (秒)",
     "startTimeHint": "输入 YouTube 视频中第一句歌词开始的时间",
@@ -1521,6 +1461,7 @@ window.LANG_ZH_CN = {
       "gradient": "渐变",
       "minimal": "极简",
       "glass": "玻璃",
+      "story": "快拍"
     },
     "advancedSettings": "详细设置",
     "sections": {

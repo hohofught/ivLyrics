@@ -33,7 +33,7 @@ const LyricsShareImage = (() => {
     // 레이아웃
     imageWidth: 1080, // 이미지 너비
     padding: 60,
-    aspectRatio: null, // null = auto, 1 = square, 16/9 = landscape
+    aspectRatio: null, // null = auto, 9/16 = story, 1 = square, 16/9 = landscape
     
     // 기타
     showWatermark: true,
@@ -132,6 +132,30 @@ const LyricsShareImage = (() => {
         innerGap: 3,
         padding: 55,
         aspectRatio: null,
+        showPronunciation: true,
+        showTranslation: true,
+        showTrackInfo: true,
+        showWatermark: true,
+      }
+    },
+    story: {
+      name: 'Story',
+      settings: {
+        backgroundType: 'coverBlur',
+        backgroundOpacity: 0.5,
+        backgroundBlur: 40,
+        showCover: true,
+        coverSize: 160,
+        coverPosition: 'center',
+        coverRadius: 24,
+        coverBlur: 0,
+        fontSize: 30,
+        fontWeight: '600',
+        lyricsAlign: 'center',
+        blockGap: 35,
+        innerGap: 4,
+        padding: 50,
+        aspectRatio: 9 / 16,
         showPronunciation: true,
         showTranslation: true,
         showTrackInfo: true,
@@ -313,7 +337,7 @@ const LyricsShareImage = (() => {
    * @param {string} options.trackName - 곡 제목
    * @param {string} options.artistName - 아티스트 이름
    * @param {string} options.albumCover - 앨범 커버 URL
-   * @param {string} options.template - 프리셋 이름 (cover, gradient, minimal, glass)
+   * @param {string} options.template - 프리셋 이름 (cover, gradient, minimal, glass, story)
    * @param {Object} options.customSettings - 커스텀 설정 (템플릿 설정 덮어쓰기)
    * @param {number} options.width - 이미지 너비 (기본: 1080)
    * @returns {Promise<{canvas: HTMLCanvasElement, dataUrl: string, blob: Blob}>}

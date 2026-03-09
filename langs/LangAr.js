@@ -26,51 +26,6 @@ window.LANG_AR = {
     "clear": "مسح",
     "inSection": "في {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "الأساس",
-      "display": "العرض",
-      "text": "طبقات النص",
-      "playback": "التشغيل والمزامنة",
-      "surfaces": "الشاشات",
-      "providers": "المزوّدون",
-      "fullscreen": "ملء الشاشة",
-      "panel": "كلمات لوحة التشغيل",
-      "system": "النظام"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "أساسي",
-        "typography": "نص",
-        "behavior": "تدفق",
-        "surface": "عرض",
-        "providers": "مصدر",
-        "system": "نظام"
-      },
-      "generalDesc": "اللغة وتراكب سطح المكتب والإعدادات الأساسية.",
-      "appearanceDesc": "الخلفيات والخطوط والحركة وتكوين الشاشة.",
-      "lyricsDesc": "المزامنة والترجمة والكاريوكي ومعالجة الكلمات.",
-      "fullscreenDesc": "تخطيط التشغيل بملء الشاشة والعناصر المعروضة.",
-      "nowplayingDesc": "تخطيط كلمات اللوحة وحجمها وخلفيتها.",
-      "lyricsProvidersDesc": "أولوية المصادر والرموز وإعدادات مزوّدي الكلمات.",
-      "aiProvidersDesc": "إعداد مزوّدي الذكاء الاصطناعي للترجمة والمعالجة.",
-      "advancedDesc": "الاكتشاف والذاكرة المؤقتة والتطبيقات المساعدة والخيارات المتقدمة.",
-      "debugDesc": "أدوات التشخيص والاستعادة واستكشاف الأخطاء.",
-      "aboutDesc": "معلومات الإصدار وفحص التحديثات والشكر وملاحظات الإصدار."
-    },
-    "background": {
-      "none": "بسيط",
-      "noneDesc": "يحافظ على مساحة الكلمات نظيفة من دون تأثيرات خلفية إضافية.",
-      "layout": "التخطيط والحركة",
-      "finetune": "تفاصيل الخلفية"
-    },
-    "theme": {
-      "light": "التبديل إلى الوضع الفاتح",
-      "dark": "التبديل إلى الوضع الداكن",
-      "lightShort": "فاتح",
-      "darkShort": "داكن"
-    }
-  },
   "sections": {
     "language": "اللغة",
     "visualEffects": "تأثيرات بصرية",
@@ -105,8 +60,7 @@ window.LANG_AR = {
     "fadWarningDesc": "غير مدعوم أثناء استخدام إضافة Full Screen.",
     "fadWarningTip": "يرجى تغيير طريقة الترتيب من إعدادات Full Screen نفسها.",
     "desktopOverlay": "تراكب سطح المكتب",
-    "desktopOverlaySubtitle": "عرض الكلمات كتراكب (Overlay) على سطح المكتب",
-    "motion": "الحركة"
+    "desktopOverlaySubtitle": "عرض الكلمات كتراكب (Overlay) على سطح المكتب"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_AR = {
       "label": "اللغة",
       "desc": "اختر لغة الإضافة"
     },
-    "translationTargetLanguage": {
-      "label": "لغة الترجمة المستهدفة",
-      "desc": "اختر اللغة المستخدمة في الترجمة التلقائية",
-      "options": {
-        "auto": "تلقائي"
-      }
-    },
     "alignment": {
       "label": "المحاذاة",
       "desc": "اختر مكان محاذاة نص الكلمات",
@@ -156,10 +103,6 @@ window.LANG_AR = {
     "albumBgBlur": {
       "label": "تمويه خلفية الألبوم",
       "desc": "ضبط شدة تمويه خلفية الألبوم"
-    },
-    "reduceMotion": {
-      "label": "تقليل الحركة",
-      "desc": "يقلل من رسوم الواجهة المتحركة."
     },
     "blurGradientBackground": {
       "label": "خلفية تدرج مموهة",
@@ -471,8 +414,7 @@ window.LANG_AR = {
     "openSettings": "فتح الإعدادات",
     "translationSettings": "إعدادات التحويل",
     "regenerateTranslation": "إعادة إنشاء الترجمة",
-    "fullscreen": "ملء الشاشة",
-    "exitFullscreen": "الخروج من ملء الشاشة"
+    "fullscreen": "ملء الشاشة"
   },
   "messages": {
     "noLyrics": "لا توجد كلمات متاحة",
@@ -1497,8 +1439,6 @@ window.LANG_AR = {
     "applyShort": "تطبيق",
     "applied": "تم تطبيق الفيديو",
     "videoTitle": "عنوان الفيديو",
-    "edit": "تعديل",
-    "updateAction": "تحديث",
     "loadingTitle": "جارٍ جلب العنوان...",
     "startTimeLabel": "وقت بدء أول كلمة (ثواني)",
     "startTimeHint": "أدخل الوقت الذي تبدأ فيه أول كلمة في فيديو YouTube",
@@ -1521,6 +1461,7 @@ window.LANG_AR = {
       "gradient": "تدرج",
       "minimal": "بسيط (Minimal)",
       "glass": "زجاجي",
+      "story": "قصة (Story)"
     },
     "advancedSettings": "إعدادات متقدمة",
     "sections": {

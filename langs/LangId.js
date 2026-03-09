@@ -26,51 +26,6 @@ window.LANG_ID = {
     "clear": "Hapus",
     "inSection": "Di {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Inti",
-      "display": "Tampilan",
-      "text": "Lapisan Teks",
-      "playback": "Pemutaran & Sinkronisasi",
-      "surfaces": "Layar",
-      "providers": "Penyedia",
-      "fullscreen": "Layar Penuh",
-      "panel": "Lirik Panel",
-      "system": "Sistem"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Inti",
-        "typography": "Teks",
-        "behavior": "Alur",
-        "surface": "Tampilan",
-        "providers": "Sumber",
-        "system": "Sistem"
-      },
-      "generalDesc": "Bahasa, overlay desktop, dan pengaturan inti.",
-      "appearanceDesc": "Latar belakang, tipografi, animasi, dan komposisi layar.",
-      "lyricsDesc": "Sinkronisasi, terjemahan, karaoke, dan pemrosesan lirik.",
-      "fullscreenDesc": "Tata letak pemutaran layar penuh dan elemen yang ditampilkan.",
-      "nowplayingDesc": "Tata letak, ukuran, dan latar lirik panel.",
-      "lyricsProvidersDesc": "Prioritas sumber, token, dan kontrol penyedia lirik.",
-      "aiProvidersDesc": "Konfigurasi penyedia AI untuk terjemahan dan pemrosesan.",
-      "advancedDesc": "Deteksi, cache, aplikasi pendukung, dan kontrol lanjutan.",
-      "debugDesc": "Diagnostik, utilitas pemulihan, dan pemecahan masalah.",
-      "aboutDesc": "Detail versi, pemeriksaan pembaruan, kredit, dan catatan rilis."
-    },
-    "background": {
-      "none": "Minimal",
-      "noneDesc": "Menjaga area lirik tetap bersih tanpa efek latar tambahan.",
-      "layout": "Tata letak & gerakan",
-      "finetune": "Detail latar belakang"
-    },
-    "theme": {
-      "light": "Beralih ke mode terang",
-      "dark": "Beralih ke mode gelap",
-      "lightShort": "Terang",
-      "darkShort": "Gelap"
-    }
-  },
   "sections": {
     "language": "Bahasa",
     "visualEffects": "Efek Visual",
@@ -105,8 +60,7 @@ window.LANG_ID = {
     "fadWarningDesc": "Tidak didukung saat menggunakan ekstensi Full Screen.",
     "fadWarningTip": "Silakan ubah pengaturan tampilan pada ekstensi Full Screen itu sendiri.",
     "desktopOverlay": "Overlay Desktop",
-    "desktopOverlaySubtitle": "Tampilkan lirik sebagai overlay di desktop",
-    "motion": "Gerakan"
+    "desktopOverlaySubtitle": "Tampilkan lirik sebagai overlay di desktop"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_ID = {
       "label": "Bahasa",
       "desc": "Pilih bahasa ekstensi"
     },
-    "translationTargetLanguage": {
-      "label": "Bahasa target terjemahan",
-      "desc": "Pilih bahasa yang digunakan untuk terjemahan otomatis",
-      "options": {
-        "auto": "Otomatis"
-      }
-    },
     "alignment": {
       "label": "Perataan",
       "desc": "Pilih posisi perataan teks lirik",
@@ -156,10 +103,6 @@ window.LANG_ID = {
     "albumBgBlur": {
       "label": "Blur Latar Belakang Album",
       "desc": "Atur intensitas blur pada latar belakang album"
-    },
-    "reduceMotion": {
-      "label": "Kurangi Animasi",
-      "desc": "Mengurangi animasi antarmuka."
     },
     "blurGradientBackground": {
       "label": "Latar Belakang Gradasi Blur",
@@ -471,8 +414,7 @@ window.LANG_ID = {
     "openSettings": "Buka Pengaturan",
     "translationSettings": "Pengaturan Konversi",
     "regenerateTranslation": "Buat Ulang Terjemahan",
-    "fullscreen": "Layar Penuh",
-    "exitFullscreen": "Keluar dari layar penuh"
+    "fullscreen": "Layar Penuh"
   },
   "messages": {
     "noLyrics": "Lirik tidak tersedia",
@@ -1497,8 +1439,6 @@ window.LANG_ID = {
     "applyShort": "Terapkan",
     "applied": "Video diterapkan",
     "videoTitle": "Judul Video",
-    "edit": "Edit",
-    "updateAction": "Perbarui",
     "loadingTitle": "Mengambil judul...",
     "startTimeLabel": "Waktu Mulai Lirik Pertama (detik)",
     "startTimeHint": "Masukkan waktu di mana lirik pertama dimulai dalam video YouTube",
@@ -1521,6 +1461,7 @@ window.LANG_ID = {
       "gradient": "Gradien",
       "minimal": "Minimal",
       "glass": "Glass",
+      "story": "Story"
     },
     "advancedSettings": "Pengaturan Lanjutan",
     "sections": {

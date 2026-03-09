@@ -26,51 +26,6 @@ window.LANG_FA = {
     "clear": "پاک کردن",
     "inSection": "در {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "اصلی",
-      "display": "نمایش",
-      "text": "لایه‌های متن",
-      "playback": "پخش و همگام‌سازی",
-      "surfaces": "صفحه‌ها",
-      "providers": "ارائه‌دهنده‌ها",
-      "fullscreen": "تمام‌صفحه",
-      "panel": "متن پنل",
-      "system": "سیستم"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "اصلی",
-        "typography": "متن",
-        "behavior": "جریان",
-        "surface": "نما",
-        "providers": "منبع",
-        "system": "سیستم"
-      },
-      "generalDesc": "زبان، پوشش دسکتاپ و تنظیمات اصلی.",
-      "appearanceDesc": "پس‌زمینه‌ها، تایپوگرافی، حرکت و چیدمان صفحه.",
-      "lyricsDesc": "همگام‌سازی، ترجمه، کارائوکه و پردازش متن ترانه.",
-      "fullscreenDesc": "چیدمان پخش تمام‌صفحه و عناصر نمایشی.",
-      "nowplayingDesc": "چیدمان، اندازه و پس‌زمینهٔ متن پنل.",
-      "lyricsProvidersDesc": "اولویت منابع، توکن‌ها و کنترل ارائه‌دهندگان متن ترانه.",
-      "aiProvidersDesc": "پیکربندی ارائه‌دهندگان هوش مصنوعی برای ترجمه و پردازش.",
-      "advancedDesc": "شناسایی، کش، برنامه‌های کمکی و کنترل‌های پیشرفته.",
-      "debugDesc": "ابزارهای عیب‌یابی، بازیابی و رفع مشکل.",
-      "aboutDesc": "جزئیات نسخه، بررسی به‌روزرسانی، قدردانی و یادداشت‌های انتشار."
-    },
-    "background": {
-      "none": "مینیمال",
-      "noneDesc": "بدون افکت پس‌زمینهٔ اضافی، سطح ترانه را تمیز نگه می‌دارد.",
-      "layout": "چیدمان و حرکت",
-      "finetune": "جزئیات پس‌زمینه"
-    },
-    "theme": {
-      "light": "تغییر به حالت روشن",
-      "dark": "تغییر به حالت تیره",
-      "lightShort": "روشن",
-      "darkShort": "تیره"
-    }
-  },
   "sections": {
     "language": "زبان",
     "visualEffects": "جلوه‌های بصری",
@@ -105,8 +60,7 @@ window.LANG_FA = {
     "fadWarningDesc": "هنگام استفاده از افزونه Full Screen پشتیبانی نمی‌شود.",
     "fadWarningTip": "لطفاً روش مرتب‌سازی را در تنظیمات خود افزونه Full Screen تغییر دهید.",
     "desktopOverlay": "پوشش دسکتاپ (Overlay)",
-    "desktopOverlaySubtitle": "نمایش متن آهنگ به صورت لایه روی دسکتاپ",
-    "motion": "حرکت"
+    "desktopOverlaySubtitle": "نمایش متن آهنگ به صورت لایه روی دسکتاپ"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_FA = {
       "label": "زبان",
       "desc": "زبان افزونه را انتخاب کنید"
     },
-    "translationTargetLanguage": {
-      "label": "زبان مقصد ترجمه",
-      "desc": "زبان مورد استفاده برای ترجمهٔ خودکار را انتخاب کنید",
-      "options": {
-        "auto": "خودکار"
-      }
-    },
     "alignment": {
       "label": "تراز بندی",
       "desc": "موقعیت تراز متن آهنگ را انتخاب کنید",
@@ -156,10 +103,6 @@ window.LANG_FA = {
     "albumBgBlur": {
       "label": "تاری پس‌زمینه آلبوم",
       "desc": "تنظیم شدت تاری پس‌زمینه آلبوم"
-    },
-    "reduceMotion": {
-      "label": "کاهش حرکت",
-      "desc": "انیمیشن‌های رابط را کمتر می‌کند."
     },
     "blurGradientBackground": {
       "label": "پس‌زمینه گرادیان تار",
@@ -471,8 +414,7 @@ window.LANG_FA = {
     "openSettings": "باز کردن تنظیمات",
     "translationSettings": "تنظیمات تبدیل",
     "regenerateTranslation": "تولید مجدد ترجمه",
-    "fullscreen": "تمام صفحه",
-    "exitFullscreen": "خروج از تمام‌صفحه"
+    "fullscreen": "تمام صفحه"
   },
   "messages": {
     "noLyrics": "متن آهنگی موجود نیست",
@@ -1497,8 +1439,6 @@ window.LANG_FA = {
     "applyShort": "اعمال",
     "applied": "ویدیو اعمال شد",
     "videoTitle": "عنوان ویدیو",
-    "edit": "ویرایش",
-    "updateAction": "بروزرسانی",
     "loadingTitle": "در حال دریافت عنوان...",
     "startTimeLabel": "زمان شروع اولین خط متن (ثانیه)",
     "startTimeHint": "زمانی که اولین خط متن در ویدیوی YouTube شروع می‌شود را وارد کنید",
@@ -1521,6 +1461,7 @@ window.LANG_FA = {
       "gradient": "گرادیان",
       "minimal": "مینیمال",
       "glass": "شیشه‌ای",
+      "story": "استوری"
     },
     "advancedSettings": "تنظیمات پیشرفته",
     "sections": {

@@ -26,51 +26,6 @@ window.LANG_BN = {
     "clear": "মুছুন",
     "inSection": "{section}-এ"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "মূল",
-      "display": "প্রদর্শন",
-      "text": "টেক্সট স্তর",
-      "playback": "প্লেব্যাক ও সিঙ্ক",
-      "surfaces": "স্ক্রিন",
-      "providers": "প্রদানকারী",
-      "fullscreen": "ফুলস্ক্রিন",
-      "panel": "প্যানেল গীত",
-      "system": "সিস্টেম"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "মূল",
-        "typography": "টেক্সট",
-        "behavior": "প্রবাহ",
-        "surface": "দৃশ্য",
-        "providers": "উৎস",
-        "system": "সিস্টেম"
-      },
-      "generalDesc": "ভাষা, ডেস্কটপ ওভারলে এবং মূল ডিফল্ট সেটিংস।",
-      "appearanceDesc": "পটভূমি, টাইপোগ্রাফি, অ্যানিমেশন এবং স্ক্রিন বিন্যাস।",
-      "lyricsDesc": "সিঙ্ক, অনুবাদ, কারাওকে এবং গীত প্রক্রিয়াকরণ।",
-      "fullscreenDesc": "ফুলস্ক্রিন প্লেব্যাক লেআউট এবং প্রদর্শিত উপাদান।",
-      "nowplayingDesc": "প্যানেল গীতের বিন্যাস, আকার এবং পটভূমি।",
-      "lyricsProvidersDesc": "গীত উৎসের অগ্রাধিকার, টোকেন এবং প্রদানকারী নিয়ন্ত্রণ।",
-      "aiProvidersDesc": "অনুবাদ ও প্রক্রিয়াকরণের জন্য AI প্রদানকারীর কনফিগারেশন।",
-      "advancedDesc": "সনাক্তকরণ, ক্যাশ, সহায়ক অ্যাপ এবং উন্নত নিয়ন্ত্রণ।",
-      "debugDesc": "ডায়াগনস্টিক, পুনরুদ্ধার টুল এবং সমস্যা সমাধান।",
-      "aboutDesc": "সংস্করণ তথ্য, আপডেট পরীক্ষা, কৃতজ্ঞতা এবং প্যাচ নোট।"
-    },
-    "background": {
-      "none": "মিনিমাল",
-      "noneDesc": "অতিরিক্ত পটভূমি প্রভাব ছাড়া গীতের পৃষ্ঠ পরিষ্কার রাখে।",
-      "layout": "লেআউট ও মোশন",
-      "finetune": "পটভূমির বিবরণ"
-    },
-    "theme": {
-      "light": "লাইট মোডে পরিবর্তন করুন",
-      "dark": "ডার্ক মোডে পরিবর্তন করুন",
-      "lightShort": "লাইট",
-      "darkShort": "ডার্ক"
-    }
-  },
   "sections": {
     "language": "ভাষা",
     "visualEffects": "ভিজ্যুয়াল এফেক্ট",
@@ -105,8 +60,7 @@ window.LANG_BN = {
     "fadWarningDesc": "Full Screen এক্সটেনশন ব্যবহার করার সময় এটি সমর্থিত নয়।",
     "fadWarningTip": "Full Screen এর নিজস্ব সেটিংসে বিন্যাস পরিবর্তন করুন।",
     "desktopOverlay": "ডেস্কটপ ওভারলে",
-    "desktopOverlaySubtitle": "ডেস্কটপে ওভারলে হিসেবে লিরিক্স প্রদর্শন করুন",
-    "motion": "মোশন"
+    "desktopOverlaySubtitle": "ডেস্কটপে ওভারলে হিসেবে লিরিক্স প্রদর্শন করুন"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_BN = {
       "label": "ভাষা",
       "desc": "এক্সটেনশনের ভাষা নির্বাচন করুন"
     },
-    "translationTargetLanguage": {
-      "label": "অনুবাদের লক্ষ্য ভাষা",
-      "desc": "স্বয়ংক্রিয় অনুবাদের জন্য ব্যবহৃত ভাষা নির্বাচন করুন",
-      "options": {
-        "auto": "স্বয়ংক্রিয়"
-      }
-    },
     "alignment": {
       "label": "বিন্যাস পদ্ধতি",
       "desc": "লিরিক্স টেক্সটের অবস্থান নির্বাচন করুন",
@@ -156,10 +103,6 @@ window.LANG_BN = {
     "albumBgBlur": {
       "label": "অ্যালবাম ব্যাকগ্রাউন্ড ব্লার",
       "desc": "অ্যালবাম ব্যাকগ্রাউন্ডের ব্লার বা অস্পষ্টতার মাত্রা নিয়ন্ত্রণ করুন"
-    },
-    "reduceMotion": {
-      "label": "মোশন কমান",
-      "desc": "ইন্টারফেসের অ্যানিমেশন কমায়।"
     },
     "blurGradientBackground": {
       "label": "ব্লার গ্রেডিয়েন্ট ব্যাকগ্রাউন্ড",
@@ -471,8 +414,7 @@ window.LANG_BN = {
     "openSettings": "সেটিংস খুলুন",
     "translationSettings": "রূপান্তর সেটিংস",
     "regenerateTranslation": "অনুবাদ পুনরায় তৈরি করুন",
-    "fullscreen": "ফুলস্ক্রিন",
-    "exitFullscreen": "ফুলস্ক্রিন থেকে বের হন"
+    "fullscreen": "ফুলস্ক্রিন"
   },
   "messages": {
     "noLyrics": "কোনো লিরিক্স পাওয়া যায়নি",
@@ -1497,8 +1439,6 @@ window.LANG_BN = {
     "applyShort": "প্রয়োগ",
     "applied": "ভিডিও প্রয়োগ করা হয়েছে",
     "videoTitle": "ভিডিও শিরোনাম",
-    "edit": "সম্পাদনা",
-    "updateAction": "আপডেট",
     "loadingTitle": "শিরোনাম আনা হচ্ছে...",
     "startTimeLabel": "প্রথম লিরিক্স শুরুর সময় (সেকেন্ড)",
     "startTimeHint": "YouTube ভিডিওতে প্রথম লিরিক্স যে সময়ে শুরু হয় তা লিখুন",
@@ -1521,6 +1461,7 @@ window.LANG_BN = {
       "gradient": "গ্রেডিয়েন্ট",
       "minimal": "মিনিমাল",
       "glass": "গ্লাস",
+      "story": "স্টোরি"
     },
     "advancedSettings": "বিস্তারিত সেটিংস",
     "sections": {

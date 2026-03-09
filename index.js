@@ -1213,10 +1213,6 @@ const CONFIG = {
     ),
     "album-bg-blur":
       StorageManager.getItem("ivLyrics:visual:album-bg-blur") || "20",
-    "reduce-motion": StorageManager.get(
-      "ivLyrics:visual:reduce-motion",
-      false
-    ),
 
     "blur-gradient-background": StorageManager.get(
       "ivLyrics:visual:blur-gradient-background",
@@ -1339,7 +1335,7 @@ const CONFIG = {
     "translate:translated-lyrics-source":
       StorageManager.getItem(
         "ivLyrics:visual:translate:translated-lyrics-source"
-      ) || "auto",
+      ) || "geminiKo",
     "translate:display-mode":
       StorageManager.getItem("ivLyrics:visual:translate:display-mode") ||
       "replace",
@@ -1730,6 +1726,8 @@ const emptyState = {
   synced: null,
   unsynced: null,
   currentLyrics: null,
+  selectedSource: null,
+  providerDisplayName: null,
 };
 
 // Enhanced cache system with memory-efficient LRU and automatic cleanup
@@ -2167,7 +2165,8 @@ const Prefetcher = {
       // ignore
     }
 
-    const modeKey = friendlyLanguage || "gemini";
+    const provider = CONFIG.visual["translate:translated-lyrics-source"];
+    const modeKey = provider === "geminiKo" && !friendlyLanguage ? "gemini" : friendlyLanguage;
     const displayMode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const displayMode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
 
@@ -2522,6 +2521,8 @@ class LyricsContainer extends react.Component {
       tw: null,
       uri: "",
       provider: "",
+      selectedSource: null,
+      providerDisplayName: null,
       contributors: null,
       colors: {
         background: "",
@@ -2537,7 +2538,6 @@ class LyricsContainer extends react.Component {
       versionIndex2: 0,
       isFullscreen: false,
       isFloatingMenuOpen: false,
-      isFloatingMenuClosing: false,
       isFADMode: false,
       isCached: false,
       language: null,
@@ -2575,7 +2575,6 @@ class LyricsContainer extends react.Component {
     this.translationLoadingTimer = null;
     this.streamingApplyTimer = null;
     this.pendingStreamingPayload = null;
-    this.floatingMenuCloseTimer = null;
 
     // Portrait viewport detection
     this._isPortraitViewport = typeof window !== "undefined" && typeof window.matchMedia === "function"
@@ -2626,53 +2625,16 @@ class LyricsContainer extends react.Component {
     this.regenerateTranslation = this.regenerateTranslation.bind(this);
   }
 
-  shouldReduceMotion() {
-    return CONFIG.visual["reduce-motion"] === true;
-  }
-
-  getMotionDurationMs() {
-    return this.shouldReduceMotion() ? 24 : 280;
-  }
-
-  clearFloatingMenuCloseTimer() {
-    if (this.floatingMenuCloseTimer) {
-      clearTimeout(this.floatingMenuCloseTimer);
-      this.floatingMenuCloseTimer = null;
+  ensureDisplayModeResultEntry(trackUri) {
+    if (!trackUri) return null;
+    if (!this._dmResults || typeof this._dmResults !== "object") {
+      this._dmResults = {};
     }
-  }
-
-  openFloatingMenu() {
-    this.clearFloatingMenuCloseTimer();
-    this.setState({
-      isFloatingMenuOpen: true,
-      isFloatingMenuClosing: false,
-    });
-  }
-
-  closeFloatingMenu() {
-    if (!this.state.isFloatingMenuOpen && !this.state.isFloatingMenuClosing) {
-      return;
-    }
-
-    this.clearFloatingMenuCloseTimer();
-    this.setState({
-      isFloatingMenuOpen: false,
-      isFloatingMenuClosing: true,
-    });
-
-    this.floatingMenuCloseTimer = setTimeout(() => {
-      this.setState({ isFloatingMenuClosing: false });
-      this.floatingMenuCloseTimer = null;
-    }, this.getMotionDurationMs());
-  }
-
-  toggleFloatingMenu() {
-    if (this.state.isFloatingMenuOpen) {
-      this.closeFloatingMenu();
-      return;
-    }
-
-    this.openFloatingMenu();
+    this._dmResults[trackUri] = this._dmResults[trackUri] || {
+      mode1: null,
+      mode2: null,
+    };
+    return this._dmResults[trackUri];
   }
 
   /**
@@ -2862,7 +2824,10 @@ class LyricsContainer extends react.Component {
       new Intl.DisplayNames(["en"], { type: "language" })
         .of(originalLanguage.split("-")[0])
         ?.toLowerCase();
-    const modeKey = friendlyLanguage || "gemini";
+    const modeKey =
+      provider === "geminiKo" && !friendlyLanguage
+        ? "gemini"
+        : friendlyLanguage;
     const mode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const mode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
 
@@ -2932,17 +2897,14 @@ class LyricsContainer extends react.Component {
 
       const currentUri = lyricsState.uri;
       const currentProvider = lyricsState.provider || "";
-
-      if (!this._dmResults) {
-        this._dmResults = {};
-      }
-      if (!this._dmResults[currentUri]) {
-        this._dmResults[currentUri] = {};
+      const dmEntry = this.ensureDisplayModeResultEntry(currentUri);
+      if (!dmEntry) {
+        throw new Error("display_mode_result_unavailable");
       }
 
-      this._dmResults[currentUri].lastMode1 = mode1;
-      this._dmResults[currentUri].lastMode2 = mode2;
-      this._dmResults[currentUri].lastProvider = currentProvider;
+      dmEntry.lastMode1 = mode1;
+      dmEntry.lastMode2 = mode2;
+      dmEntry.lastProvider = currentProvider;
 
       const originalNonSectionIndices = [];
       originalLyrics.forEach((line, i) => {
@@ -3039,9 +3001,11 @@ class LyricsContainer extends react.Component {
         if (this.state.uri !== currentUri) {
           return;
         }
+        const currentEntry = this.ensureDisplayModeResultEntry(currentUri);
+        if (!currentEntry) return;
 
-        this._dmResults[currentUri].mode1 = streamedLyrics1;
-        this._dmResults[currentUri].mode2 = streamedLyrics2;
+        currentEntry.mode1 = streamedLyrics1;
+        currentEntry.mode2 = streamedLyrics2;
 
         this.applyStreamingTranslation({
           uri: currentUri,
@@ -3236,13 +3200,17 @@ class LyricsContainer extends react.Component {
 
       // _dmResults에 번역 결과 저장
       // mode1과 mode2 결과 저장
-      this._dmResults[currentUri].mode1 = translatedLyrics1;
-      this._dmResults[currentUri].mode2 = translatedLyrics2;
-      this._dmResults[currentUri].lastMode1 = mode1;
-      this._dmResults[currentUri].lastMode2 = mode2;
+      const finalEntry = this.ensureDisplayModeResultEntry(currentUri);
+      if (!finalEntry) {
+        throw new Error("display_mode_result_unavailable");
+      }
+      finalEntry.mode1 = translatedLyrics1;
+      finalEntry.mode2 = translatedLyrics2;
+      finalEntry.lastMode1 = mode1;
+      finalEntry.lastMode2 = mode2;
 
       // CacheManager에도 새 결과 저장 (getGeminiTranslation에서 캐시 히트하도록)
-      this._dmResults[currentUri].lastProvider = currentProvider;
+      finalEntry.lastProvider = currentProvider;
       if (translatedLyrics1 && mode1) {
         CacheManager.set(`${currentUri}:${currentProvider}:${mode1}`, translatedLyrics1);
       }
@@ -3445,9 +3413,9 @@ class LyricsContainer extends react.Component {
       // if lyrics are cached
       if (
         (mode === -1 && CACHE[info.uri]) ||
-        CACHE[info.uri]?.[CONFIG.modes?.[mode]]
+        CACHE[info.uri]?.[['karaoke', 'synced', 'unsynced'][mode]]
       ) {
-        tempState = { provider: "", contributors: null, ...CACHE[info.uri], isCached };
+        tempState = { provider: "", selectedSource: null, providerDisplayName: null, contributors: null, ...CACHE[info.uri], isCached };
         const cachedMode = CACHE[info.uri]?.mode;
         if (typeof cachedMode === "number" && cachedMode !== -1) {
           tempState = { ...tempState, mode: cachedMode };
@@ -3478,7 +3446,7 @@ class LyricsContainer extends react.Component {
         // In case user skips tracks too fast and multiple callbacks
         // set wrong lyrics to current track.
         if (resp.uri === this.currentTrackUri) {
-          tempState = { provider: "", contributors: null, ...resp, isLoading: false, isCached };
+          tempState = { provider: "", selectedSource: null, providerDisplayName: null, contributors: null, ...resp, isLoading: false, isCached };
         } else {
           return;
         }
@@ -3539,8 +3507,6 @@ class LyricsContainer extends react.Component {
         }
       }
 
-      const initialLyricsForMode = this.resolveLyricsForMode(tempState, finalMode);
-
       // if song changed one time
       if (tempState.uri !== this.state.uri || refresh) {
         // Detect language from the new lyrics data
@@ -3565,7 +3531,6 @@ class LyricsContainer extends react.Component {
           ...tempState,
           language: defaultLanguage,
           ...this.applyTranslationStates(tempState),
-          currentLyrics: initialLyricsForMode || [],
         });
         return;
       }
@@ -3574,7 +3539,6 @@ class LyricsContainer extends react.Component {
       this.setState({
         ...tempState,
         ...this.applyTranslationStates(tempState),
-        currentLyrics: initialLyricsForMode || [],
       });
     } catch (error) {
       this.setState({
@@ -3585,39 +3549,29 @@ class LyricsContainer extends react.Component {
     }
   }
 
-  resolveLyricsForMode(lyricsState, mode) {
-    if (!lyricsState) return null;
-
-    const preferredModeKey =
-      typeof mode === "number" && mode >= 0 ? CONFIG.modes?.[mode] : null;
-    const preferredLyrics =
-      preferredModeKey && lyricsState[preferredModeKey]
-        ? lyricsState[preferredModeKey]
-        : null;
-
-    return (
-      preferredLyrics ||
-      lyricsState.karaoke ||
-      lyricsState.synced ||
-      lyricsState.unsynced ||
-      null
-    );
-  }
-
   lyricsSource(lyricsState, mode) {
     if (!lyricsState) return;
 
-    const lyrics = this.resolveLyricsForMode(lyricsState, mode);
+    const MODE_KEYS = ['karaoke', 'synced', 'unsynced'];
+    let lyrics = lyricsState[MODE_KEYS[mode]];
+    // Fallback: if the preferred mode has no lyrics, use any available lyrics
     if (!lyrics) {
-      this.setState({ currentLyrics: [] });
-      // 오버레이에 가사 없음 상태 전송 (트랙 정보 업데이트용)
-      window.dispatchEvent(new CustomEvent('ivLyrics:lyrics-ready', {
-        detail: {
-          trackInfo: { uri: lyricsState.uri, title: this.state.title, artist: this.state.artist },
-          lyrics: []
-        }
-      }));
-      return;
+      lyrics =
+        lyricsState.karaoke ||
+        lyricsState.synced ||
+        lyricsState.unsynced ||
+        null;
+      if (!lyrics) {
+        this.setState({ currentLyrics: [] });
+        // 오버레이에 가사 없음 상태 전송 (트랙 정보 업데이트용)
+        window.dispatchEvent(new CustomEvent('ivLyrics:lyrics-ready', {
+          detail: {
+            trackInfo: { uri: lyricsState.uri, title: this.state.title, artist: this.state.artist },
+            lyrics: []
+          }
+        }));
+        return;
+      }
     }
 
     // Clean up any existing progress flags from previous songs
@@ -3655,7 +3609,11 @@ class LyricsContainer extends react.Component {
     }
 
     // For Gemini mode, use generic keys if no specific language detected
-    const modeKey = friendlyLanguage || "gemini";
+    const provider = CONFIG.visual["translate:translated-lyrics-source"];
+    const modeKey =
+      provider === "geminiKo" && !friendlyLanguage
+        ? "gemini"
+        : friendlyLanguage;
 
     const displayMode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const displayMode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
@@ -3757,8 +3715,9 @@ class LyricsContainer extends react.Component {
     // Progressive loading: keep results per track so Mode 1 does not disappear when Mode 2 finishes
     // Check if display modes or provider changed - if so, clear cached results
     const currentProvider = lyricsState.provider || '';
-    if (this._dmResults[currentUri]) {
-      const cached = this._dmResults[currentUri];
+    const dmEntry = this.ensureDisplayModeResultEntry(currentUri);
+    if (dmEntry) {
+      const cached = dmEntry;
       // If provider changed, invalidate all cache for this track
       if (cached.lastProvider !== currentProvider) {
         ivLyricsDebug(`[processLyricsWithDisplayModes] Provider changed from ${cached.lastProvider} to ${currentProvider}, invalidating cache`);
@@ -3774,16 +3733,14 @@ class LyricsContainer extends react.Component {
       }
     }
 
-    this._dmResults[currentUri] = this._dmResults[currentUri] || {
-      mode1: null,
-      mode2: null,
-    };
-    this._dmResults[currentUri].lastMode1 = displayMode1;
-    this._dmResults[currentUri].lastMode2 = displayMode2;
-    this._dmResults[currentUri].lastProvider = currentProvider;
+    const currentEntry = this.ensureDisplayModeResultEntry(currentUri);
+    if (!currentEntry) return;
+    currentEntry.lastMode1 = displayMode1;
+    currentEntry.lastMode2 = displayMode2;
+    currentEntry.lastProvider = currentProvider;
 
-    let lyricsMode1 = this._dmResults[currentUri].mode1;
-    let lyricsMode2 = this._dmResults[currentUri].mode2;
+    let lyricsMode1 = currentEntry.mode1;
+    let lyricsMode2 = currentEntry.mode2;
 
     const updateCombinedLyrics = () => {
       // Guard clause to prevent race conditions from previous songs
@@ -3848,7 +3805,9 @@ class LyricsContainer extends react.Component {
         : processMode(displayMode1, lyrics, (partialLyrics) => {
           if (this.state.uri !== uri || !partialLyrics) return;
           lyricsMode1 = partialLyrics;
-          this._dmResults[currentUri].mode1 = partialLyrics;
+          const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+          if (!nextEntry) return;
+          nextEntry.mode1 = partialLyrics;
           this.applyStreamingTranslation({
             uri,
             lyrics,
@@ -3863,7 +3822,9 @@ class LyricsContainer extends react.Component {
         : processMode(displayMode2, lyrics, (partialLyrics) => {
           if (this.state.uri !== uri || !partialLyrics) return;
           lyricsMode2 = partialLyrics;
-          this._dmResults[currentUri].mode2 = partialLyrics;
+          const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+          if (!nextEntry) return;
+          nextEntry.mode2 = partialLyrics;
           this.applyStreamingTranslation({
             uri,
             lyrics,
@@ -3883,7 +3844,9 @@ class LyricsContainer extends react.Component {
           }
           if (result) {
             lyricsMode1 = result;
-            this._dmResults[currentUri].mode1 = result;
+            const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+            if (!nextEntry) return;
+            nextEntry.mode1 = result;
             updateCombinedLyrics(); // 첫 번째 결과가 나오면 즉시 표시
           }
         })
@@ -3900,7 +3863,9 @@ class LyricsContainer extends react.Component {
           }
           if (result) {
             lyricsMode2 = result;
-            this._dmResults[currentUri].mode2 = result;
+            const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+            if (!nextEntry) return;
+            nextEntry.mode2 = result;
             updateCombinedLyrics(); // 두 번째 결과가 나오면 즉시 추가 표시
           }
         })
@@ -3912,7 +3877,7 @@ class LyricsContainer extends react.Component {
       // Mode1만 활성화: Mode1 완료 시 바로 업데이트
       // Mode2는 비활성화되었으므로 null로 설정
       lyricsMode2 = null;
-      this._dmResults[currentUri].mode2 = null;
+      this.ensureDisplayModeResultEntry(currentUri).mode2 = null;
 
       // 캐시된 결과가 있으면 바로 업데이트, 없으면 새로 요청
       if (lyricsMode1) {
@@ -3921,7 +3886,9 @@ class LyricsContainer extends react.Component {
         processMode(displayMode1, lyrics, (partialLyrics) => {
           if (this.state.uri !== uri || !partialLyrics) return;
           lyricsMode1 = partialLyrics;
-          this._dmResults[currentUri].mode1 = partialLyrics;
+          const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+          if (!nextEntry) return;
+          nextEntry.mode1 = partialLyrics;
           this.applyStreamingTranslation({
             uri,
             lyrics,
@@ -3933,7 +3900,9 @@ class LyricsContainer extends react.Component {
         })
           .then((result) => {
             lyricsMode1 = result;
-            this._dmResults[currentUri].mode1 = result;
+            const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+            if (!nextEntry) return;
+            nextEntry.mode1 = result;
             updateCombinedLyrics();
           })
           .catch((error) => {
@@ -3945,7 +3914,7 @@ class LyricsContainer extends react.Component {
       // Mode2만 활성화: Mode2 완료 시 바로 업데이트
       // Mode1은 비활성화되었으므로 null로 설정
       lyricsMode1 = null;
-      this._dmResults[currentUri].mode1 = null;
+      this.ensureDisplayModeResultEntry(currentUri).mode1 = null;
 
       // 캐시된 결과가 있으면 바로 업데이트, 없으면 새로 요청
       if (lyricsMode2) {
@@ -3954,7 +3923,9 @@ class LyricsContainer extends react.Component {
         processMode(displayMode2, lyrics, (partialLyrics) => {
           if (this.state.uri !== uri || !partialLyrics) return;
           lyricsMode2 = partialLyrics;
-          this._dmResults[currentUri].mode2 = partialLyrics;
+          const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+          if (!nextEntry) return;
+          nextEntry.mode2 = partialLyrics;
           this.applyStreamingTranslation({
             uri,
             lyrics,
@@ -3966,7 +3937,9 @@ class LyricsContainer extends react.Component {
         })
           .then((result) => {
             lyricsMode2 = result;
-            this._dmResults[currentUri].mode2 = result;
+            const nextEntry = this.ensureDisplayModeResultEntry(currentUri);
+            if (!nextEntry) return;
+            nextEntry.mode2 = result;
             updateCombinedLyrics();
           })
           .catch((error) => {
@@ -4438,6 +4411,24 @@ class LyricsContainer extends react.Component {
     if (this.trackLanguageOverride) {
       Utils.setDetectedLanguage(this.trackLanguageOverride);
       return this.trackLanguageOverride;
+    }
+
+    const provider = CONFIG.visual["translate:translated-lyrics-source"];
+
+    // For Gemini API, always detect language from lyrics (no override needed)
+    if (provider === "geminiKo") {
+      // If we have a cached language in state, use it
+      if (this.state.language) {
+        // Update Utils detected language for furigana check
+        Utils.setDetectedLanguage(this.state.language);
+        return this.state.language;
+      }
+
+      // Otherwise, detect language from lyrics
+      const detectedLanguage = Utils.detectLanguage(lyrics);
+      // Update Utils detected language for furigana check
+      Utils.setDetectedLanguage(detectedLanguage);
+      return detectedLanguage;
     }
 
     // For Kuromoji mode, use language override if set
@@ -5113,8 +5104,6 @@ class LyricsContainer extends react.Component {
       this.setState({
         isFullscreen: isEnabled,
         justEnteredFullscreen: isEnabled, // 전체화면 진입 시 true로 설정하여 축소 아이콘 대신 메뉴 아이콘 표시
-        isFloatingMenuOpen: isEnabled ? this.state.isFloatingMenuOpen : false,
-        isFloatingMenuClosing: false,
       });
     };
     this.mousetrap.reset();
@@ -5167,7 +5156,6 @@ class LyricsContainer extends react.Component {
       this._cleanupFloatingMenuOutsideClick();
       this._cleanupFloatingMenuOutsideClick = null;
     }
-    this.clearFloatingMenuCloseTimer();
 
     // Mouse idle timer cleanup
     if (this.mouseIdleTimer) {
@@ -5245,7 +5233,7 @@ class LyricsContainer extends react.Component {
 
     // Clean up progressive results
     if (this._dmResults) {
-      this._dmResults = null;
+      this._dmResults = {};
     }
 
     // Force garbage collection hint
@@ -5407,6 +5395,10 @@ class LyricsContainer extends react.Component {
         backgroundStyle.filter = `brightness(${brightness}) blur(${blurAmount}px)`;
         backgroundStyle.backgroundSize = "cover";
         backgroundStyle.backgroundPosition = "center";
+        // 블러 경계선 숨기기 - scale 대신 inset 사용하여 스크롤 방지
+        backgroundStyle.inset = "-5%";
+        backgroundStyle.width = "100%";
+        backgroundStyle.height = "100%";
       }
     } else if (!this.state.isFADMode && CONFIG.visual["blur-gradient-background"]) {
       const brightness = CONFIG.visual["background-brightness"] / 100;
@@ -5524,12 +5516,6 @@ class LyricsContainer extends react.Component {
       "--animation-tempo": this.state.tempo,
       "--lyrics-fullscreen-right-padding": `${CONFIG.visual["fullscreen-lyrics-right-padding"] || 40}px`,
       "--fullscreen-tmi-font-size": (CONFIG.visual["fullscreen-tmi-font-size"] || 100) / 100,
-      "--iv-motion-ease-standard": "cubic-bezier(0.22, 1, 0.36, 1)",
-      "--iv-motion-duration-fast": this.shouldReduceMotion() ? "1ms" : "180ms",
-      "--iv-motion-duration-medium": this.shouldReduceMotion() ? "1ms" : "280ms",
-      "--iv-motion-duration-slow": this.shouldReduceMotion() ? "1ms" : "420ms",
-      "--iv-motion-distance-sm": this.shouldReduceMotion() ? "0px" : "10px",
-      "--iv-motion-distance-md": this.shouldReduceMotion() ? "0px" : "18px",
     };
 
     let mode = this.getCurrentMode();
@@ -5545,7 +5531,11 @@ class LyricsContainer extends react.Component {
         ?.toLowerCase();
 
     // For Gemini mode, use generic keys if no specific language detected
-    const modeKey = friendlyLanguage || "gemini";
+    const provider = CONFIG.visual["translate:translated-lyrics-source"];
+    const modeKey =
+      provider === "geminiKo" && !friendlyLanguage
+        ? "gemini"
+        : friendlyLanguage;
 
     const displayMode1 = CONFIG.visual[`translation-mode:${modeKey}`];
     const displayMode2 = CONFIG.visual[`translation-mode-2:${modeKey}`];
@@ -5615,6 +5605,8 @@ class LyricsContainer extends react.Component {
         synced: this.state.synced,
         unsynced: this.state.unsynced,
         provider: this.state.provider,
+        selectedSource: this.state.selectedSource,
+        providerDisplayName: this.state.providerDisplayName,
         contributors: this.state.contributors,
         copyright: this.state.copyright,
         isLoading: this.state.isLoading,
@@ -5652,95 +5644,6 @@ class LyricsContainer extends react.Component {
     const isTwoColumn = CONFIG.visual["fullscreen-two-column"] !== false;
     const isLayoutReversed = CONFIG.visual["fullscreen-layout-reverse"] === true;
     const centerWhenNoLyrics = CONFIG.visual["fullscreen-center-when-no-lyrics"] !== false;
-    const shouldReduceMotion = this.shouldReduceMotion();
-    const shouldRenderFloatingMenu =
-      !this.state.isFullscreen ||
-      this.state.isFloatingMenuOpen ||
-      this.state.isFloatingMenuClosing;
-    const modeButtons = [
-      this.state.karaoke &&
-      CONFIG.visual["karaoke-mode-enabled"] &&
-      react.createElement(
-        Spicetify.ReactComponent.TooltipWrapper,
-        { key: "karaoke", label: I18n.t("modes.karaoke") },
-        react.createElement(
-          "button",
-          {
-            type: "button",
-            className: `lyrics-config-button lyrics-mode-button ${mode === KARAOKE ? "active" : ""}`,
-            onClick: () => this.switchTo(KARAOKE),
-            "aria-pressed": mode === KARAOKE,
-          },
-          react.createElement("svg", {
-            width: 18,
-            height: 18,
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: 2,
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            dangerouslySetInnerHTML: {
-              __html: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
-            },
-          })
-        )
-      ),
-      this.state.synced &&
-      react.createElement(
-        Spicetify.ReactComponent.TooltipWrapper,
-        { key: "synced", label: I18n.t("modes.synced") },
-        react.createElement(
-          "button",
-          {
-            type: "button",
-            className: `lyrics-config-button lyrics-mode-button ${mode === SYNCED ? "active" : ""}`,
-            onClick: () => this.switchTo(SYNCED),
-            "aria-pressed": mode === SYNCED,
-          },
-          react.createElement("svg", {
-            width: 18,
-            height: 18,
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: 2,
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            dangerouslySetInnerHTML: {
-              __html: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
-            },
-          })
-        )
-      ),
-      this.state.unsynced &&
-      react.createElement(
-        Spicetify.ReactComponent.TooltipWrapper,
-        { key: "unsynced", label: I18n.t("modes.unsynced") },
-        react.createElement(
-          "button",
-          {
-            type: "button",
-            className: `lyrics-config-button lyrics-mode-button ${mode === UNSYNCED ? "active" : ""}`,
-            onClick: () => this.switchTo(UNSYNCED),
-            "aria-pressed": mode === UNSYNCED,
-          },
-          react.createElement("svg", {
-            width: 18,
-            height: 18,
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: 2,
-            strokeLinecap: "round",
-            strokeLinejoin: "round",
-            dangerouslySetInnerHTML: {
-              __html: '<path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/>',
-            },
-          })
-        )
-      ),
-    ].filter(Boolean);
 
     // Build fullscreen class names
     let fullscreenClasses = "";
@@ -5774,7 +5677,7 @@ class LyricsContainer extends react.Component {
       "div",
       {
         className: `lyrics-lyricsContainer-LyricsContainer${CONFIG.visual["fade-blur"] ? " blur-enabled" : ""
-          }${CONFIG.visual["highlight-mode"] ? " highlight-mode-enabled" : ""}${fadLyricsContainer ? " fad-enabled" : ""}${fullscreenClasses}${shouldReduceMotion ? " motion-reduced" : ""}`,
+          }${CONFIG.visual["highlight-mode"] ? " highlight-mode-enabled" : ""}${fadLyricsContainer ? " fad-enabled" : ""}${fullscreenClasses}`,
         style: this.styleVariables,
         ref: (el) => {
           if (!el) return;
@@ -5881,10 +5784,9 @@ class LyricsContainer extends react.Component {
       react.createElement(
         "div",
         {
-          className: "lyrics-config-button-container lyrics-fluent-floating-toolbar" +
+          className: "lyrics-config-button-container" +
             (this.state.isFullscreen ? " fullscreen-mode-container" : "") +
-            (this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : "") +
-            (this.state.isFullscreen && this.state.isFloatingMenuClosing ? " menu-closing" : ""),
+            (this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : ""),
           ref: (el) => {
             if (this._cleanupFloatingMenuOutsideClick) {
               this._cleanupFloatingMenuOutsideClick();
@@ -5894,8 +5796,8 @@ class LyricsContainer extends react.Component {
             if (el && this.state.isFullscreen) {
               // 전체화면에서 바깥 클릭 시 메뉴 닫기
               const handleClickOutside = (e) => {
-                if (!el.contains(e.target) && (this.state.isFloatingMenuOpen || this.state.isFloatingMenuClosing)) {
-                  this.closeFloatingMenu();
+                if (!el.contains(e.target) && this.state.isFloatingMenuOpen) {
+                  this.setState({ isFloatingMenuOpen: false });
                 }
               };
               document.addEventListener('click', handleClickOutside);
@@ -5910,10 +5812,9 @@ class LyricsContainer extends react.Component {
           "button",
           {
             className: "lyrics-config-button lyrics-floating-menu-toggle",
-            type: "button",
             onClick: (e) => {
               e.stopPropagation();
-              this.toggleFloatingMenu();
+              this.setState({ isFloatingMenuOpen: !this.state.isFloatingMenuOpen });
             },
           },
           react.createElement("svg", {
@@ -5933,11 +5834,9 @@ class LyricsContainer extends react.Component {
           })
         ),
         // 메뉴 내용 (일반 모드: 항상 표시, 전체화면: 열렸을 때만 표시)
-        shouldRenderFloatingMenu && react.createElement(
-          "div",
-          {
-            className: `lyrics-floating-menu-content${this.state.isFullscreen && this.state.isFloatingMenuOpen ? " menu-open" : ""}${this.state.isFullscreen && this.state.isFloatingMenuClosing ? " menu-closing" : ""}`,
-          },
+        (!this.state.isFullscreen || this.state.isFloatingMenuOpen) && react.createElement(
+          react.Fragment,
+          null,
           showTranslationButton &&
           react.createElement(TranslationMenu, {
             friendlyLanguage,
@@ -5948,7 +5847,7 @@ class LyricsContainer extends react.Component {
             isEnabled: canRegenerateTranslation,
             isLoading: this.state.isTranslationLoading,
           }),
-          react.createElement(SyncAdjustButtonFluent, {
+          react.createElement(SyncAdjustButton, {
             trackUri: this.currentTrackUri,
             provider: this.state.provider, // Pass provider
             onOffsetChange: (offset) => {
@@ -5984,7 +5883,6 @@ class LyricsContainer extends react.Component {
               "button",
               {
                 className: `lyrics-config-button lyrics-marketplace-button${this.state.showMarketplace ? " active" : ""}`,
-                type: "button",
                 onClick: () => this.setState({ showMarketplace: !this.state.showMarketplace }),
               },
               react.createElement("svg", {
@@ -6013,10 +5911,9 @@ class LyricsContainer extends react.Component {
               "button",
               {
                 className: "lyrics-config-button lyrics-fullscreen-toggle-button",
-                type: "button",
                 onClick: () => {
                   if (this.state.isFullscreen) {
-                    this.closeFloatingMenu();
+                    this.setState({ isFloatingMenuOpen: false });
                   }
                   this.toggleFullscreen();
                 },
@@ -6038,18 +5935,79 @@ class LyricsContainer extends react.Component {
               })
             )
           ),
-          modeButtons.length > 0 &&
-          react.createElement(
-            "div",
-            { className: "lyrics-config-mode-section" },
-            react.createElement("div", { className: "lyrics-config-separator" }),
+          // 구분선
+          react.createElement("div", { className: "lyrics-config-separator" }),
+          // 모드 전환 버튼들
+          this.state.karaoke && CONFIG.visual["karaoke-mode-enabled"] && react.createElement(
+            Spicetify.ReactComponent.TooltipWrapper,
+            { label: I18n.t("modes.karaoke") },
             react.createElement(
-              "div",
+              "button",
               {
-                className: "lyrics-config-mode-group",
-                role: "group",
+                className: `lyrics-config-button lyrics-mode-button ${mode === KARAOKE ? "active" : ""}`,
+                onClick: () => this.switchTo(KARAOKE),
               },
-              ...modeButtons
+              react.createElement("svg", {
+                width: 18,
+                height: 18,
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: 2,
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                dangerouslySetInnerHTML: {
+                  __html: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
+                },
+              })
+            )
+          ),
+          this.state.synced && react.createElement(
+            Spicetify.ReactComponent.TooltipWrapper,
+            { label: I18n.t("modes.synced") },
+            react.createElement(
+              "button",
+              {
+                className: `lyrics-config-button lyrics-mode-button ${mode === SYNCED ? "active" : ""}`,
+                onClick: () => this.switchTo(SYNCED),
+              },
+              react.createElement("svg", {
+                width: 18,
+                height: 18,
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: 2,
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                dangerouslySetInnerHTML: {
+                  __html: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+                },
+              })
+            )
+          ),
+          this.state.unsynced && react.createElement(
+            Spicetify.ReactComponent.TooltipWrapper,
+            { label: I18n.t("modes.unsynced") },
+            react.createElement(
+              "button",
+              {
+                className: `lyrics-config-button lyrics-mode-button ${mode === UNSYNCED ? "active" : ""}`,
+                onClick: () => this.switchTo(UNSYNCED),
+              },
+              react.createElement("svg", {
+                width: 18,
+                height: 18,
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: 2,
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                dangerouslySetInnerHTML: {
+                  __html: '<path d="M17 6.1H3"/><path d="M21 12.1H3"/><path d="M15.1 18H3"/>',
+                },
+              })
             )
           ),
           react.createElement(SyncDataCreatorButton, {
@@ -6083,14 +6041,12 @@ class LyricsContainer extends react.Component {
   }
 
   switchTo(mode) {
-    this.lastProcessedMode = null;
-    this.setState((prevState) => ({
-      explicitMode: mode,
-      currentLyrics:
-        this.resolveLyricsForMode(prevState, mode) ||
-        prevState.currentLyrics ||
-        [],
-    }));
+    const currentTrack = Spicetify.Player?.data?.item;
+    this.setState({ explicitMode: mode }, () => {
+      if (currentTrack) {
+        this.fetchLyrics(currentTrack, mode);
+      }
+    });
   }
 
 }

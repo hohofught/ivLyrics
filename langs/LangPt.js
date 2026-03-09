@@ -26,51 +26,6 @@ window.LANG_PT = {
     "clear": "Limpar",
     "inSection": "Em {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Espaço de trabalho",
-      "display": "Exibição",
-      "text": "Camadas de texto",
-      "playback": "Reprodução e sincronização",
-      "surfaces": "Telas",
-      "providers": "Provedores",
-      "fullscreen": "Tela cheia",
-      "panel": "Letras do painel",
-      "system": "Sistema"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Base",
-        "typography": "Texto",
-        "behavior": "Fluxo",
-        "surface": "Visão",
-        "providers": "Fonte",
-        "system": "Sistema"
-      },
-      "generalDesc": "Idioma, sobreposição da área de trabalho e ajustes principais.",
-      "appearanceDesc": "Fundos, tipografia, animações e composição da tela.",
-      "lyricsDesc": "Sincronização, tradução, karaokê e processamento das letras.",
-      "fullscreenDesc": "Layout de reprodução em tela cheia e elementos exibidos.",
-      "nowplayingDesc": "Layout, tamanho e fundo das letras do painel.",
-      "lyricsProvidersDesc": "Prioridades das fontes, tokens e controles dos provedores de letras.",
-      "aiProvidersDesc": "Configuração de provedores de IA para tradução e processamento.",
-      "advancedDesc": "Detecção, cache, aplicativos auxiliares e controles avançados.",
-      "debugDesc": "Diagnóstico, utilitários de recuperação e solução de problemas.",
-      "aboutDesc": "Versão, verificação de atualizações, créditos e notas da versão."
-    },
-    "background": {
-      "none": "Minimal",
-      "noneDesc": "Mantém a área das letras limpa, sem efeito de fundo extra.",
-      "layout": "Layout e animação",
-      "finetune": "Detalhes do fundo"
-    },
-    "theme": {
-      "light": "Alternar para o modo claro",
-      "dark": "Alternar para o modo escuro",
-      "lightShort": "Claro",
-      "darkShort": "Escuro"
-    }
-  },
   "sections": {
     "language": "Idioma",
     "visualEffects": "Efeitos Visuais",
@@ -105,8 +60,7 @@ window.LANG_PT = {
     "fadWarningDesc": "Não suportado enquanto a extensão Full Screen está ativa.",
     "fadWarningTip": "Altere o método de alinhamento nas configurações da própria extensão Full Screen.",
     "desktopOverlay": "Overlay de Desktop",
-    "desktopOverlaySubtitle": "Exibe a letra como uma sobreposição na área de trabalho",
-    "motion": "Movimento"
+    "desktopOverlaySubtitle": "Exibe a letra como uma sobreposição na área de trabalho"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_PT = {
       "label": "Idioma",
       "desc": "Selecione o idioma da extensão"
     },
-    "translationTargetLanguage": {
-      "label": "Idioma de destino da tradução",
-      "desc": "Escolha o idioma usado na tradução automática",
-      "options": {
-        "auto": "Automático"
-      }
-    },
     "alignment": {
       "label": "Alinhamento",
       "desc": "Selecione a posição de alinhamento do texto da letra",
@@ -156,10 +103,6 @@ window.LANG_PT = {
     "albumBgBlur": {
       "label": "Desfoque do Fundo do Álbum",
       "desc": "Ajusta a intensidade do desfoque do fundo do álbum"
-    },
-    "reduceMotion": {
-      "label": "Reduzir animações",
-      "desc": "Reduz as animações da interface."
     },
     "blurGradientBackground": {
       "label": "Fundo Gradiente Desfocado",
@@ -471,8 +414,7 @@ window.LANG_PT = {
     "openSettings": "Abrir Configurações",
     "translationSettings": "Configurações de Conversão",
     "regenerateTranslation": "Regenerar Tradução",
-    "fullscreen": "Tela Cheia",
-    "exitFullscreen": "Sair da tela cheia"
+    "fullscreen": "Tela Cheia"
   },
   "messages": {
     "noLyrics": "Nenhuma letra disponível",
@@ -1497,8 +1439,6 @@ window.LANG_PT = {
     "applyShort": "Aplicar",
     "applied": "Vídeo aplicado",
     "videoTitle": "Título do Vídeo",
-    "edit": "Editar",
-    "updateAction": "Atualizar",
     "loadingTitle": "Obtendo título...",
     "startTimeLabel": "Início da Primeira Letra (s)",
     "startTimeHint": "Insira o tempo em que a primeira letra começa no vídeo do YouTube",
@@ -1521,6 +1461,7 @@ window.LANG_PT = {
       "gradient": "Gradiente",
       "minimal": "Minimalista",
       "glass": "Glass",
+      "story": "Story"
     },
     "advancedSettings": "Configurações Avançadas",
     "sections": {

@@ -1,8 +1,62 @@
-// CreditFooter implementing provider and contributor display
-const CreditFooter = react.memo(({ provider, contributors }) => {
-	if (!provider) return null;
+const SOURCE_DISPLAY_MAP = {
+	"blyrics-richsynced": { label: "Better Lyrics", sync: "Word Sync" },
+	"blyrics-synced": { label: "Better Lyrics", sync: "Line Sync" },
+	"musixmatch-richsync": { label: "Musixmatch", sync: "Word Sync" },
+	"musixmatch-synced": { label: "Musixmatch", sync: "Line Sync" },
+	"lrclib-synced": { label: "LRCLib", sync: "Line Sync" },
+	"lrclib-plain": { label: "LRCLib", sync: "Text Sync" },
+	"legato-synced": { label: "Legato", sync: "Line Sync" },
+	"spotify-syllable": { label: "Spotify", sync: "Word Sync" },
+	"spotify-line": { label: "Spotify", sync: "Line Sync" },
+	"spotify-syllable-synced": { label: "Spotify", sync: "Word Sync" },
+	"spotify-line-synced": { label: "Spotify", sync: "Line Sync" },
+	"spotify-official-fallback": { label: "Spotify", sync: "Official" },
+	"cubey-instrumental": { label: "Better Lyrics", sync: "Instrumental" },
+};
 
-	let text = `${I18n.t("misc.lyricsProvider") || "Lyrics Provider"} : ${provider}`;
+const PROVIDER_DISPLAY_MAP = {
+	"betterlyrics-engine": "Better Lyrics Engine",
+	"spotify": "Spotify",
+	"lrclib": "LRCLib",
+	"legato": "Legato",
+	"local": "Local",
+};
+
+const normalizeSourceKey = (value) => String(value || "").trim().toLowerCase();
+
+const getProviderDisplayLabel = (provider) => {
+	const key = normalizeSourceKey(provider);
+	return PROVIDER_DISPLAY_MAP[key] || provider || "";
+};
+
+const getSourceBadgeInfo = (selectedSource, providerDisplayName = null, provider = null) => {
+	const sourceKey = normalizeSourceKey(selectedSource);
+	if (sourceKey && SOURCE_DISPLAY_MAP[sourceKey]) {
+		return {
+			...SOURCE_DISPLAY_MAP[sourceKey],
+			key: sourceKey,
+		};
+	}
+
+	const providerLabel = String(providerDisplayName || "").trim() || getProviderDisplayLabel(provider);
+	if (!providerLabel) return null;
+
+	return {
+		key: normalizeSourceKey(providerLabel),
+		label: providerLabel,
+		sync: null,
+	};
+};
+
+window.ivLyricsGetSourceBadgeInfo = getSourceBadgeInfo;
+
+// CreditFooter implementing provider and contributor display
+const CreditFooter = react.memo(({ provider, contributors, selectedSource, providerDisplayName }) => {
+	if (!provider && !selectedSource && !providerDisplayName) return null;
+
+	const providerLabel = getProviderDisplayLabel(provider) || (I18n.t("misc.unknown") || "Unknown");
+	const sourceBadgeInfo = getSourceBadgeInfo(selectedSource, providerDisplayName, provider);
+	let text = `${I18n.t("misc.lyricsProvider") || "Lyrics Provider"} : ${providerLabel}`;
 	if (contributors && contributors.length > 0) {
 		let uniqueContributors = contributors;
 
@@ -38,10 +92,51 @@ const CreditFooter = react.memo(({ provider, contributors }) => {
 				textAlign: "center",
 				zIndex: 200,
 				pointerEvents: "none",
-				textShadow: "0 0 10px rgba(0,0,0,0.5)"
+				textShadow: "0 0 10px rgba(0,0,0,0.5)",
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				gap: "10px",
+				flexWrap: "wrap",
+				paddingInline: "20px",
 			}
 		},
-		text
+		react.createElement("span", null, text),
+		sourceBadgeInfo && react.createElement(
+			"span",
+			{
+				className: "lyrics-source-badge",
+				title: sourceBadgeInfo.sync
+					? `Source: ${sourceBadgeInfo.label} (${sourceBadgeInfo.sync})`
+					: `Source: ${sourceBadgeInfo.label}`,
+				style: {
+					display: "inline-flex",
+					alignItems: "center",
+					gap: "6px",
+					padding: "6px 12px",
+					borderRadius: "999px",
+					background: "rgba(255,255,255,0.08)",
+					border: "1px solid rgba(255,255,255,0.12)",
+					backdropFilter: "blur(14px)",
+					WebkitBackdropFilter: "blur(14px)",
+					color: "rgba(255,255,255,0.88)",
+					fontSize: "12px",
+					fontWeight: 600,
+					letterSpacing: "0.01em",
+				}
+			},
+			react.createElement(
+				"span",
+				{
+					style: {
+						opacity: 0.68,
+						fontWeight: 500,
+					}
+				},
+				"Source"
+			),
+			react.createElement("span", null, sourceBadgeInfo.label)
+		)
 	);
 });
 window.CreditFooter = CreditFooter;
@@ -100,6 +195,87 @@ const safeRenderText = (value) => {
 	return String(value);
 };
 
+const normalizeComparableText = (value) => {
+	if (value === null || value === undefined) return "";
+	if (typeof value === "string") {
+		return value.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+	}
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value).trim();
+	}
+	return "";
+};
+
+const lineHasKaraokeData = (line) => !!(
+	Array.isArray(line?.syllables) && line.syllables.length > 0
+	|| line?.vocals?.lead?.syllables?.length
+	|| (Array.isArray(line?.vocals?.background) && line.vocals.background.some(group => Array.isArray(group?.syllables) && group.syllables.length > 0))
+);
+
+const lineHasSeparatedPhonetic = (line) => {
+	const original = normalizeComparableText(line?.originalText);
+	const phonetic = normalizeComparableText(line?.text);
+	return !!(original && phonetic && original !== phonetic);
+};
+
+const lineHasBackgroundVocals = (line) => !!(
+	Array.isArray(line?.vocals?.background)
+	&& line.vocals.background.some(group => Array.isArray(group?.syllables) && group.syllables.length > 0)
+);
+
+const maybeApplyFurigana = (line, text, isKara = false) => {
+	if (typeof text !== "string") {
+		return text;
+	}
+	if (isKara || lineHasKaraokeData(line) || lineHasSeparatedPhonetic(line) || line?.vocals) {
+		return text;
+	}
+	return Utils.applyFuriganaIfEnabled(text);
+};
+
+const parsePxVariable = (style, name, fallback) => {
+	const raw = style?.getPropertyValue?.(name)?.trim?.() || "";
+	const parsed = parseFloat(raw);
+	return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const estimateLineBlockHeight = (container, line, isKara = false) => {
+	const style = container ? window.getComputedStyle(container) : null;
+	const baseFont = parsePxVariable(style, "--lyrics-font-size", 28);
+	const phoneticFont = parsePxVariable(style, "--lyrics-phonetic-font-size", baseFont * 0.6);
+	const translationFont = parsePxVariable(style, "--lyrics-translation-font-size", baseFont * 0.7);
+	const phoneticSpacing = parsePxVariable(style, "--lyrics-phonetic-spacing", 4);
+	const translationSpacing = parsePxVariable(style, "--lyrics-translation-spacing", 8);
+	const baseHeight = Math.max(baseFont * (isKara || lineHasKaraokeData(line) ? 1.34 : 1.22), baseFont + 8);
+	const hasPhonetic = lineHasSeparatedPhonetic(line) || !!line?.layout?.hasNativePhonetic;
+	const hasTranslation = !!(normalizeComparableText(line?.text2 || line?.translation || line?.translationText) || line?.layout?.hasNativeTranslation);
+	let total = baseHeight;
+	if (hasPhonetic) total += (phoneticFont * 1.35) + phoneticSpacing;
+	if (hasTranslation) total += (translationFont * 1.4) + translationSpacing;
+	if (lineHasBackgroundVocals(line) || line?.layout?.hasBackgroundVocals) total += Math.max(6, baseFont * 0.18);
+	return Math.ceil(total);
+};
+
+const buildLineOffsetMap = ({ linesToRender, activeLineIndex, compact, isScrolling, isKara, container }) => {
+	if (compact && isScrolling) return new Map();
+	const gap = Math.max(12, Math.round(parsePxVariable(container ? window.getComputedStyle(container) : null, "--lyrics-font-size", 28) * 0.18));
+	const heights = linesToRender.map(line => estimateLineBlockHeight(container, line, isKara));
+	const offsets = new Map();
+	const anchorIndex = Math.max(0, Math.min(activeLineIndex, linesToRender.length - 1));
+	offsets.set(anchorIndex, 0);
+	let running = 0;
+	for (let index = anchorIndex + 1; index < linesToRender.length; index += 1) {
+		running += Math.ceil((heights[index - 1] + heights[index]) / 2) + gap;
+		offsets.set(index, running);
+	}
+	running = 0;
+	for (let index = anchorIndex - 1; index >= 0; index -= 1) {
+		running += Math.ceil((heights[index + 1] + heights[index]) / 2) + gap;
+		offsets.set(index, -running);
+	}
+	return offsets;
+};
+
 // Unified function to handle lyrics display mode logic
 const getLyricsDisplayMode = (isKara, line, text, originalText, text2) => {
 	const displayMode = CONFIG.visual["translate:display-mode"];
@@ -111,7 +287,9 @@ const getLyricsDisplayMode = (isKara, line, text, originalText, text2) => {
 	if (isKara) {
 		// For karaoke mode, safely handle the line object
 		mainText = line; // Keep as object for KaraokeLine component
-		subText = text ? safeRenderText(text) : null;
+		subText = (originalText && text && normalizeComparableText(text) !== normalizeComparableText(originalText))
+			? safeRenderText(text)
+			: null;
 		subText2 = safeRenderText(text2);
 	} else {
 		// Default: show original text
@@ -124,8 +302,10 @@ const getLyricsDisplayMode = (isKara, line, text, originalText, text2) => {
 			// Apply furigana to original text if enabled
 			const processedOriginalText = safeRenderText(originalText);
 			mainText = typeof processedOriginalText === 'string' ?
-				Utils.applyFuriganaIfEnabled(processedOriginalText) : processedOriginalText;
-			subText = text ? safeRenderText(text) : null;
+				maybeApplyFurigana(line, processedOriginalText, false) : processedOriginalText;
+			subText = (text && normalizeComparableText(text) !== normalizeComparableText(originalText))
+				? safeRenderText(text)
+				: null;
 			subText2 = text2 ? safeRenderText(text2) : null;
 		} else if (replaceOriginal && text) {
 			// Replace original with translation (only if translation exists)
@@ -136,7 +316,7 @@ const getLyricsDisplayMode = (isKara, line, text, originalText, text2) => {
 			// Default: just show original with furigana if enabled
 			const processedOriginalText = safeRenderText(originalText);
 			mainText = typeof processedOriginalText === 'string' ?
-				Utils.applyFuriganaIfEnabled(processedOriginalText) : processedOriginalText;
+				maybeApplyFurigana(line, processedOriginalText, false) : processedOriginalText;
 			subText = null;
 			subText2 = null;
 		}
@@ -416,6 +596,34 @@ const getCompactSyncedOffset = (container, activeLine, isScrolling) => {
 	return anchorOffset - (activeLine.offsetTop + activeLine.clientHeight / 2);
 };
 
+const sortKaraokeSegments = (segments) =>
+	(segments || []).filter(Boolean).slice().sort((left, right) => (left?.startTime || 0) - (right?.startTime || 0));
+
+const getKaraokeSegments = (line, { includeBackground = true } = {}) => {
+	const leadSegments = line?.vocals?.lead?.syllables?.length
+		? (Array.isArray(line.vocals.lead.syllables) ? line.vocals.lead.syllables : []).map(segment => ({
+			...segment,
+			isBackground: false,
+			agent: line.vocals?.lead?.agent || line.agent || undefined
+		}))
+		: (Array.isArray(line?.syllables) ? line.syllables : []).map(segment => ({
+			...segment,
+			isBackground: false,
+			agent: line?.agent || undefined
+		}));
+	if (!includeBackground || !Array.isArray(line?.vocals?.background)) {
+		return sortKaraokeSegments(leadSegments);
+	}
+	const backgroundSegments = line.vocals.background.flatMap(group =>
+		(Array.isArray(group?.syllables) ? group.syllables : []).map(segment => ({
+			...segment,
+			isBackground: true,
+			agent: group?.agent || undefined
+		}))
+	);
+	return sortKaraokeSegments([...leadSegments, ...backgroundSegments]);
+};
+
 const buildGlobalCharState = (lyrics, position) => {
 	const offsets = [];
 	let totalChars = 0;
@@ -428,11 +636,12 @@ const buildGlobalCharState = (lyrics, position) => {
 		const line = lyrics[i];
 		offsets.push(totalChars);
 
-		if (!line?.syllables || !Array.isArray(line.syllables)) {
+		const segments = getKaraokeSegments(line);
+		if (segments.length === 0) {
 			continue;
 		}
 
-		for (const syllable of line.syllables) {
+		for (const syllable of segments) {
 			if (!syllable || !syllable.text) continue;
 
 			const charArray = Array.from(syllable.text || "");
@@ -711,6 +920,18 @@ const useSyncedLyricsEngine = ({
 		? getCompactSyncedOffset(containerRef.current, activeLineRef.current, isScrolling)
 		: 0;
 
+	const lineOffsetMap = useMemo(
+		() => buildLineOffsetMap({
+			linesToRender,
+			activeLineIndex,
+			compact,
+			isScrolling,
+			isKara,
+			container: containerRef.current
+		}),
+		[linesToRender, activeLineIndex, compact, isScrolling, isKara, containerRef]
+	);
+
 	useEffect(() => {
 		const actualIndex = Math.max(0, activeLineIndex - leadingEmptyLines);
 		window.dispatchEvent(new CustomEvent("ivLyrics:lyric-index-changed", {
@@ -849,6 +1070,7 @@ const useSyncedLyricsEngine = ({
 				style: {
 					cursor: "pointer",
 					"--position-index": animationIndex,
+					"--position-offset-px": `${lineOffsetMap.get(lineNumber) ?? 0}px`,
 					"--animation-index": Math.abs(animationIndex) + 1,
 					"--line-shift-duration": isScrolling
 						? "0s"
@@ -889,6 +1111,7 @@ const useSyncedLyricsEngine = ({
 		visualAnchorLineNumber,
 		globalCharOffsets,
 		activeGlobalCharIndex,
+		lineOffsetMap,
 	]);
 
 	return {
@@ -1047,7 +1270,8 @@ const useTrackPosition = (callback) => {
 };
 
 const getKaraokeLineBounds = (line) => {
-	if (!line?.syllables || !Array.isArray(line.syllables) || line.syllables.length === 0) {
+	const segments = getKaraokeSegments(line);
+	if (segments.length === 0) {
 		const startTime = Number.isFinite(line?.startTime) ? line.startTime : 0;
 		const endTime = Number.isFinite(line?.endTime) ? line.endTime : startTime;
 		return { startTime, endTime };
@@ -1056,7 +1280,7 @@ const getKaraokeLineBounds = (line) => {
 	let startTime = Infinity;
 	let endTime = -Infinity;
 
-	for (const syllable of line.syllables) {
+	for (const syllable of segments) {
 		if (!syllable) continue;
 		const syllableStart = Number.isFinite(syllable.startTime) ? syllable.startTime : null;
 		const syllableEnd = Number.isFinite(syllable.endTime) ? syllable.endTime : syllableStart;
@@ -1120,32 +1344,33 @@ const buildKaraokeFuriganaMap = (processedText) => {
 
 const buildKaraokeTimedChars = (line) => {
 	const timedChars = [];
+	const segments = getKaraokeSegments(line);
+	segments.forEach((syllable, segmentIndex) => {
+		if (!syllable || !syllable.text) return;
 
-	if (line?.syllables && Array.isArray(line.syllables) && line.syllables.length > 0) {
-		line.syllables.forEach((syllable) => {
-			if (!syllable || !syllable.text) return;
+		const charArray = Array.from(syllable.text || "");
+		const syllableStart = Number.isFinite(syllable.startTime) ? syllable.startTime : (line.startTime || 0);
+		const syllableEnd = Number.isFinite(syllable.endTime) ? syllable.endTime : syllableStart + 500;
+		const charDuration = Math.max(1, (syllableEnd - syllableStart) / Math.max(1, charArray.length));
 
-			const charArray = Array.from(syllable.text || "");
-			const syllableStart = Number.isFinite(syllable.startTime) ? syllable.startTime : (line.startTime || 0);
-			const syllableEnd = Number.isFinite(syllable.endTime) ? syllable.endTime : syllableStart + 500;
-			const charDuration = Math.max(1, (syllableEnd - syllableStart) / Math.max(1, charArray.length));
-
-			charArray.forEach((char, charIndex) => {
-				const charStart = syllableStart + (charIndex * charDuration);
-				timedChars.push({
-					char,
-					startTime: charStart,
-					endTime: charStart + charDuration,
-				});
+		charArray.forEach((char, charIndex) => {
+			const charStart = syllableStart + (charIndex * charDuration);
+			timedChars.push({
+				char,
+				startTime: charStart,
+				endTime: charStart + charDuration,
+				isBackground: !!syllable.isBackground,
+				agent: syllable.agent,
+				segmentIndex,
 			});
 		});
-	}
+	});
 
 	if (timedChars.length > 0) {
 		return timedChars;
 	}
 
-	const fallbackChars = Array.from(getCopyableText(line?.text) || "");
+	const fallbackChars = Array.from(getCopyableText(line?.originalText || line?.text) || "");
 	const { startTime, endTime } = getKaraokeLineBounds(line);
 	const totalDuration = Math.max(1, endTime - startTime || 500);
 	const charDuration = Math.max(1, totalDuration / Math.max(1, fallbackChars.length || 1));
@@ -1212,11 +1437,6 @@ const KaraokeLine = react.memo(({ line, position, isActive, globalCharOffset = 0
 		return "";
 	}
 
-	const rawLineText = line.syllables?.map((syllable) => syllable?.text || "").join("")
-		|| getCopyableText(line.text)
-		|| "";
-	const processedText = Utils.applyFuriganaIfEnabled(rawLineText);
-	const furiganaMap = buildKaraokeFuriganaMap(processedText);
 	const timedChars = buildKaraokeTimedChars(line);
 	const { endTime } = getKaraokeLineBounds(line);
 	const isComplete = isActive && position >= endTime;
@@ -1246,31 +1466,16 @@ const KaraokeLine = react.memo(({ line, position, isActive, globalCharOffset = 0
 			"--karaoke-bounce-y": `${bounce.offsetY}px`,
 			"--karaoke-bounce-scale": bounce.scale,
 		};
-		const className = `lyrics-karaoke-char${isComplete ? " is-complete" : ""}`;
-		const charNode = react.createElement(
+		const className = `lyrics-karaoke-char${charInfo.isBackground ? " lyrics-karaoke-char-background" : ""}${isComplete ? " is-complete" : ""}`;
+		return react.createElement(
 			"span",
 			{
 				className,
 				style: karaokeStyle,
 				key: `karaoke-char-${index}`,
+				"data-agent": charInfo.agent || undefined,
 			},
 			charInfo.char
-		);
-		const reading = furiganaMap.get(index);
-
-		if (!reading) {
-			return charNode;
-		}
-
-		return react.createElement(
-			"ruby",
-			{
-				className: "lyrics-karaoke-ruby",
-				style: karaokeStyle,
-				key: `karaoke-ruby-${index}`,
-			},
-			charNode,
-			react.createElement("rt", null, reading)
 		);
 	});
 
@@ -1700,6 +1905,11 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics = [], provider, contributo
 
 const UnsyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, copyright }) => {
 	const lyricsArray = useMemo(() => normalizeUnsyncedLyrics(lyrics), [lyrics]);
+
+	if (lyricsArray.length === 0) {
+		return react.createElement("div", { className: "lyrics-lyricsContainer-UnsyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
+	}
+
 	const renderItems = useMemo(() => lyricsArray.map(({ text, originalText, text2 }, index) => {
 		const {
 			lineText,
@@ -1725,10 +1935,6 @@ const UnsyncedLyricsPage = react.memo(({ lyrics = [], provider, contributors, co
 			originalText,
 		};
 	}), [lyricsArray, lyrics]);
-
-	if (lyricsArray.length === 0) {
-		return react.createElement("div", { className: "lyrics-lyricsContainer-UnsyncedLyricsPage" }, renderLyricsUnavailable(I18n.t("messages.noLyrics")));
-	}
 
 	return react.createElement(
 		"div",
@@ -1864,6 +2070,8 @@ const LyricsPage = ({ lyricsContainer }) => {
 		lyricsContainer.render(),
 		react.createElement(CreditFooter, {
 			provider: lyricsContainer.state.provider,
+			selectedSource: lyricsContainer.state.selectedSource,
+			providerDisplayName: lyricsContainer.state.providerDisplayName,
 			contributors: lyricsContainer.state.contributors
 		})
 	);
@@ -1886,6 +2094,8 @@ const LyricsPageRenderer = react.memo(({
 	synced = null,
 	unsynced = null,
 	provider = null,
+	selectedSource = null,
+	providerDisplayName = null,
 	contributors = null,
 	copyright = null,
 	isLoading = false,
@@ -1915,6 +2125,8 @@ const LyricsPageRenderer = react.memo(({
 					trackUri,
 					lyrics: karaokeLyrics,
 					provider,
+					selectedSource,
+					providerDisplayName,
 					contributors,
 					copyright,
 					isKara: true,
@@ -1932,6 +2144,8 @@ const LyricsPageRenderer = react.memo(({
 					trackUri,
 					lyrics: sharedLyrics,
 					provider,
+					selectedSource,
+					providerDisplayName,
 					contributors,
 					copyright,
 					reRenderLyricsPage,
@@ -1946,6 +2160,8 @@ const LyricsPageRenderer = react.memo(({
 					trackUri,
 					lyrics: sharedLyrics,
 					provider,
+					selectedSource,
+					providerDisplayName,
 					contributors,
 					copyright,
 					reRenderLyricsPage,
@@ -1968,6 +2184,8 @@ const LyricsPageRenderer = react.memo(({
 		sharedLyrics,
 		trackUri,
 		provider,
+		selectedSource,
+		providerDisplayName,
 		contributors,
 		copyright,
 		reRenderLyricsPage,
@@ -1987,6 +2205,8 @@ const LyricsPageRenderer = react.memo(({
 		content,
 		react.createElement(CreditFooter, {
 			provider,
+			selectedSource,
+			providerDisplayName,
 			contributors,
 		})
 	);

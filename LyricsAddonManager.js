@@ -338,6 +338,7 @@
         getProviderOrder() {
             let order = [];
             const stored = Spicetify.LocalStorage.get(STORAGE_PREFIX + 'provider-order');
+            const preferredProviderId = 'betterlyrics-engine';
 
             if (stored) {
                 try {
@@ -355,6 +356,11 @@
                 // Filter out any IDs that no longer exist (uninstalled)
                 order = order.filter(id => allAddonIds.includes(id));
 
+                // If the user has never placed BetterLyricsEngine, insert it conservatively at the front once.
+                if (allAddonIds.includes(preferredProviderId) && !order.includes(preferredProviderId)) {
+                    order = [preferredProviderId, ...order];
+                }
+
                 // Add any new IDs that aren't in the order yet
                 const newIds = allAddonIds.filter(id => !order.includes(id));
                 order = [...order, ...newIds];
@@ -362,7 +368,10 @@
                 return order;
             }
 
-            // Default: validation order (registered order)
+            // Default: registered order, but prefer BetterLyricsEngine first when available.
+            if (allAddonIds.includes(preferredProviderId)) {
+                return [preferredProviderId, ...allAddonIds.filter(id => id !== preferredProviderId)];
+            }
             return allAddonIds;
         }
 
@@ -422,7 +431,7 @@
             this.emit('addon:setting:changed', { id: addonId, key, value });
 
             // 가사 관련 설정이 변경되면 가사 새로고침
-            if (key.startsWith('enable_')) {
+            if (key.startsWith('enable_') || key === 'source_preference_list') {
                 this._triggerLyricsRefresh();
             }
         }

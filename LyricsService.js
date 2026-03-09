@@ -1638,8 +1638,8 @@
                     return { lyrics: [], provider: null, error: lyricsResult.error };
                 }
 
-                // 2. 가사 선택 (synced, karaoke, unsynced 순)
-                let lyrics = lyricsResult.synced || lyricsResult.karaoke || lyricsResult.unsynced || [];
+                // 2. 가사 선택 (karaoke, synced, unsynced 순)
+                let lyrics = lyricsResult.karaoke || lyricsResult.synced || lyricsResult.unsynced || [];
                 const provider = lyricsResult.provider;
 
                 if (lyrics.length === 0) {
@@ -1687,8 +1687,8 @@
                 }
 
                 // 설정을 LocalStorage에서 직접 읽기
-                const translationProvider = Spicetify.LocalStorage.get("ivLyrics:visual:translate:translated-lyrics-source") || "auto";
-                const modeKey = friendlyLanguage || "gemini";
+                const translationProvider = Spicetify.LocalStorage.get("ivLyrics:visual:translate:translated-lyrics-source") || "geminiKo";
+                const modeKey = translationProvider === "geminiKo" && !friendlyLanguage ? "gemini" : friendlyLanguage;
 
                 // 설정 키: translation-mode:japanese, translation-mode-2:japanese 등
                 if (mode1 === null) {
@@ -1708,7 +1708,7 @@
 
                     try {
                         // Gemini API를 통한 발음/번역 요청
-                        const lyricsText = lyrics.map(l => l.text || '').join('\n');
+                        const lyricsText = lyrics.map(l => l.originalText || l.text || '').join('\n');
 
                         // 발음 요청 (mode1 = gemini_romaji)
                         let pronResult = null;
@@ -1746,23 +1746,36 @@
                             const transLines = Array.isArray(transResult) ? transResult : (transResult ? transResult.split('\n') : []);
 
                             lyrics = lyrics.map((line, idx) => {
-                                const originalText = line.text || '';
-                                const pronText = pronLines[idx]?.trim() || null;
-                                const transText = transLines[idx]?.trim() || null;
-
-                                // Determine the final original text.
-                                // If pronText exists, the current 'text' is the original.
-                                // If pronText doesn't exist, but line.originalText exists, use that.
-                                // Otherwise, the current 'text' is the original.
-                                const finalOriginal = pronText ? originalText : (line.originalText || originalText);
+                                const baseOriginal = line.originalText || line.text || '';
+                                const existingPhonetic = (line.originalText && line.text && line.text !== line.originalText)
+                                    ? line.text
+                                    : '';
+                                const existingTranslation = line.text2 || line.translation || line.translationText || '';
+                                const aiPhonetic = pronLines[idx]?.trim() || '';
+                                const aiTranslation = transLines[idx]?.trim() || '';
+                                const finalPhonetic = existingPhonetic || aiPhonetic;
+                                const finalTranslation = existingTranslation || aiTranslation;
+                                const nextAnnotations = {
+                                    ...(line.annotations || {}),
+                                    phoneticOrigin: existingPhonetic ? (line.annotations?.phoneticOrigin || 'provider') : (aiPhonetic ? 'ai' : (line.annotations?.phoneticOrigin || null)),
+                                    translationOrigin: existingTranslation ? (line.annotations?.translationOrigin || 'provider') : (aiTranslation ? 'ai' : (line.annotations?.translationOrigin || null))
+                                };
+                                const nextLayout = {
+                                    ...(line.layout || {}),
+                                    subLineCount: (finalPhonetic ? 1 : 0) + (finalTranslation ? 1 : 0),
+                                    hasNativePhonetic: !!existingPhonetic,
+                                    hasNativeTranslation: !!existingTranslation
+                                };
 
                                 return {
                                     ...line,
-                                    originalText: finalOriginal, // The original text before any phonetic/translation
-                                    text: pronText || originalText, // The primary displayed text (phonetic or original)
-                                    text2: transText, // The secondary displayed text (translation)
-                                    translation: transText, // For compatibility
-                                    translationText: transText // For compatibility
+                                    originalText: line.originalText || baseOriginal,
+                                    text: finalPhonetic || line.text || baseOriginal,
+                                    text2: finalTranslation || undefined,
+                                    translation: finalTranslation || undefined,
+                                    translationText: finalTranslation || undefined,
+                                    annotations: nextAnnotations,
+                                    layout: nextLayout
                                 };
                             });
 
@@ -2624,10 +2637,15 @@
         // 싱크 오프셋 가져오기
         async getSyncOffset(uri) {
             let offset = 0;
+            let hasPerTrackDelay = false;
 
             // 1. 전역 딜레이 설정 (CONFIG가 로드되면)
             if (typeof window.CONFIG !== 'undefined' && window.CONFIG.visual && typeof window.CONFIG.visual.delay === 'number') {
-                offset += window.CONFIG.visual.delay;
+                const currentUri = Spicetify?.Player?.data?.item?.uri;
+                if (!uri || !currentUri || currentUri === uri) {
+                    offset += window.CONFIG.visual.delay;
+                    hasPerTrackDelay = true;
+                }
             }
 
             // 2. TrackSyncDB에서 트랙별 오프셋
@@ -2645,12 +2663,14 @@
                 } catch (e) { }
             }
 
-            // 3. localStorage 개별 트랙 딜레이
-            try {
-                const delayKey = `lyrics-delay:${uri}`;
-                const delay = Spicetify.LocalStorage.get(delayKey);
-                if (delay) offset += Number(delay);
-            } catch (e) { }
+            // 3. CONFIG에 현재 트랙 딜레이가 반영되지 않은 경우에만 localStorage fallback 사용
+            if (!hasPerTrackDelay) {
+                try {
+                    const delayKey = `lyrics-delay:${uri}`;
+                    const delay = Spicetify.LocalStorage.get(delayKey);
+                    if (delay) offset += Number(delay);
+                } catch (e) { }
+            }
 
             return -offset;
         },

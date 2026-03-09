@@ -66,7 +66,7 @@ Korean, English, Japanese, Chinese (Simplified/Traditional), Spanish, French, Ge
 
 ## Initial Setup
 
-1. Launch Spicetify and select ivLyrics from the left menu.
+1. Launch Spotify and select ivLyrics from the left menu.
 2. Click the settings button at the bottom right.
 3. Enter your Gemini API key in the Advanced tab.
    - You can get a free API key from [Google AI Studio](https://aistudio.google.com/apikey).
@@ -81,15 +81,15 @@ Korean, English, Japanese, Chinese (Simplified/Traditional), Spanish, French, Ge
 If you experience issues with settings or lyrics display:
 
 1. Run the `spicetify enable-devtools` command in Terminal.
-2. Right-click on the Spicetify window and select "Inspect Element" or "Developer Tools".
+2. Right-click on the Spotify window and select "Inspect Element" or "Developer Tools".
 3. Go to Application tab > Storage > Click "Clear site data".
-4. Click on the Spicetify window and press Ctrl+Shift+R (macOS: Cmd+Shift+R) to refresh.
+4. Click on the Spotify window and press Ctrl+Shift+R (macOS: Cmd+Shift+R) to refresh.
 
 ### Common Issues
 
 - **Lyrics not displaying**: Check if the lyrics provider is enabled in settings.
 - **Translation not working**: Make sure the Gemini API key is entered correctly.
-- **Spicetify not launching**: Run `spicetify restore` followed by `spicetify apply`.
+- **Spotify not launching**: Run `spicetify restore` followed by `spicetify apply`.
 
 ---
 

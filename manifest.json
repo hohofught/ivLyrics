@@ -62,6 +62,7 @@
 		"Addon_AI_OpenRouter.js",
 		"Addon_AI_Perplexity.js",
 		"Addon_AI_Pollinations.js",
+		"Addon_Lyrics_BetterLyricsEngine.js",
 		"Addon_Lyrics_Spotify.js",
 		"Addon_Lyrics_Lrclib.js",
 		"AIAddonManager.js",

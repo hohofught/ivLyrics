@@ -891,8 +891,8 @@
                 // LRCLIB API가 instrumental=true로 표시한 경우
                 // 가사 없는 연주곡임을 표시
                 if (body.instrumental) {
-                    result.synced = [{ startTime: 0, text: '♪ Instrumental ♪' }];
-                    result.unsynced = [{ text: '♪ Instrumental ♪' }];
+                    result.synced = [{ startTime: 0, text: '♪', isInstrumental: true }];
+                    result.unsynced = [{ text: '♪', isInstrumental: true }];
                     logDebug('Success (Instrumental)');
                     return result;
                 }

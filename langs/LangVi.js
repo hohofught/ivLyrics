@@ -26,51 +26,6 @@ window.LANG_VI = {
     "clear": "Xóa",
     "inSection": "trong {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Cốt lõi",
-      "display": "Hiển thị",
-      "text": "Lớp văn bản",
-      "playback": "Phát lại & đồng bộ",
-      "surfaces": "Màn hình",
-      "providers": "Nhà cung cấp",
-      "fullscreen": "Toàn màn hình",
-      "panel": "Lời bài hát bảng",
-      "system": "Hệ thống"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Cốt lõi",
-        "typography": "Văn bản",
-        "behavior": "Luồng",
-        "surface": "Giao diện",
-        "providers": "Nguồn",
-        "system": "Hệ thống"
-      },
-      "generalDesc": "Ngôn ngữ, lớp phủ desktop và các thiết lập cốt lõi.",
-      "appearanceDesc": "Nền, kiểu chữ, chuyển động và bố cục màn hình.",
-      "lyricsDesc": "Đồng bộ, dịch, karaoke và xử lý lời bài hát.",
-      "fullscreenDesc": "Bố cục phát toàn màn hình và các thành phần hiển thị.",
-      "nowplayingDesc": "Bố cục, kích thước và nền của lời bài hát bảng.",
-      "lyricsProvidersDesc": "Ưu tiên nguồn, token và điều khiển nhà cung cấp lời bài hát.",
-      "aiProvidersDesc": "Cấu hình nhà cung cấp AI cho dịch và xử lý.",
-      "advancedDesc": "Phát hiện, bộ nhớ đệm, ứng dụng hỗ trợ và điều khiển nâng cao.",
-      "debugDesc": "Chẩn đoán, công cụ khôi phục và xử lý sự cố.",
-      "aboutDesc": "Chi tiết phiên bản, kiểm tra cập nhật, ghi công và ghi chú bản vá."
-    },
-    "background": {
-      "none": "Tối giản",
-      "noneDesc": "Giữ bề mặt lời bài hát sạch sẽ mà không có hiệu ứng nền bổ sung.",
-      "layout": "Bố cục & chuyển động",
-      "finetune": "Chi tiết nền"
-    },
-    "theme": {
-      "light": "Chuyển sang chế độ sáng",
-      "dark": "Chuyển sang chế độ tối",
-      "lightShort": "Sáng",
-      "darkShort": "Tối"
-    }
-  },
   "sections": {
     "language": "Ngôn ngữ",
     "visualEffects": "Hiệu ứng hình ảnh",
@@ -105,8 +60,7 @@ window.LANG_VI = {
     "fadWarningDesc": "Không hỗ trợ khi đang sử dụng tiện ích mở rộng Full Screen khác.",
     "fadWarningTip": "Vui lòng thay đổi cài đặt sắp xếp trong chính tiện ích Full Screen đó.",
     "desktopOverlay": "Lớp phủ màn hình (Desktop)",
-    "desktopOverlaySubtitle": "Hiển thị lời bài hát dạng lớp phủ trên màn hình desktop",
-    "motion": "Chuyển động"
+    "desktopOverlaySubtitle": "Hiển thị lời bài hát dạng lớp phủ trên màn hình desktop"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_VI = {
       "label": "Ngôn ngữ",
       "desc": "Chọn ngôn ngữ cho tiện ích mở rộng"
     },
-    "translationTargetLanguage": {
-      "label": "Ngôn ngữ đích của bản dịch",
-      "desc": "Chọn ngôn ngữ dùng cho dịch tự động",
-      "options": {
-        "auto": "Tự động"
-      }
-    },
     "alignment": {
       "label": "Căn chỉnh",
       "desc": "Chọn vị trí căn chỉnh cho văn bản lời bài hát",
@@ -156,10 +103,6 @@ window.LANG_VI = {
     "albumBgBlur": {
       "label": "Làm mờ nền Album",
       "desc": "Điều chỉnh độ mờ của hình nền album"
-    },
-    "reduceMotion": {
-      "label": "Giảm chuyển động",
-      "desc": "Giảm hoạt ảnh giao diện."
     },
     "blurGradientBackground": {
       "label": "Nền Gradient mờ",
@@ -471,8 +414,7 @@ window.LANG_VI = {
     "openSettings": "Mở cài đặt",
     "translationSettings": "Cài đặt chuyển đổi",
     "regenerateTranslation": "Tạo lại bản dịch",
-    "fullscreen": "Toàn màn hình",
-    "exitFullscreen": "Thoát toàn màn hình"
+    "fullscreen": "Toàn màn hình"
   },
   "messages": {
     "noLyrics": "Không có lời bài hát khả dụng",
@@ -1497,8 +1439,6 @@ window.LANG_VI = {
     "applyShort": "Áp dụng",
     "applied": "Đã áp dụng video",
     "videoTitle": "Tiêu đề video",
-    "edit": "Sửa",
-    "updateAction": "Cập nhật",
     "loadingTitle": "Đang lấy tiêu đề...",
     "startTimeLabel": "Thời gian bắt đầu lời đầu tiên (giây)",
     "startTimeHint": "Nhập thời điểm lời bài hát đầu tiên bắt đầu trong video YouTube",
@@ -1521,6 +1461,7 @@ window.LANG_VI = {
       "gradient": "Gradient",
       "minimal": "Tối giản",
       "glass": "Kính",
+      "story": "Story"
     },
     "advancedSettings": "Cài đặt chi tiết",
     "sections": {

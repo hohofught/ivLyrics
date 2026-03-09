@@ -176,6 +176,8 @@ body.ivlyrics-page-active .ivlyrics-panel-lyrics-section {
 .ivlyrics-panel-header {
   display: flex !important;
   align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
   margin-bottom: 10px !important;
   padding: 0 !important;
 }
@@ -187,6 +189,35 @@ body.ivlyrics-page-active .ivlyrics-panel-lyrics-section {
   margin: 0 !important;
   letter-spacing: 0.02em !important;
   font-family: var(--ivlyrics-panel-font-family) !important;
+}
+
+.ivlyrics-panel-source-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.13) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+  max-width: 72% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ivlyrics-panel-source-badge-label {
+  opacity: 0.68 !important;
+  font-weight: 500 !important;
+}
+
+.ivlyrics-panel-source-badge-value {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 /* 가사 래퍼 - 슬라이드 업 애니메이션 */
@@ -337,6 +368,12 @@ body.ivlyrics-page-active .ivlyrics-panel-lyrics-section {
   transform-origin: center bottom !important;
 }
 
+.ivlyrics-panel-karaoke-word.background {
+  color: rgba(255, 255, 255, 0.3) !important;
+  opacity: 0.75 !important;
+  font-weight: 500 !important;
+}
+
 /* 노래방 단어 - 활성 (하이라이트 + 미세 바운스) */
 .ivlyrics-panel-karaoke-word.sung {
   color: #ffffff !important;
@@ -348,9 +385,18 @@ body.ivlyrics-page-active .ivlyrics-panel-lyrics-section {
   color: rgba(255, 255, 255, 0.6) !important;
 }
 
+.ivlyrics-panel-line.active .ivlyrics-panel-karaoke-word.background {
+  color: rgba(255, 255, 255, 0.42) !important;
+}
+
 .ivlyrics-panel-line.active .ivlyrics-panel-karaoke-word.sung {
   color: #ffffff !important;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
+}
+
+.ivlyrics-panel-line.active .ivlyrics-panel-karaoke-word.background.sung {
+  color: rgba(255, 255, 255, 0.82) !important;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.25) !important;
 }
 
 /* 가사 없음 상태 */
@@ -560,7 +606,8 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         lyrics: [],
         currentIndex: 0,
         isPlaying: false,
-        trackUri: null
+        trackUri: null,
+        sourceInfo: null
     };
 
     const clearInsertTimer = () => {
@@ -596,26 +643,88 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         }
     };
 
+    const resolveSourceBadgeInfo = (selectedSource, providerDisplayName, provider) => {
+        if (typeof window.ivLyricsGetSourceBadgeInfo === "function") {
+            return window.ivLyricsGetSourceBadgeInfo(selectedSource, providerDisplayName, provider);
+        }
+
+        const sourceMap = {
+            "blyrics-richsynced": { label: "Better Lyrics" },
+            "blyrics-synced": { label: "Better Lyrics" },
+            "musixmatch-richsync": { label: "Musixmatch" },
+            "musixmatch-synced": { label: "Musixmatch" },
+            "lrclib-synced": { label: "LRCLib" },
+            "lrclib-plain": { label: "LRCLib" },
+            "legato-synced": { label: "Legato" },
+            "spotify-syllable": { label: "Spotify" },
+            "spotify-line": { label: "Spotify" },
+            "spotify-syllable-synced": { label: "Spotify" },
+            "spotify-line-synced": { label: "Spotify" },
+            "spotify-official-fallback": { label: "Spotify" },
+            "cubey-instrumental": { label: "Better Lyrics" }
+        };
+        const providerMap = {
+            "betterlyrics-engine": { label: "Better Lyrics Engine" },
+            "spotify": { label: "Spotify" },
+            "lrclib": { label: "LRCLib" },
+            "legato": { label: "Legato" },
+            "local": { label: "Local" }
+        };
+
+        const sourceKey = String(selectedSource || "").trim().toLowerCase();
+        if (sourceKey && sourceMap[sourceKey]) {
+            return { ...sourceMap[sourceKey], key: sourceKey };
+        }
+
+        const displayLabel = String(providerDisplayName || "").trim();
+        if (displayLabel) {
+            return { key: displayLabel.toLowerCase(), label: displayLabel };
+        }
+
+        const providerKey = String(provider || "").trim().toLowerCase();
+        if (providerKey && providerMap[providerKey]) {
+            return { ...providerMap[providerKey], key: providerKey };
+        }
+
+        return provider ? { key: providerKey || "provider", label: provider } : null;
+    };
+
     // ============================================
     // 노래방 가사 렌더링 헬퍼
-    // syllables 또는 vocals 구조에서 syllables 추출
+    // syllables 또는 vocals 구조를 공용 karaoke segment 배열로 정규화
     // ============================================
     const getSyllablesFromLine = (line) => {
-        if (line.syllables && line.syllables.length > 0) {
-            return line.syllables;
-        }
         if (line.vocals?.lead?.syllables) {
-            // lead와 background 병합
-            const allSyllables = [...line.vocals.lead.syllables];
+            const leadSegments = (Array.isArray(line.vocals.lead.syllables) ? line.vocals.lead.syllables : [])
+                .filter(Boolean)
+                .map(segment => ({
+                    ...segment,
+                    isBackground: false,
+                    agent: line.vocals?.lead?.agent || line.agent || undefined
+                }));
+            const backgroundSegments = [];
             if (line.vocals.background) {
                 line.vocals.background.forEach(bg => {
                     if (bg.syllables) {
-                        allSyllables.push(...bg.syllables);
+                        bg.syllables.forEach(segment => {
+                            if (!segment) return;
+                            backgroundSegments.push({
+                                ...segment,
+                                isBackground: true,
+                                agent: bg.agent || undefined
+                            });
+                        });
                     }
                 });
             }
-            // startTime 기준 정렬
-            return allSyllables.sort((a, b) => a.startTime - b.startTime);
+            return [...leadSegments, ...backgroundSegments].sort((a, b) => a.startTime - b.startTime);
+        }
+        if (line.syllables && line.syllables.length > 0) {
+            return line.syllables.filter(Boolean).map(segment => ({
+                ...segment,
+                isBackground: false,
+                agent: line.agent || undefined
+            }));
         }
         return [];
     };
@@ -680,7 +789,7 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         return react.createElement("span", {
             key: idx,
             ref: wordRef,
-            className: `ivlyrics-panel-karaoke-word ${isLinePast ? 'sung' : ''}`
+            className: `ivlyrics-panel-karaoke-word${syllable.isBackground ? ' background' : ''} ${isLinePast ? 'sung' : ''}`.trim()
         }, text);
     });
 
@@ -791,6 +900,7 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         const [currentIndex, setCurrentIndex] = useState(0);
         // currentTime은 더 이상 상태로 관리하지 않음 - 전역 변수 사용
         const [trackOffset, setTrackOffset] = useState(0); // 곡별 싱크 오프셋
+        const [sourceInfo, setSourceInfo] = useState(null);
         const [isEnabled, setIsEnabled] = useState(getStorageValue(STORAGE_KEY, DEFAULT_ENABLED));
         const [numLines, setNumLines] = useState(parseInt(getStorageValue(PANEL_LINES_KEY, DEFAULT_LINES), 10));
         const [fontScale, setFontScale] = useState(parseInt(getStorageValue(FONT_SCALE_KEY, DEFAULT_FONT_SCALE), 10));
@@ -860,6 +970,7 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
                 const result = await window.LyricsService.getLyricsFromProviders(trackInfo);
 
                 if (result && !result.error) {
+                    const nextSourceInfo = resolveSourceBadgeInfo(result.selectedSource, result.providerDisplayName, result.provider);
                     // 비동기 작업 완료 후 현재 재생 중인 트랙이 로딩을 시작한 트랙과 일치하는지 검증
                     const currentPlayingUri = Spicetify.Player.data?.item?.uri;
                     if (currentPlayingUri !== loadingForTrackUri) {
@@ -887,8 +998,10 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
                         }
 
                         setLyrics(lyricsData);
+                        setSourceInfo(nextSourceInfo);
                         currentLyricsState.lyrics = lyricsData;
                         currentLyricsState.trackUri = loadingForTrackUri;
+                        currentLyricsState.sourceInfo = nextSourceInfo;
                         setCurrentIndex(0);
 
                         // 곡별 싱크 오프셋 가져오기
@@ -905,16 +1018,21 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
                     } else {
                         panelDebug("[PanelLyrics] No lyrics in result");
                         setLyrics([]);
+                        setSourceInfo(null);
                         currentLyricsState.lyrics = [];
+                        currentLyricsState.sourceInfo = null;
                     }
                 } else {
                     panelDebug("[PanelLyrics] No lyrics found:", result?.error);
                     setLyrics([]);
+                    setSourceInfo(null);
                     currentLyricsState.lyrics = [];
+                    currentLyricsState.sourceInfo = null;
                 }
             } catch (error) {
                 console.error("[PanelLyrics] Failed to load lyrics:", error);
                 setLyrics([]);
+                setSourceInfo(null);
             } finally {
                 loadingRef.current = false;
             }
@@ -930,7 +1048,7 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
 
             try {
                 // 가사 언어 감지
-                const lyricsText = lyricsData.map(l => l.text || '').join('\n');
+                const lyricsText = lyricsData.map(l => l.originalText || l.text || '').join('\n');
                 const trackId = trackInfo.trackId;
 
                 // 언어 감지 (LyricsService.detectLanguage 사용)
@@ -1052,12 +1170,37 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
 
                 // 결과 병합
                 if (phoneticLines.length > 0 || translationLines.length > 0) {
-                    const updatedLyrics = lyricsData.map((line, idx) => ({
-                        ...line,
-                        originalText: line.text || line.originalText || '',
-                        text: phoneticLines[idx] || line.text || '',
-                        text2: translationLines[idx] || line.text2 || ''
-                    }));
+                    const updatedLyrics = lyricsData.map((line, idx) => {
+                        const baseOriginal = line.originalText || line.text || '';
+                        const existingPhonetic = (line.originalText && line.text && line.text !== line.originalText)
+                            ? line.text
+                            : '';
+                        const existingTranslation = line.text2 || line.translation || line.translationText || '';
+                        const nextPhonetic = existingPhonetic || (phoneticLines[idx]?.trim() || '');
+                        const nextTranslation = existingTranslation || (translationLines[idx]?.trim() || '');
+                        const nextAnnotations = {
+                            ...(line.annotations || {}),
+                            phoneticOrigin: existingPhonetic ? (line.annotations?.phoneticOrigin || 'provider') : ((phoneticLines[idx]?.trim() || '') ? 'ai' : (line.annotations?.phoneticOrigin || null)),
+                            translationOrigin: existingTranslation ? (line.annotations?.translationOrigin || 'provider') : ((translationLines[idx]?.trim() || '') ? 'ai' : (line.annotations?.translationOrigin || null))
+                        };
+                        const nextLayout = {
+                            ...(line.layout || {}),
+                            subLineCount: (nextPhonetic ? 1 : 0) + (nextTranslation ? 1 : 0),
+                            hasNativePhonetic: !!existingPhonetic,
+                            hasNativeTranslation: !!existingTranslation
+                        };
+
+                        return {
+                            ...line,
+                            originalText: line.originalText || baseOriginal,
+                            text: nextPhonetic || line.text || baseOriginal,
+                            text2: nextTranslation || undefined,
+                            translation: nextTranslation || undefined,
+                            translationText: nextTranslation || undefined,
+                            annotations: nextAnnotations,
+                            layout: nextLayout
+                        };
+                    });
 
                     panelDebug("[PanelLyrics] Applied translation:", phoneticLines.length, "phonetic,", translationLines.length, "translation");
                     setLyrics(updatedLyrics);
@@ -1078,8 +1221,10 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
 
                 // 이전 가사 상태 초기화 (새 곡 전환 중임을 표시)
                 setLyrics([]);
+                setSourceInfo(null);
                 currentLyricsState.lyrics = [];
                 currentLyricsState.currentIndex = 0;
+                currentLyricsState.sourceInfo = null;
 
                 // 약간의 딜레이 후 로드 (트랙 정보가 완전히 업데이트될 때까지 대기)
                 // 캡처한 URI를 전달하여 딜레이 중 곡이 변경되면 무시
@@ -1424,7 +1569,7 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
                     // originalText = 원어, text = 발음, text2 = 번역
                     const originalText = line?.originalText || line?.text || '';
                     const phonetic = (line?.originalText && line?.text !== line?.originalText) ? line?.text : '';
-                    const translation = line?.text2 || '';
+                    const translation = line?.text2 || line?.translation || line?.translationText || '';
 
                     lines.push({
                         index: i,
@@ -1465,7 +1610,18 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
                 style: containerStyle
             },
                 react.createElement("div", { className: "ivlyrics-panel-header" },
-                    react.createElement("h2", null, "ivLyrics")
+                    react.createElement("h2", null, "ivLyrics"),
+                    sourceInfo && react.createElement("div", {
+                        className: "ivlyrics-panel-source-badge",
+                        title: `Source: ${sourceInfo.label}`
+                    },
+                        react.createElement("span", {
+                            className: "ivlyrics-panel-source-badge-label"
+                        }, "Source"),
+                        react.createElement("span", {
+                            className: "ivlyrics-panel-source-badge-value"
+                        }, sourceInfo.label)
+                    )
                 ),
                 react.createElement("div", { className: "ivlyrics-panel-empty" },
                     "가사를 불러오는 중..."
@@ -1481,7 +1637,18 @@ body.ivlyrics-starrynight-theme .Root__now-playing-bar {
         },
             // 헤더
             react.createElement("div", { className: "ivlyrics-panel-header" },
-                react.createElement("h2", null, "ivLyrics")
+                react.createElement("h2", null, "ivLyrics"),
+                sourceInfo && react.createElement("div", {
+                    className: "ivlyrics-panel-source-badge",
+                    title: `Source: ${sourceInfo.label}`
+                },
+                    react.createElement("span", {
+                        className: "ivlyrics-panel-source-badge-label"
+                    }, "Source"),
+                    react.createElement("span", {
+                        className: "ivlyrics-panel-source-badge-value"
+                    }, sourceInfo.label)
+                )
             ),
             // 가사 컨테이너
             react.createElement("div", {

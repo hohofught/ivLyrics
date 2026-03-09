@@ -26,51 +26,6 @@ window.LANG_DE = {
     "clear": "Löschen",
     "inSection": "In {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Arbeitsbereich",
-      "display": "Anzeige",
-      "text": "Textebenen",
-      "playback": "Wiedergabe und Sync",
-      "surfaces": "Ansichten",
-      "providers": "Anbieter",
-      "fullscreen": "Vollbild",
-      "panel": "Panel-Texte",
-      "system": "System"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Basis",
-        "typography": "Text",
-        "behavior": "Ablauf",
-        "surface": "Ansicht",
-        "providers": "Quelle",
-        "system": "System"
-      },
-      "generalDesc": "Sprache, Desktop-Overlay und zentrale Grundeinstellungen.",
-      "appearanceDesc": "Hintergründe, Typografie, Animationen und Bildschirmaufbau.",
-      "lyricsDesc": "Synchronisation, Übersetzung, Karaoke und Liedtextverarbeitung.",
-      "fullscreenDesc": "Vollbild-Layout und Darstellung bei der Wiedergabe.",
-      "nowplayingDesc": "Layout, Größe und Hintergrund der Panel-Texte.",
-      "lyricsProvidersDesc": "Quellen-Prioritäten, Tokens und Provider-Steuerung für Liedtexte.",
-      "aiProvidersDesc": "Konfiguration der KI-Anbieter für Übersetzung und Verarbeitung.",
-      "advancedDesc": "Erkennung, Cache, Hilfsprogramme und erweiterte Optionen.",
-      "debugDesc": "Diagnose, Wiederherstellung und Werkzeuge zur Fehlersuche.",
-      "aboutDesc": "Versionsdetails, Update-Prüfung, Mitwirkende und Patchnotes."
-    },
-    "background": {
-      "none": "Minimal",
-      "noneDesc": "Hält die Liedtextfläche ohne zusätzliche Hintergrundeffekte sauber.",
-      "layout": "Layout und Animation",
-      "finetune": "Hintergrunddetails"
-    },
-    "theme": {
-      "light": "In den hellen Modus wechseln",
-      "dark": "In den dunklen Modus wechseln",
-      "lightShort": "Hell",
-      "darkShort": "Dunkel"
-    }
-  },
   "sections": {
     "language": "Sprache",
     "visualEffects": "Visuelle Effekte",
@@ -105,8 +60,7 @@ window.LANG_DE = {
     "fadWarningDesc": "Wird nicht unterstützt, während die Full Screen Erweiterung verwendet wird.",
     "fadWarningTip": "Bitte ändern Sie die Ausrichtung in den Einstellungen von Full Screen.",
     "desktopOverlay": "Desktop-Overlay",
-    "desktopOverlaySubtitle": "Zeigt Songtexte als Overlay auf dem Desktop an",
-    "motion": "Bewegung"
+    "desktopOverlaySubtitle": "Zeigt Songtexte als Overlay auf dem Desktop an"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_DE = {
       "label": "Sprache",
       "desc": "Wählen Sie die Sprache der Erweiterung"
     },
-    "translationTargetLanguage": {
-      "label": "Zielsprache der Übersetzung",
-      "desc": "Wähle die Sprache für die automatische Übersetzung",
-      "options": {
-        "auto": "Automatisch"
-      }
-    },
     "alignment": {
       "label": "Ausrichtung",
       "desc": "Wählen Sie die Ausrichtung des Songtextes",
@@ -156,10 +103,6 @@ window.LANG_DE = {
     "albumBgBlur": {
       "label": "Album-Hintergrundunschärfe",
       "desc": "Passt die Stärke der Unschärfe des Albumhintergrunds an"
-    },
-    "reduceMotion": {
-      "label": "Bewegungen reduzieren",
-      "desc": "Reduziert die Interface-Animationen."
     },
     "blurGradientBackground": {
       "label": "Verschwommener Verlaufshintergrund",
@@ -471,8 +414,7 @@ window.LANG_DE = {
     "openSettings": "Einstellungen öffnen",
     "translationSettings": "Konvertierungseinstellungen",
     "regenerateTranslation": "Übersetzung neu generieren",
-    "fullscreen": "Vollbild",
-    "exitFullscreen": "Vollbild verlassen"
+    "fullscreen": "Vollbild"
   },
   "messages": {
     "noLyrics": "Kein Songtext verfügbar",
@@ -1497,8 +1439,6 @@ window.LANG_DE = {
     "applyShort": "Anwenden",
     "applied": "Video angewendet",
     "videoTitle": "Videotitel",
-    "edit": "Bearbeiten",
-    "updateAction": "Aktualisieren",
     "loadingTitle": "Lade Titel...",
     "startTimeLabel": "Startzeit erster Text (Sek)",
     "startTimeHint": "Geben Sie die Zeit im YouTube-Video ein, bei der der erste Text beginnt",
@@ -1521,6 +1461,7 @@ window.LANG_DE = {
       "gradient": "Verlauf",
       "minimal": "Minimal",
       "glass": "Glas",
+      "story": "Story"
     },
     "advancedSettings": "Erweiterte Einstellungen",
     "sections": {

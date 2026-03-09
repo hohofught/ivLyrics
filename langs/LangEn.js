@@ -26,51 +26,6 @@ window.LANG_EN = {
     "clear": "Clear",
     "inSection": "in {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Workspace",
-      "display": "Display",
-      "text": "Text Layers",
-      "playback": "Playback & Sync",
-      "surfaces": "Display",
-      "providers": "Providers",
-      "fullscreen": "Fullscreen",
-      "panel": "Panel Lyrics",
-      "system": "System"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Core",
-        "typography": "Text",
-        "behavior": "Flow",
-        "surface": "View",
-        "providers": "Source",
-        "system": "Ops"
-      },
-      "generalDesc": "Language, desktop overlay, and core workspace defaults.",
-      "appearanceDesc": "Backgrounds, typography, motion, and screen composition.",
-      "lyricsDesc": "Sync behavior, translation, karaoke, and lyric processing.",
-      "fullscreenDesc": "Fullscreen playback layout and remote-view presentation.",
-      "nowplayingDesc": "Panel lyrics layout, scale, and background treatment.",
-      "lyricsProvidersDesc": "Lyrics source priorities, tokens, and provider controls.",
-      "aiProvidersDesc": "AI translation and processing provider configuration.",
-      "advancedDesc": "Detection, cache, helper apps, and advanced controls.",
-      "debugDesc": "Diagnostics, recovery utilities, and troubleshooting tools.",
-      "aboutDesc": "Version details, update checks, credits, and patch notes."
-    },
-    "background": {
-      "none": "Minimal",
-      "noneDesc": "Keep the lyrics surface clean with no extra background effect.",
-      "layout": "Layout & Motion",
-      "finetune": "Background Details"
-    },
-    "theme": {
-      "light": "Switch to light mode",
-      "dark": "Switch to dark mode",
-      "lightShort": "Light",
-      "darkShort": "Dark"
-    }
-  },
   "sections": {
     "language": "Language",
     "visualEffects": "Visual Effects",
@@ -101,12 +56,11 @@ window.LANG_EN = {
     "github": "GitHub",
     "maintainers": "Maintainers",
     "contributors": "Contributors",
-    "fadWarningTitle": "Full Screen Extension Detected",
+    "fadWarningTitle": "⚠️ Full Screen Extension Detected",
     "fadWarningDesc": "Not supported while using a Full Screen extension.",
     "fadWarningTip": "Please change the alignment settings within the Full Screen extension itself.",
     "desktopOverlay": "Desktop Overlay",
-    "desktopOverlaySubtitle": "Display lyrics as an overlay on your desktop",
-    "motion": "Motion"
+    "desktopOverlaySubtitle": "Display lyrics as an overlay on your desktop"
   },
   "overlay": {
     "enabled": {
@@ -156,10 +110,6 @@ window.LANG_EN = {
     "albumBgBlur": {
       "label": "Album Background Blur",
       "desc": "Adjust the blur intensity of the album background"
-    },
-    "reduceMotion": {
-      "label": "Reduce Motion",
-      "desc": "Reduce interface animations."
     },
     "blurGradientBackground": {
       "label": "Blur Gradient Background",
@@ -1497,8 +1447,6 @@ window.LANG_EN = {
     "applyShort": "Apply",
     "applied": "Video applied",
     "videoTitle": "Video Title",
-    "edit": "Edit",
-    "updateAction": "Update",
     "loadingTitle": "Getting title...",
     "startTimeLabel": "First Lyrics Start Time (sec)",
     "startTimeHint": "Enter the time when the first lyrics line starts in the YouTube video",
@@ -1521,6 +1469,7 @@ window.LANG_EN = {
       "gradient": "Gradient",
       "minimal": "Minimal",
       "glass": "Glass",
+      "story": "Story"
     },
     "advancedSettings": "Advanced Settings",
     "sections": {
@@ -1530,7 +1479,7 @@ window.LANG_EN = {
       "layout": "Layout",
       "other": "Other"
     },
-    "copyrightWarning": "Copyright Notice\n\nThis lyrics image may contain copyrighted content.\n\n• Please use for personal use only\n• Do not use for commercial purposes\n• Respect original creators when sharing on social media\n\nDo you want to continue?",
+    "copyrightWarning": "⚠️ Copyright Notice\n\nThis lyrics image may contain copyrighted content.\n\n• Please use for personal use only\n• Do not use for commercial purposes\n• Respect original creators when sharing on social media\n\nDo you want to continue?",
     "copyrightTitle": "Copyright Notice",
     "copyrightDesc": "This lyrics image may contain copyrighted content.",
     "copyrightPoint1": "Please use for personal use only",
@@ -1762,7 +1711,7 @@ window.LANG_EN = {
       "publishing": "Publishing...",
       "cancelPublish": "Cancel Publish",
       "publishCancelled": "Publish cancelled",
-      "timeWarning": "LRCLIB requires cryptographic token processing to prevent spam. This process may take about 5 minutes depending on computer performance.",
+      "timeWarning": "⚠️ LRCLIB requires cryptographic token processing to prevent spam. This process may take about 5 minutes depending on computer performance.",
       "requestingChallenge": "Requesting auth...",
       "solvingChallenge": "Processing auth...",
       "solving": "Processing auth... (Attempt {nonce})",

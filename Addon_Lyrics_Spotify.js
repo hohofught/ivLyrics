@@ -1,15 +1,13 @@
 /**
  * Spotify Lyrics Provider Addon
  * Spotify의 내장 가사 서비스를 통해 가사를 제공합니다.
- * 
- * Original Code is from https://github.com/spicetify/cli/tree/main/CustomApps/lyrics-plus
  *
  * @addon-type lyrics
  * @id spotify
  * @name Spotify
- * @version 1.0.0
- * @author Spicetify
- * @supports karaoke: false (커뮤니티 sync-data를 통해 지원 가능)
+ * @version 1.1.0
+ * @author ivLis STUDIO
+ * @supports karaoke: true
  * @supports synced: true
  * @supports unsynced: true
  */
@@ -25,14 +23,14 @@
         id: 'spotify',
         name: 'Spotify',
         author: 'ivLis STUDIO',
-        version: '1.0.0',
+        version: '1.1.0',
         description: {
             en: 'Get lyrics from Spotify\'s built-in lyrics service',
             ko: 'Spotify 내장 가사 서비스에서 가사를 가져옵니다'
         },
         // 지원하는 가사 유형
         supports: {
-            karaoke: false,   // 기본적으로 노래방 가사 미지원 (sync-data로 확장 가능)
+            karaoke: true,    // Spotify SYLLABLE_SYNCED를 실제 karaoke로 노출
             synced: true,     // 싱크 가사 지원
             unsynced: true    // 일반 가사 지원
         },
@@ -51,6 +49,130 @@
     // ============================================
     // Addon Implementation
     // ============================================
+
+    const LINE_FALLBACK_DURATION_MS = 1800;
+    const SPOTIFY_REFERENCE_CACHE_MS = 60000;
+
+    function normalizeText(value) {
+        return String(value || '').normalize('NFKC').replace(/\r/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function deepCopy(value) {
+        return value ? JSON.parse(JSON.stringify(value)) : value;
+    }
+
+    function getSharedSpotifyReferenceCache() {
+        if (!window.__ivLyricsSpotifyReferenceCache) {
+            window.__ivLyricsSpotifyReferenceCache = new Map();
+        }
+        return window.__ivLyricsSpotifyReferenceCache;
+    }
+
+    async function getCachedSpotifyReference(trackId, fetcher, ttlMs = SPOTIFY_REFERENCE_CACHE_MS) {
+        const cache = getSharedSpotifyReferenceCache();
+        const now = Date.now();
+        const cached = cache.get(trackId);
+        if (cached?.value !== undefined && cached.expiresAt > now) {
+            return deepCopy(cached.value);
+        }
+        if (cached?.promise) {
+            return deepCopy(await cached.promise);
+        }
+        const promise = Promise.resolve()
+            .then(fetcher)
+            .then(value => {
+                cache.set(trackId, {
+                    value: value || null,
+                    expiresAt: Date.now() + ttlMs
+                });
+                return value || null;
+            })
+            .catch(error => {
+                cache.delete(trackId);
+                throw error;
+            });
+        cache.set(trackId, { promise, expiresAt: now + ttlMs });
+        return deepCopy(await promise);
+    }
+
+    function parseMs(value) {
+        if (typeof value === 'number' && Number.isFinite(value)) return Math.max(0, Math.round(value));
+        if (typeof value === 'string' && value.trim()) {
+            const parsed = Number(value);
+            if (Number.isFinite(parsed)) return Math.max(0, Math.round(parsed));
+        }
+        return null;
+    }
+
+    function splitDisplaySegments(text) {
+        const raw = String(text || '').replace(/\r/g, '');
+        if (!raw) return [];
+        const matches = raw.match(/\S+\s*/g);
+        return matches && matches.length > 0 ? matches : [raw];
+    }
+
+    function buildEvenlyTimedSyllables(segments, lineStart, lineEnd) {
+        const values = (segments || []).map(item => String(item || '')).filter(Boolean);
+        if (values.length === 0) return [];
+        const safeStart = Number.isFinite(lineStart) ? lineStart : 0;
+        const safeEnd = Number.isFinite(lineEnd) && lineEnd > safeStart ? lineEnd : safeStart + LINE_FALLBACK_DURATION_MS;
+        const totalDuration = Math.max(1, safeEnd - safeStart);
+        return values.map((text, index) => {
+            const startTime = safeStart + Math.round((totalDuration * index) / values.length);
+            const endTime = index === values.length - 1
+                ? safeEnd
+                : safeStart + Math.round((totalDuration * (index + 1)) / values.length);
+            return {
+                text,
+                startTime,
+                endTime: Math.max(startTime + 1, endTime)
+            };
+        });
+    }
+
+    function finalizeSyllables(syllables, lineEnd) {
+        const items = (syllables || []).filter(item => item && Number.isFinite(item.startTime)).sort((a, b) => a.startTime - b.startTime);
+        for (let index = 0; index < items.length; index += 1) {
+            const current = items[index];
+            const next = items[index + 1] || null;
+            const fallbackEnd = next ? next.startTime : lineEnd;
+            current.text = String(current.text || '');
+            current.endTime = Math.max(current.startTime + 1, Number.isFinite(current.endTime) ? current.endTime : fallbackEnd);
+        }
+        return items;
+    }
+
+    function buildSyncedFromKaraoke(karaoke) {
+        return (karaoke || []).map(line => ({
+            startTime: Math.max(0, Math.round(line.startTime || 0)),
+            endTime: Number.isFinite(line.endTime) ? Math.max(0, Math.round(line.endTime)) : undefined,
+            text: normalizeText(line.originalText || line.text || '')
+        })).filter(line => line.text);
+    }
+
+    function buildUnsyncedFromTimedLines(lines) {
+        return (lines || []).map(line => ({
+            text: normalizeText(line.originalText || line.text || '')
+        })).filter(line => line.text);
+    }
+
+    function parseLineSyllables(line, lineStart, lineEnd) {
+        const raw = Array.isArray(line?.syllables) ? line.syllables : [];
+        if (raw.length === 0) return [];
+        if (typeof raw[0] === 'string') {
+            return buildEvenlyTimedSyllables(raw, lineStart, lineEnd);
+        }
+        const mapped = raw.map(item => ({
+            text: String(item?.text ?? item?.words ?? item?.syllable ?? item?.label ?? ''),
+            startTime: parseMs(item?.startTimeMs ?? item?.startTime ?? item?.startMs),
+            endTime: parseMs(item?.endTimeMs ?? item?.endTime ?? item?.endMs)
+        })).filter(item => item.text);
+        if (mapped.length === 0) return [];
+        if (mapped.every(item => Number.isFinite(item.startTime))) {
+            return finalizeSyllables(mapped, lineEnd);
+        }
+        return buildEvenlyTimedSyllables(mapped.map(item => item.text), lineStart, lineEnd);
+    }
 
     const SpotifyLyricsAddon = {
         ...ADDON_INFO,
@@ -108,8 +230,11 @@
             // Spotify API 호출
             let body;
             try {
-                body = await Spicetify.CosmosAsync.get(
-                    `${LYRICS_API_BASE}${trackId}?format=json&vocalRemoval=false&market=from_token`
+                body = await getCachedSpotifyReference(
+                    trackId,
+                    () => Spicetify.CosmosAsync.get(
+                        `${LYRICS_API_BASE}${trackId}?format=json&vocalRemoval=false&market=from_token`
+                    )
                 );
             } catch (e) {
                 result.error = 'Request error';
@@ -125,64 +250,49 @@
             // Spotify 내부 가사 provider 추출
             const spotifyLyricsProvider = lyrics.provider || 'unknown';
             result.spotifyLyricsProvider = spotifyLyricsProvider;
+            result.spotifySyncType = lyrics.syncType || 'UNSYNCED';
+            result.spotifyLanguage = lyrics.language || '';
 
             // provider 필드를 세분화 (예: spotify-abc)
             result.provider = `spotify-${spotifyLyricsProvider}`;
 
             // 가사 파싱
-            const lines = lyrics.lines;
+            const lines = Array.isArray(lyrics.lines) ? lyrics.lines : [];
+            const normalizedLines = lines.map((line, index) => {
+                const startTime = parseMs(line?.startTimeMs) ?? parseMs(line?.startTime) ?? 0;
+                const nextLine = lines[index + 1];
+                const nextStart = nextLine ? (parseMs(nextLine?.startTimeMs) ?? parseMs(nextLine?.startTime)) : null;
+                const endTime = parseMs(line?.endTimeMs) ?? parseMs(line?.endTime) ?? (nextStart ?? (startTime + LINE_FALLBACK_DURATION_MS));
+                const text = normalizeText(line?.words || line?.text || '');
+                return {
+                    startTime,
+                    endTime: Math.max(startTime + 1, endTime),
+                    text,
+                    syllables: parseLineSyllables(line, startTime, endTime)
+                };
+            }).filter(line => line.text);
 
-            // To support karaoke in ivLyrics, you must convert to this format:
-            // [
-            //   {
-            //     "startTime": 1000,
-            //     "endTime": 3000,
-            //     "text": "I see the light",
-            //     "syllables": [
-            //       { "text": "I ", "startTime": 1000, "endTime": 1490 },
-            //       { "text": "see ", "startTime": 1500, "endTime": 1990 },
-            //       { "text": "the ", "startTime": 2000, "endTime": 2490 },
-            //       { "text": "light", "startTime": 2500, "endTime": 3000 }
-            //     ]
-            //   },
-            //   {
-            //     "startTime": 4000,
-            //     "endTime": 6000,
-            //     "text": "It calls me",
-            //     "syllables": [
-            //       { "text": "It ", "startTime": 4000, "endTime": 4490 },
-            //       { "text": "calls ", "startTime": 4500, "endTime": 4990 },
-            //       { "text": "me", "startTime": 5000, "endTime": 6000 }
-            //     ]
-            //   },
-            //   {
-            //     "startTime": 7000,
-            //     "endTime": 9000,
-            //     "text": "And I run",
-            //     "syllables": [
-            //       { "text": "And ", "startTime": 7000, "endTime": 7490 },
-            //       { "text": "I ", "startTime": 7500, "endTime": 7990 },
-            //       { "text": "run", "startTime": 8000, "endTime": 9000 }
-            //     ]
-            //   }
-            // ]
-            if (lyrics.syncType === 'LINE_SYNCED' || lyrics.syncType === 'SYLLABLE_SYNCED') {
-                result.synced = lines.map(line => {
-                    // Start Time: try line.startTimeMs first, then first syllable's time
-                    let startTime = parseInt(line.startTimeMs, 10);
-                    if (isNaN(startTime) && line.syllables && line.syllables.length > 0) {
-                        startTime = parseInt(line.syllables[0].startTimeMs, 10);
-                    }
-
-                    return {
-                        startTime: startTime || 0,
-                        text: line.words || ''
-                    };
-                });
-                result.unsynced = result.synced;
+            if (lyrics.syncType === 'SYLLABLE_SYNCED') {
+                result.karaoke = normalizedLines.map(line => ({
+                    startTime: line.startTime,
+                    endTime: line.endTime,
+                    text: line.text,
+                    syllables: line.syllables.length > 0
+                        ? line.syllables
+                        : buildEvenlyTimedSyllables(splitDisplaySegments(line.text), line.startTime, line.endTime)
+                }));
+                result.synced = buildSyncedFromKaraoke(result.karaoke);
+                result.unsynced = buildUnsyncedFromTimedLines(result.synced);
+            } else if (lyrics.syncType === 'LINE_SYNCED') {
+                result.synced = normalizedLines.map(line => ({
+                    startTime: line.startTime,
+                    endTime: line.endTime,
+                    text: line.text
+                }));
+                result.unsynced = buildUnsyncedFromTimedLines(result.synced);
             } else {
-                result.unsynced = lines.map(line => ({
-                    text: line.words || ''
+                result.unsynced = normalizedLines.map(line => ({
+                    text: line.text
                 }));
             }
 

@@ -26,51 +26,6 @@ window.LANG_IT = {
     "clear": "Pulisci",
     "inSection": "In {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "Area di lavoro",
-      "display": "Visualizzazione",
-      "text": "Livelli di testo",
-      "playback": "Riproduzione e sincronizzazione",
-      "surfaces": "Schermate",
-      "providers": "Provider",
-      "fullscreen": "Schermo intero",
-      "panel": "Testi nel pannello",
-      "system": "Sistema"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "Base",
-        "typography": "Testo",
-        "behavior": "Flusso",
-        "surface": "Vista",
-        "providers": "Fonte",
-        "system": "Sistema"
-      },
-      "generalDesc": "Lingua, overlay desktop e impostazioni principali.",
-      "appearanceDesc": "Sfondi, tipografia, animazioni e composizione dello schermo.",
-      "lyricsDesc": "Sincronizzazione, traduzione, karaoke ed elaborazione dei testi.",
-      "fullscreenDesc": "Layout di riproduzione a schermo intero ed elementi visibili.",
-      "nowplayingDesc": "Layout, dimensione e sfondo dei testi nel pannello.",
-      "lyricsProvidersDesc": "Priorità delle fonti, token e controlli dei provider di testi.",
-      "aiProvidersDesc": "Configurazione dei provider IA per traduzione ed elaborazione.",
-      "advancedDesc": "Rilevamento, cache, app di supporto e controlli avanzati.",
-      "debugDesc": "Diagnostica, strumenti di recupero e risoluzione dei problemi.",
-      "aboutDesc": "Versione, controllo aggiornamenti, crediti e note di rilascio."
-    },
-    "background": {
-      "none": "Minimal",
-      "noneDesc": "Mantiene pulita la superficie dei testi senza effetti di sfondo aggiuntivi.",
-      "layout": "Layout e animazione",
-      "finetune": "Dettagli dello sfondo"
-    },
-    "theme": {
-      "light": "Passa alla modalità chiara",
-      "dark": "Passa alla modalità scura",
-      "lightShort": "Chiaro",
-      "darkShort": "Scuro"
-    }
-  },
   "sections": {
     "language": "Lingua",
     "visualEffects": "Effetti visivi",
@@ -105,8 +60,7 @@ window.LANG_IT = {
     "fadWarningDesc": "Non supportato durante l'uso dell'estensione Full Screen.",
     "fadWarningTip": "Modifica il metodo di allineamento nelle impostazioni di Full Screen.",
     "desktopOverlay": "Overlay desktop",
-    "desktopOverlaySubtitle": "Mostra i testi come overlay sul desktop",
-    "motion": "Animazioni"
+    "desktopOverlaySubtitle": "Mostra i testi come overlay sul desktop"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_IT = {
       "label": "Lingua",
       "desc": "Seleziona la lingua dell'estensione"
     },
-    "translationTargetLanguage": {
-      "label": "Lingua di destinazione della traduzione",
-      "desc": "Scegli la lingua usata per la traduzione automatica",
-      "options": {
-        "auto": "Automatico"
-      }
-    },
     "alignment": {
       "label": "Allineamento",
       "desc": "Scegli l'allineamento del testo",
@@ -156,10 +103,6 @@ window.LANG_IT = {
     "albumBgBlur": {
       "label": "Sfocatura sfondo album",
       "desc": "Regola l'intensità della sfocatura dello sfondo dell'album"
-    },
-    "reduceMotion": {
-      "label": "Riduci animazioni",
-      "desc": "Riduce le animazioni dell’interfaccia."
     },
     "blurGradientBackground": {
       "label": "Sfondo gradiente sfocato",
@@ -471,8 +414,7 @@ window.LANG_IT = {
     "openSettings": "Apri impostazioni",
     "translationSettings": "Impostazioni conversione",
     "regenerateTranslation": "Rigenera traduzione",
-    "fullscreen": "Schermo intero",
-    "exitFullscreen": "Esci da schermo intero"
+    "fullscreen": "Schermo intero"
   },
   "messages": {
     "noLyrics": "Nessun testo disponibile",
@@ -1497,8 +1439,6 @@ window.LANG_IT = {
     "applyShort": "Applica",
     "applied": "Video applicato",
     "videoTitle": "Titolo video",
-    "edit": "Modifica",
-    "updateAction": "Aggiorna",
     "loadingTitle": "Recupero titolo...",
     "startTimeLabel": "Tempo inizio primo testo (sec)",
     "startTimeHint": "Inserisci il tempo in cui inizia la prima riga di testo nel video YouTube",
@@ -1521,6 +1461,7 @@ window.LANG_IT = {
       "gradient": "Gradiente",
       "minimal": "Minimal",
       "glass": "Glass",
+      "story": "Story"
     },
     "advancedSettings": "Impostazioni avanzate",
     "sections": {

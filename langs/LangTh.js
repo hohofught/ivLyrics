@@ -26,51 +26,6 @@ window.LANG_TH = {
     "clear": "ล้าง",
     "inSection": "ใน {section}"
   },
-  "settingsUi": {
-    "groups": {
-      "core": "พื้นฐาน",
-      "display": "การแสดงผล",
-      "text": "ชั้นข้อความ",
-      "playback": "การเล่นและซิงก์",
-      "surfaces": "หน้าจอ",
-      "providers": "ผู้ให้บริการ",
-      "fullscreen": "เต็มหน้าจอ",
-      "panel": "เนื้อเพลงแผง",
-      "system": "ระบบ"
-    },
-    "nav": {
-      "badges": {
-        "workspace": "หลัก",
-        "typography": "ข้อความ",
-        "behavior": "โฟลว์",
-        "surface": "มุมมอง",
-        "providers": "แหล่งที่มา",
-        "system": "ระบบ"
-      },
-      "generalDesc": "ภาษา โอเวอร์เลย์เดสก์ท็อป และค่าหลักของระบบ",
-      "appearanceDesc": "พื้นหลัง ตัวอักษร แอนิเมชัน และการจัดองค์ประกอบหน้าจอ",
-      "lyricsDesc": "การซิงก์ การแปล คาราโอเกะ และการประมวลผลเนื้อเพลง",
-      "fullscreenDesc": "เลย์เอาต์การเล่นแบบเต็มหน้าจอและองค์ประกอบที่แสดงผล",
-      "nowplayingDesc": "เลย์เอาต์ ขนาด และพื้นหลังของเนื้อเพลงบนแผง",
-      "lyricsProvidersDesc": "ลำดับความสำคัญของแหล่งเพลง โทเคน และการควบคุมผู้ให้บริการเพลง",
-      "aiProvidersDesc": "การตั้งค่าผู้ให้บริการ AI สำหรับการแปลและการประมวลผล",
-      "advancedDesc": "การตรวจจับ แคช แอปตัวช่วย และการควบคุมขั้นสูง",
-      "debugDesc": "การวินิจฉัย เครื่องมือกู้คืน และการแก้ปัญหา",
-      "aboutDesc": "รายละเอียดเวอร์ชัน การตรวจสอบอัปเดต เครดิต และบันทึกแพตช์"
-    },
-    "background": {
-      "none": "มินิมอล",
-      "noneDesc": "คงพื้นที่แสดงเนื้อเพลงให้สะอาดโดยไม่มีเอฟเฟกต์พื้นหลังเพิ่มเติม",
-      "layout": "เลย์เอาต์และการเคลื่อนไหว",
-      "finetune": "รายละเอียดพื้นหลัง"
-    },
-    "theme": {
-      "light": "สลับเป็นโหมดสว่าง",
-      "dark": "สลับเป็นโหมดมืด",
-      "lightShort": "สว่าง",
-      "darkShort": "มืด"
-    }
-  },
   "sections": {
     "language": "ภาษา",
     "visualEffects": "เอฟเฟกต์ภาพ",
@@ -105,8 +60,7 @@ window.LANG_TH = {
     "fadWarningDesc": "ไม่รองรับการใช้งานร่วมกับส่วนขยาย Full Screen",
     "fadWarningTip": "โปรดเปลี่ยนวิธีการจัดเรียงในการตั้งค่าของ Full Screen เอง",
     "desktopOverlay": "โอเวอร์เลย์บนเดสก์ท็อป",
-    "desktopOverlaySubtitle": "แสดงเนื้อเพลงเป็นโอเวอร์เลย์บนเดสก์ท็อป",
-    "motion": "การเคลื่อนไหว"
+    "desktopOverlaySubtitle": "แสดงเนื้อเพลงเป็นโอเวอร์เลย์บนเดสก์ท็อป"
   },
   "overlay": {
     "enabled": {
@@ -133,13 +87,6 @@ window.LANG_TH = {
       "label": "ภาษา",
       "desc": "เลือกภาษาของส่วนขยาย"
     },
-    "translationTargetLanguage": {
-      "label": "ภาษาเป้าหมายของการแปล",
-      "desc": "เลือกภาษาที่ใช้สำหรับการแปลอัตโนมัติ",
-      "options": {
-        "auto": "อัตโนมัติ"
-      }
-    },
     "alignment": {
       "label": "การจัดเรียง",
       "desc": "เลือกตำแหน่งการจัดเรียงของเนื้อเพลง",
@@ -156,10 +103,6 @@ window.LANG_TH = {
     "albumBgBlur": {
       "label": "เบลอพื้นหลังอัลบั้ม",
       "desc": "ปรับความเข้มของการเบลอพื้นหลังอัลบั้ม"
-    },
-    "reduceMotion": {
-      "label": "ลดการเคลื่อนไหว",
-      "desc": "ลดแอนิเมชันของอินเทอร์เฟซ"
     },
     "blurGradientBackground": {
       "label": "พื้นหลังไล่เฉดสีแบบเบลอ",
@@ -471,8 +414,7 @@ window.LANG_TH = {
     "openSettings": "เปิดการตั้งค่า",
     "translationSettings": "ตั้งค่าการแปลง",
     "regenerateTranslation": "สร้างคำแปลใหม่",
-    "fullscreen": "เต็มหน้าจอ",
-    "exitFullscreen": "ออกจากโหมดเต็มหน้าจอ"
+    "fullscreen": "เต็มหน้าจอ"
   },
   "messages": {
     "noLyrics": "ไม่มีเนื้อเพลงที่ใช้ได้",
@@ -1497,8 +1439,6 @@ window.LANG_TH = {
     "applyShort": "ใช้",
     "applied": "นำวิดีโอไปใช้แล้ว",
     "videoTitle": "ชื่อวิดีโอ",
-    "edit": "แก้ไข",
-    "updateAction": "อัปเดต",
     "loadingTitle": "กำลังดึงชื่อ...",
     "startTimeLabel": "เวลาเริ่มเนื้อเพลงแรก (วินาที)",
     "startTimeHint": "ป้อนเวลาที่เนื้อเพลงแรกเริ่มในวิดีโอ YouTube",
@@ -1521,6 +1461,7 @@ window.LANG_TH = {
       "gradient": "ไล่เฉดสี",
       "minimal": "มินิมอล",
       "glass": "Glass",
+      "story": "สตอรี่"
     },
     "advancedSettings": "การตั้งค่าขั้นสูง",
     "sections": {
